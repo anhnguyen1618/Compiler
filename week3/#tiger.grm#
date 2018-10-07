@@ -119,7 +119,7 @@ vardec: VAR ID ASSIGN exp ()
 	     
 fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp ()
        | FUNCTION ID LPAREN tyfields RPAREN COLON ty EQ exp ()
-	     
+\	     
 lvalue : ID lvaluetail ()
 
 lvaluetail : (* empty*) ()
