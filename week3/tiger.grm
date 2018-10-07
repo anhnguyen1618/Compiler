@@ -5,7 +5,7 @@
   | INT of int | STRING of string 
   | COMMA | COLON | SEMICOLON | LPAREN | RPAREN | LBRACK | RBRACK 
   | LBRACE | RBRACE | DOT 
-  | PLUS | MINUS | TIMES | DIVIDE | EQ | NEQ | LT | LE | GT | GE
+  | PLUS | MINUS | TIMES | DIVIDE | UMINUS | EQ | NEQ | LT | LE | GT | GE
   | AND | OR | ASSIGN
   | ARRAY | IF | THEN | ELSE | WHILE | FOR | TO | DO | LET | IN | END | OF 
   | BREAK | NIL
@@ -14,6 +14,7 @@
 %nonterm  exp
 	| program
 	| lvalue
+	| lvaluetail
 	| record
 	| array
 	| sequence
@@ -36,6 +37,7 @@
 	| seqexp
 	| seqexptail
 	| fields
+	| fieldtail
 	| listexp
 	| listexptail
 
@@ -52,6 +54,18 @@
 
 %prefer THEN ELSE LPAREN
 
+(* LOW PRECEDENCE *)
+%nonassoc FUNCTION VAR TYPE IF THEN ELSE DO OF ASSIGN ARRAY WHILE FOR TO
+%left OR
+%left AND
+
+%nonassoc EQ NEQ LT LE GT GE
+%left PLUS MINUS
+%left TIMES DIVIDE
+%left UMINUS
+(* HIGH PRECEDENCE *)
+
+
 %value ID ("bogus")
 %value INT (1)
 %value STRING ("")
@@ -66,10 +80,22 @@
 program	: exp				()
 
 	
-exp: 			()
+exp: lvalue ()
+   | NIL ()
+   | INT ()
+   | STRING ()
+   | sequence ()
+   | fncallexp ()
+   | mathexp ()
+   | compexp ()
+   | boolexp ()
+   | assign ()
+   | control ()
+   | array ()
+   | record ()
+	 
 
-decs : () ()
-	| dec decs ()
+decs : dec decs ()
 			    
 dec : tydec ()
     | vardec ()
@@ -79,51 +105,57 @@ ty : ID ()
    | LBRACE tyfields RBRACE ()
    | ARRAY OF ID ()
 
-tyfields: () ()
-	| ID COLON ty tyfield ()
+tyfields: (* empty *) ()
+	| ID COLON ty tyfieldstail ()
 
-tyfieldstail : () ()
-		| COMMA ID COLON ty tyfieldstail ()
+tyfieldstail : (* empty*) ()
+	     | COMMA ID COLON ty tyfieldstail ()
 			
 
 tydec : TYPE ID EQ ty ()
 
+vardec: VAR ID ASSIGN exp ()
+      | VAR ID COLON ty ASSIGN exp ()
+	     
 fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp ()
        | FUNCTION ID LPAREN tyfields RPAREN COLON ty EQ exp ()
-
-vardec: VAR ID ASSIGN exp
-      | VAR ID COLON ty ASSIGN exp
 	     
-lvalue : ID ()
-       | lvalue DOT ID ()
-       | lvalue LBRACK exp RBRACK ()
+lvalue : ID lvaluetail ()
+
+lvaluetail : (* empty*) ()
+	   | DOT ID lvaluetail ()
+	   | LBRACK exp RBRACK lvaluetail ()
 		
-fields : ID EQ exp
-       | fields COMMA fields
+fields : (* empty *) ()
+       | ID EQ exp fieldtail ()
 
-record : ID LBRACE fields RBRACE ()
+fieldtail : (* empty *) ()
+	  | COMMA ID EQ exp fieldtail ()
 
-array : ty LBRACK exp RBRACK OF exp ()
+record : ty LBRACE fields RBRACE ()
+
+array : ID LBRACK exp RBRACK OF exp ()
 	   
-args: () ()
-       | exp argtail
+args: (* empty *) ()
+    | exp argtail ()
 
-argtail : () ()
-	   | COMMA exp argtail ()
+argtail : (* empty *) ()
+	| COMMA exp argtail ()
 
-seqexp: exp seqexptail
+seqexp: exp seqexptail ()
 
-seqexptail: () ()
-	     | SEMICOLON exp seqexptail ()
+seqexptail: (* empty *) ()
+	  | SEMICOLON exp seqexptail ()
 
 sequence : LPAREN seqexp RPAREN ()
 		  
 fncallexp : ID LPAREN args LPAREN ()
 
-mathexp : exp PLUS exp ()
+mathexp : MINUS exp %prec UMINUS ()
+	| exp PLUS exp ()
 	| exp MINUS exp ()
 	| exp TIMES exp ()
-	| exp DEVIDE exp ()
+	| exp DIVIDE exp ()
 
 compexp : exp EQ exp ()
 	| exp NEQ exp ()
@@ -142,7 +174,7 @@ control : IF exp THEN exp ELSE exp ()
 	| WHILE exp DO exp ()
 	| FOR ID ASSIGN exp TO exp DO exp ()
 	| BREAK ()
-	| LET decs IN expseq END ()
+	| LET decs IN seqexp END ()
 		    
 	   
 	    
