@@ -1,0 +1,177 @@
+%%
+%term
+    EOF 
+  | ID of string
+  | INT of int | STRING of string 
+  | COMMA | COLON | SEMICOLON | LPAREN | RPAREN | LBRACK | RBRACK 
+  | LBRACE | RBRACE | DOT 
+  | PLUS | MINUS | TIMES | DIVIDE | UMINUS | EQ | NEQ | LT | LE | GT | GE
+  | AND | OR | ASSIGN
+  | ARRAY | IF | THEN | ELSE | WHILE | FOR | TO | DO | LET | IN | END | OF 
+  | BREAK | NIL
+  | FUNCTION | VAR | TYPE 
+
+%nonterm  exp
+	| program
+	| lvalue
+	| lvaluetail
+	| record
+	| array
+	| sequence
+	| fncallexp
+	| mathexp
+	| compexp
+	| boolexp
+	| assign
+	| control
+	| decs
+	| dec
+	| vardec
+	| fundec
+	| tydec
+	| ty
+	| tyfields
+	| tyfieldstail
+	| args
+	| argtail
+	| seqexp
+	| seqexptail
+	| fields
+	| fieldtail
+	| listexp
+	| listexptail
+
+%pos int
+%verbose
+%start program
+%eop EOF
+%noshift EOF
+
+%name Tiger
+
+%keyword WHILE FOR TO BREAK LET IN END FUNCTION VAR TYPE ARRAY IF THEN ELSE 
+	DO OF NIL
+
+%prefer THEN ELSE LPAREN
+
+(* LOW PRECEDENCE *)
+%nonassoc FUNCTION VAR TYPE IF THEN ELSE DO OF ASSIGN ARRAY WHILE FOR TO
+%left OR
+%left AND
+
+%nonassoc EQ NEQ LT LE GT GE
+%left PLUS MINUS
+%left TIMES DIVIDE
+%left UMINUS
+(* HIGH PRECEDENCE *)
+
+
+%value ID ("bogus")
+%value INT (1)
+%value STRING ("")
+
+%%
+
+(* This is a skeleton grammar file, meant to illustrate what kind of
+ * declarations are necessary above the %% mark.  Students are expected
+ *  to replace the two dummy productions below with an actual grammar. 
+ *)
+
+program	: exp				()
+
+	
+exp: lvalue ()
+   | NIL ()
+   | INT ()
+   | STRING ()
+   | sequence ()
+   | fncallexp ()
+   | mathexp ()
+   | compexp ()
+   | boolexp ()
+   | assign ()
+   | control ()
+   | array ()
+   | record ()
+	 
+
+decs : dec decs ()
+			    
+dec : tydec ()
+    | vardec ()
+    | fundec ()
+
+ty : ID ()
+   | LBRACE tyfields RBRACE ()
+   | ARRAY OF ID ()
+
+tyfields: (* empty *) ()
+	| ID COLON ty tyfieldstail ()
+
+tyfieldstail : (* empty*) ()
+	     | COMMA ID COLON ty tyfieldstail ()
+			
+
+tydec : TYPE ID EQ ty ()
+
+vardec: VAR ID ASSIGN exp ()
+      | VAR ID COLON ty ASSIGN exp ()
+	     
+fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp ()
+       | FUNCTION ID LPAREN tyfields RPAREN COLON ty EQ exp ()
+	     
+lvalue : ID lvaluetail ()
+
+lvaluetail : (* empty*) ()
+	   | DOT ID lvaluetail ()
+	   | LBRACK exp RBRACK lvaluetail ()
+		
+fields : (* empty *) ()
+       | ID EQ exp fieldtail ()
+
+fieldtail : (* empty *) ()
+	  | COMMA ID EQ exp fieldtail ()
+
+record : ty LBRACE fields RBRACE ()
+
+array : ID LBRACK exp RBRACK OF exp ()
+	   
+args: (* empty *) ()
+    | exp argtail ()
+
+argtail : (* empty *) ()
+	| COMMA exp argtail ()
+
+seqexp: exp seqexptail ()
+
+seqexptail: (* empty *) ()
+	  | SEMICOLON exp seqexptail ()
+
+sequence : LPAREN seqexp RPAREN ()
+		  
+fncallexp : ID LPAREN args RPAREN ()
+
+mathexp : MINUS exp %prec UMINUS ()
+	| exp PLUS exp ()
+	| exp MINUS exp ()
+	| exp TIMES exp ()
+	| exp DIVIDE exp ()
+
+compexp : exp EQ exp ()
+	| exp NEQ exp ()
+	| exp LT exp ()
+	| exp LE exp ()
+	| exp GT exp ()
+	| exp GE exp ()
+
+boolexp : exp AND exp ()
+	| exp OR exp ()
+	      
+assign : lvalue ASSIGN exp ()
+
+control : IF exp THEN exp ELSE exp ()
+	| IF exp THEN exp ()
+	| WHILE exp DO exp ()
+	| FOR ID ASSIGN exp TO exp DO exp ()
+	| BREAK ()
+	| LET decs IN seqexp END ()
