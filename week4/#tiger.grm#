@@ -19,7 +19,7 @@ structure A = Absyn
 	| lvaluetail of A.var-> A.var
 	| record of (A.symbol * A.exp * pos) list
 	| array of A.exp
-	| sequence of A.SeqExp
+	| sequence of A.exp list
 	| fncallexp of A.exp
 	| mathexp of A.exp
 	| compexp of A.exp
@@ -36,8 +36,8 @@ structure A = Absyn
 	| tyfieldstail of A.field list
 	| args of A.exp list
 	| argtail of A.exp list
-	| seqexp of (A.exp * pos) list
-	| seqexptail of (A.exp * pos) list
+	| seqexp of A.exp
+	| seqexptail of A.exp
 	| fields of (A.symbol * A.exp * pos) list
 	| fieldtail of (A.symbol * A.exp * pos) list
 
@@ -113,10 +113,9 @@ tyfieldstail : (* empty*) ([])
 			
 
 tydec : TYPE ID EQ ty (A.TypeDec({name = Symbol.symbol ID, ty = ty, pos = TYPEleft}))
-			| TYPE ID EQ ty tydec (A.TypeDec({name = Symbol.symbol ID, ty = ty, pos = TYPEleft}))
 
 vardec: VAR ID ASSIGN exp (A.VarDec({name = Symbol.symbol ID, escape = (ref true), typ = NONE, init = exp, pos = VARleft}))
-      | VAR ID COLON ID ASSIGN exp (A.VarDec({name = Symbol.symbol ID1, escape = (ref true), typ = SOME (Symbol.symbol ID2, ID2left), init = exp, pos = VARleft}))
+      | VAR ID COLON ID ASSIGN exp (A.VarDec({name = Symbol.symbol ID, escape = (ref true), typ = SOME (Symbol.symbol ID), init = exp, pos = VARleft}))
 	     
 fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp (A.FunctionDec(tyfields))
        | FUNCTION ID LPAREN tyfields RPAREN COLON ty EQ exp (A.FunctionDec(tyfields))
@@ -128,12 +127,12 @@ lvaluetail : (* empty*) (fn var => var)
 	   | LBRACK exp RBRACK lvaluetail (fn var => lvaluetail(A.SubscriptVar(var, exp, LBRACKleft)))
 		
 fields : (* empty *) ()
-       | ID EQ exp fieldtail (A.FieldVar(exp, Symbol.symbol ID, IDleft)::fieldtail)
+       | ID EQ exp fieldtail (A.FieldVar(Symbol.symbol ID, exp, IDleft)::fieldtail)
 
 fieldtail : (* empty *) ([])
-	  | COMMA ID EQ exp fieldtail (A.FieldVar(exp, Symbol.symbol ID, IDleft)::fieldtail)
+	  | COMMA ID EQ exp fieldtail (A.FieldVar(Symbol.symbol ID, exp, IDleft)::fieldtail)
 
-record : ID LBRACE fields RBRACE (A.RecordExp({fields = fields, typ = Symbol.symbol ID, pos = IDleft}))
+record : ID LBRACE fields RBRACE (A.RecordExp({fields = fields, typ = Symbol.symbol ID, posID = IDleft}))
 
 array : ID LBRACK exp RBRACK OF exp (A.ArrayExp({typ = Symbol.symbol ID, size = exp1, init = exp2, pos = IDleft}))
 	   
@@ -146,7 +145,7 @@ argtail : (* empty *) ([])
 seqexp: exp seqexptail ((exp, expleft)::seqexptail)
 
 seqexptail: (* empty *) ([])
-	  | SEMICOLON exp seqexptail ((exp, expleft)::seqexptail)
+	  | SEMICOLON exp seqexptail (exp::seqexptail)
 
 sequence : LPAREN seqexp RPAREN (A.SeqExp(seqexp))
 		  
@@ -175,4 +174,4 @@ control : IF exp THEN exp ELSE exp (A.IfExp({ test = exp1, then' = exp2, else' =
 	| WHILE exp DO exp (A.WhileExp({test = exp1, body = exp2, pos = WHILEleft}))
 	| FOR ID ASSIGN exp TO exp DO exp (A.ForExp({var = Symbol.symbol ID, escape = (ref true), lo = exp1, hi = exp2 , body = exp3, pos = FORleft}))
 	| BREAK (A.BreakExp(BREAKleft))
-	| LET decs IN seqexp END (A.LetExp({decs = decs, body = A.SeqExp(seqexp), pos = LETleft }))
+	| LET decs IN seqexp END (A.LetExp({decs = decs, body = seqexp, pos = LETleft }))
