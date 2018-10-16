@@ -567,7 +567,7 @@ datatype svalue = VOID | ntVOID of unit ->  unit
  | decs of unit ->  (A.dec list) | control of unit ->  (A.exp)
  | assign of unit ->  (A.exp) | boolexp of unit ->  (A.exp)
  | compexp of unit ->  (A.exp) | mathexp of unit ->  (A.exp)
- | fncallexp of unit ->  (A.exp) | sequence of unit ->  (A.SeqExp)
+ | fncallexp of unit ->  (A.exp) | sequence of unit ->  (A.exp)
  | array of unit ->  (A.exp)
  | record of unit ->  ( ( A.symbol * A.exp * pos )  list)
  | lvaluetail of unit ->  (A.var -> A.var)
@@ -960,7 +960,8 @@ end)
  in ( LrTable.NT 3, ( result, LBRACK1left, lvaluetail1right), rest671)
 
 end
-|  ( 35, ( rest671)) => let val  result = MlyValue.fields (fn _ => ())
+|  ( 35, ( rest671)) => let val  result = MlyValue.fields (fn _ => ([]
+))
  in ( LrTable.NT 25, ( result, defaultPos, defaultPos), rest671)
 end
 |  ( 36, ( ( _, ( MlyValue.fieldtail fieldtail1, _, fieldtail1right))

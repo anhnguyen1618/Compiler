@@ -19,7 +19,7 @@ structure A = Absyn
 	| lvaluetail of A.var-> A.var
 	| record of (A.symbol * A.exp * pos) list
 	| array of A.exp
-	| sequence of A.SeqExp
+	| sequence of A.exp
 	| fncallexp of A.exp
 	| mathexp of A.exp
 	| compexp of A.exp
@@ -127,7 +127,7 @@ lvaluetail : (* empty*) (fn var => var)
 	   | DOT ID lvaluetail (fn var => lvaluetail(A.FieldVar(var, Symbol.symbol ID, DOTleft)))
 	   | LBRACK exp RBRACK lvaluetail (fn var => lvaluetail(A.SubscriptVar(var, exp, LBRACKleft)))
 		
-fields : (* empty *) ()
+fields : (* empty *) ([])
        | ID EQ exp fieldtail (A.FieldVar(exp, Symbol.symbol ID, IDleft)::fieldtail)
 
 fieldtail : (* empty *) ([])
