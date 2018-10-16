@@ -1,0 +1,1847 @@
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:768.27-771.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:868.6-868.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:879.6-879.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:913.6-913.29 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.fundec list
+  operand:         Absyn.field list
+  in expression:
+    FunctionDec tyfields
+tiger.grm.sml:925.6-925.29 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.fundec list
+  operand:         Absyn.field list
+  in expression:
+    FunctionDec tyfields
+tiger.grm.sml:973.6-973.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:987.6-987.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:994.29-1000.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- 1::1;
+stdIn:2.1-2.5 Error: operator and operand don't agree [overload conflict]
+  operator domain: [int ty] * [int ty] list
+  operand:         [int ty] * [int ty]
+  in expression:
+    1 :: 1
+- 1::[1];
+val it = [1,1] : int list
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+tiger.grm, line 44: Error: duplicate definition of fundec in %nonterm
+? ml-yacc: uncaught exception Semantic
+sources.cm:14.1-14.10 Error: tool "ML-Yacc" failed: "/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:568.30-568.43 Error: unbound type constructor: FunctionDec in path A.FunctionDec
+tiger.grm.sml:567.28-567.41 Error: unbound type constructor: FunctionDec in path A.FunctionDec
+tiger.grm.sml:779.27-782.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:879.6-879.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:890.6-890.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:926.1-926.108 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.fundec list
+  operand:         {body:Absyn.exp, name:Symbol.symbol,
+                    params:Absyn.field list, pos:'Z, result:'Y option}
+  in expression:
+    FunctionDec
+      {name=Symbol.symbol ID,params=tyfields,result=NONE,body=exp,
+       pos=FUNCTIONleft}
+tiger.grm.sml:940.1-940.139 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.fundec list
+  operand:         {body:Absyn.exp, name:Symbol.symbol,
+                    params:Absyn.field list, pos:'Z,
+                    result:(Symbol.symbol * 'Z) option}
+  in expression:
+    FunctionDec
+      {name=Symbol.symbol ID1,params=tyfields,
+       result=SOME (Symbol.symbol ID2,ID2left),body=exp,pos=FUNCTIONleft}
+tiger.grm.sml:947.29-951.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.dec
+  operand:         unit -> [E] list
+  in expression:
+    fundec (fn _ => let val <binding>
+                        val <binding> in <exp> :: <exp> end)
+tiger.grm.sml:1013.6-1013.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1027.6-1027.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1034.29-1040.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:778.27-781.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:878.6-878.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:889.6-889.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:925.1-925.108 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.fundec list
+  operand:         {body:Absyn.exp, name:Symbol.symbol,
+                    params:Absyn.field list, pos:'Z, result:'Y option}
+  in expression:
+    FunctionDec
+      {name=Symbol.symbol ID,params=tyfields,result=NONE,body=exp,
+       pos=FUNCTIONleft}
+tiger.grm.sml:939.1-939.139 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.fundec list
+  operand:         {body:Absyn.exp, name:Symbol.symbol,
+                    params:Absyn.field list, pos:'Z,
+                    result:(Symbol.symbol * 'Z) option}
+  in expression:
+    FunctionDec
+      {name=Symbol.symbol ID1,params=tyfields,
+       result=SOME (Symbol.symbol ID2,ID2left),body=exp,pos=FUNCTIONleft}
+tiger.grm.sml:946.29-950.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.dec
+  operand:         unit -> Absyn.fundec list
+  in expression:
+    fundec (fn _ => let val <binding>
+                        val <binding> in <exp> :: <exp> end)
+tiger.grm.sml:1012.6-1012.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1026.6-1026.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1033.29-1039.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:778.27-781.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:878.6-878.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:889.6-889.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:1012.6-1012.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1026.6-1026.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1033.29-1039.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:778.27-781.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:878.6-878.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:889.6-889.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:1012.16-1012.57 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var
+  operand:         Absyn.exp
+  in expression:
+    VarExp exp
+tiger.grm.sml:1012.6-1012.68 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.var list
+  operand:         Absyn.var * (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    FieldVar (VarExp exp,Symbol.symbol ID,IDleft) :: fieldtail
+tiger.grm.sml:1027.16-1027.57 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var
+  operand:         Absyn.exp
+  in expression:
+    VarExp exp
+tiger.grm.sml:1027.6-1027.68 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.var list
+  operand:         Absyn.var * (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    FieldVar (VarExp exp,Symbol.symbol ID,IDleft) :: fieldtail
+tiger.grm.sml:1035.29-1041.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:778.27-781.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:878.6-878.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:889.6-889.67 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:pos, ty:Absyn.ty} list
+  operand:         {name:Symbol.symbol, pos:'Z, ty:Absyn.ty}
+  in expression:
+    TypeDec {name=Symbol.symbol ID,ty=ty,pos=TYPEleft}
+tiger.grm.sml:1012.6-1012.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1026.6-1026.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1033.29-1039.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+4 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:576.44-576.46 Error: unbound type constructor: ty
+tiger.grm.sml:576.34-576.40 Error: unbound type constructor: symbol
+tiger.grm.sml:789.27-792.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:1032.6-1032.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1046.6-1046.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1053.29-1059.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+4 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:789.27-792.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:1032.6-1032.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1046.6-1046.58 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.var * Absyn.symbol * pos
+  operand:         Absyn.exp * Symbol.symbol * 'Z
+  in expression:
+    FieldVar (exp,Symbol.symbol ID,IDleft)
+tiger.grm.sml:1053.29-1059.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+4 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:789.27-792.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:1046.6-1046.48 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: (Absyn.exp * Symbol.symbol * 'Z) * 
+                   (Absyn.exp * Symbol.symbol * 'Z) list
+  operand:         (Absyn.exp * Symbol.symbol * 'Z) * 
+                   (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    (exp,Symbol.symbol ID,IDleft) :: fieldtail
+tiger.grm.sml:1053.29-1059.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+4 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:789.27-792.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> Absyn.exp
+  operand:         unit -> (Absyn.symbol * Absyn.exp * pos) list
+  in expression:
+    exp (fn _ => let val <binding> in record end)
+tiger.grm.sml:1053.29-1059.5 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: unit -> (Absyn.symbol * Absyn.exp * pos) list
+  operand:         unit -> Absyn.exp
+  in expression:
+    record (fn _ => let val <binding>
+                        val <binding> in RecordExp <exp> end)
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+4 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 65460, data: 5820, env: 2084 bytes]
+[compiling (sources.cm):parse.sml]
+[code: 5753, data: 85, env: 125 bytes]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+-   C-c C-c
+Interrupt
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+4 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 65460, data: 5820, env: 2084 bytes]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:14.31-14.49 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: {name:Absyn.symbol, pos:Absyn.pos, ty:Absyn.ty} list
+  operand:         {name:Absyn.symbol, pos:Absyn.pos, ty:Absyn.ty}
+  in expression:
+    TypeDec newType
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 shift/reduce conflicts
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 65156, data: 5768, env: 2031 bytes]
+[compiling (sources.cm):parse.sml]
+[code: 5873, data: 85, env: 125 bytes]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+1 shift/reduce conflict
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:16.5-17.61 Error: clauses don't all have same function name
+tiger.grm.sml:960.6-960.15 Error: unbound variable or constructor: addFunDec
+val it = false : bool
+-CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+1 shift/reduce conflict
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:16.5-17.61 Error: clauses don't all have same function name
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+1 shift/reduce conflict
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 64884, data: 5748, env: 1998 bytes]
+[compiling (sources.cm):parse.sml]
+[code: 5873, data: 85, env: 125 bytes]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+tiger.grm, line 1: Error: multiple precedences specified for terminal FUNCTION
+1 shift/reduce conflict
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 64884, data: 5748, env: 1998 bytes]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+1 shift/reduce conflict
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 64884, data: 5748, env: 1998 bytes]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+-  
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+-   C-c C-c
+Interrupt
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016] 
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+1 shift/reduce conflict
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 64884, data: 5748, env: 1998 bytes]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 rules not reduced
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:968.1-968.136 Error: operator and operand don't agree [tycon mismatch]
+  operator domain: Absyn.fundec * Absyn.dec
+  operand:         {body:Absyn.exp, name:Symbol.symbol,
+                    params:Absyn.field list, pos:'Z,
+                    result:(Symbol.symbol * 'Z) option}
+  in expression:
+    addFuncDec
+      {name=Symbol.symbol ID1,params=tyfields,
+       result=SOME (Symbol.symbol ID2,ID2left),body=exp,pos=FUNCTIONleft}
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+2 rules not reduced
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:968.137-968.143 Error: unbound variable or constructor: fundec
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:941.137-941.143 Error: unbound variable or constructor: fundec
+val it = false : bool
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+-  
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[compiling (sources.cm):tiger.grm.sml]
+tiger.grm.sml:943.1-943.13 Error: unbound variable or constructor: FuntionDec in path A.FuntionDec
+tiger.grm.sml:929.1-929.13 Error: unbound variable or constructor: FuntionDec in path A.FuntionDec
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 67216, data: 5744, env: 1889 bytes]
+[compiling (sources.cm):parse.sml]
+[code: 5873, data: 85, env: 125 bytes]
+[New bindings added.]
+val it = true : bool
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[parsing (sources.cm):absyn.sml]
+[creating directory .cm/SKEL]
+[parsing (sources.cm):errormsg.sml]
+[parsing (sources.cm):table.sig]
+[parsing (sources.cm):table.sml]
+[parsing (sources.cm):symbol.sml]
+[parsing (sources.cm):parse.sml]
+[parsing (sources.cm):tiger.lex.sml]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+tiger.grm, line 131: Error: funcreturntype in rule is not defined as a nonterminal
+tiger.grm, line 131: Error: funcreturntype in rule is not defined as a nonterminal
+tiger.grm, line 129: Error: funcreturntype in rule is not defined as a symbol
+tiger.grm, line 128: Error: funcreturntype in rule is not defined as a symbol
+? ml-yacc: uncaught exception Semantic
+sources.cm:14.1-14.10 Error: tool "ML-Yacc" failed: "/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[creating directory .cm/GUID]
+[creating directory .cm/x86-unix]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.lex.sml]
+[code: 137436, data: 368, env: 3012 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 64844, data: 5632, env: 1954 bytes]
+[compiling (sources.cm):parse.sml]
+[code: 5745, data: 85, env: 125 bytes]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[compiling (sources.cm):errormsg.sml]
+[code: 2668, data: 156, env: 452 bytes]
+[compiling (sources.cm):tiger.lex.sml]
+[code: 137436, data: 368, env: 3012 bytes]
+[compiling (sources.cm):table.sig]
+[code: 52, env: 222 bytes]
+[compiling (sources.cm):table.sml]
+[code: 1084, env: 327 bytes]
+[compiling (sources.cm):symbol.sml]
+[code: 1427, data: 35, env: 641 bytes]
+[compiling (sources.cm):absyn.sml]
+[code: 68, env: 2868 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 64844, data: 5632, env: 1955 bytes]
+[compiling (sources.cm):parse.sml]
+[code: 5761, data: 85, env: 126 bytes]
+[New bindings added.]
+val it = true : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 64840, data: 5628, env: 1955 bytes]
+[New bindings added.]
+val it = true : bool
+- Parser.parse "test.tig"
+= ;
+stdIn:3.1-3.13 Error: unbound structure: Parser in path Parser.parse
+- Parse.parse "test.tig";
+val it =
+  SeqExp
+    [(AssignExp {exp=#,pos=#,var=#},3),
+     (OpExp {left=#,oper=#,pos=#,right=#},11)] : Absyn.exp
+- Parse.parse "test.tig";
+val it =
+  SeqExp
+    [(AssignExp {exp=#,pos=#,var=#},3),
+     (OpExp {left=#,oper=#,pos=#,right=#},11)] : Absyn.exp
+- Parse.parse "test.tig";
+val it = SeqExp [(AssignExp {exp=#,pos=#,var=#},3)] : Absyn.exp
+- Parse.parse "test.tig";
+val it = SeqExp [(AssignExp {exp=#,pos=#,var=#},3)] : Absyn.exp
+- Parse.parse "test.tig";
+val it = SeqExp [(AssignExp {exp=#,pos=#,var=#},3)] : Absyn.exp
+- Parse.parse "test.tig";
+val it = SeqExp [(OpExp {left=#,oper=#,pos=#,right=#},3)] : Absyn.exp
+- Parse.parse "test.tig";
+val it = OpExp {left=IntExp 5,oper=PlusOp,pos=2,right=IntExp 2} : Absyn.exp
+- Parse.parse "test.tig";
+val it =
+  AssignExp
+    {exp=OpExp {left=IntExp #,oper=PlusOp,pos=7,right=IntExp #},pos=4,
+     var=SimpleVar (-,2)} : Absyn.exp
+- Parse.parse "test.tig";
+val it = AssignExp {exp=IntExp 2,pos=4,var=SimpleVar (-,2)} : Absyn.exp
+- Parse.parse "test.tig";
+val it = VarExp (SimpleVar (-,2)) : Absyn.exp
+- A.symbol "a";
+stdIn:14.1-14.9 Error: unbound structure: A in path A.symbol
+- Absym.symbol "a";
+stdIn:1.2-1.14 Error: unbound structure: Absym in path Absym.symbol
+- Absyn.symbol "a";
+stdIn:1.2-1.14 Error: unbound variable or constructor: symbol in path Absyn.symbol
+- Symbol.symbol "a";
+val it = - : Symbol.symbol
+- Symbol.symbol "a";
+val it = - : Symbol.symbol
+- Parse.parse "test.tig";
+val it =
+  AssignExp
+    {exp=OpExp {left=IntExp #,oper=TimesOp,pos=7,right=IntExp #},pos=4,
+     var=SimpleVar (-,2)} : Absyn.exp
+- Parse.parse "test.tig";
+val it =
+  AssignExp
+    {exp=OpExp {left=IntExp #,oper=TimesOp,pos=7,right=IntExp #},pos=4,
+     var=SimpleVar (-,2)} : Absyn.exp
+- Parse.parse "test.tig";
+val it =
+  AssignExp
+    {exp=OpExp {left=IntExp #,oper=PlusOp,pos=7,right=IntExp #},pos=4,
+     var=SimpleVar (-,2)} : Absyn.exp
+- Parse.parse "test.tig";
+val it = SeqExp [(AssignExp {exp=#,pos=#,var=#},3)] : Absyn.exp
+- Parse.parse "test.tig";
+test.tig:4.1:syntax error: replacing  IN with  PLUS
+test.tig:5.1:syntax error found at END
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- Parse.parse "test.tig";
+test.tig:4.1:syntax error: replacing  IN with  PLUS
+test.tig:5.1:syntax error found at END
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- Parse.parse "test.tig";
+test.tig:4.1:syntax error: replacing  IN with  PLUS
+test.tig:6.1:syntax error found at END
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+test.tig:4.1:syntax error: replacing  IN with  PLUS
+test.tig:6.1:syntax error found at END
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- Parse.parse "test.tig";
+test.tig:2.1:syntax error: replacing  IN with  PLUS
+test.tig:4.1:syntax error found at END
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- 
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 65000, data: 5656, env: 1955 bytes]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+val it =
+  LetExp
+    {body=SeqExp [(#,#)],decs=[VarDec {escape=#,init=#,name=#,pos=#,typ=#}],
+     pos=2} : Absyn.exp
+- Parse.parse "test.tig";
+val it =
+  LetExp
+    {body=SeqExp [(#,#)],
+     decs=[VarDec {escape=#,init=#,name=#,pos=#,typ=#},FunctionDec [#],
+           FunctionDec [#]],pos=2} : Absyn.exp
+- CM.make("sources.cm");
+[scanning sources.cm]
+[compiling (sources.cm):errormsg.sml]
+errormsg.sml:7.24-7.39 Error: unbound structure: TextIO in path TextIO.instream
+errormsg.sml:21.26-21.38 Error: unbound structure: TextIO in path TextIO.stdIn
+errormsg.sml:27.18-27.30 Error: unbound structure: TextIO in path TextIO.stdIn
+errormsg.sml:36.12-36.24 Error: unbound structure: Int in path Int.toString
+errormsg.sml:34.12-34.24 Error: unbound structure: Int in path Int.toString
+errormsg.sml:49.8-49.23 Error: unbound structure: TextIO in path TextIO.flushOut
+errormsg.sml:49.24-49.37 Error: unbound structure: TextIO in path TextIO.stdOut
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+val it =
+  LetExp
+    {body=SeqExp [(#,#)],
+     decs=[VarDec {escape=#,init=#,name=#,pos=#,typ=#},FunctionDec [#],
+           FunctionDec [#]],pos=2} : Absyn.exp
+- val a = Symbol.symbol "a";
+val a = - : Symbol.symbol
+- Symbol.name a;
+val it = "a" : string
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+test.tig:1.1:syntax error: replacing  DIVIDE with  BREAK
+test.tig:6.6:syntax error: inserting  BREAK
+val it =
+  OpExp
+    {left=OpExp {left=OpExp #,oper=TimesOp,pos=3,right=BreakExp #},
+     oper=DivideOp,pos=3,
+     right=AssignExp {exp=IntExp #,pos=98,var=SimpleVar #}} : Absyn.exp
+- Parse.parse "test.tig";
+val it = AssignExp {exp=IntExp 5,pos=6,var=SimpleVar (-,4)} : Absyn.exp
+- Parse.parse "test.tig";
+val it = AssignExp {exp=IntExp 5,pos=6,var=SimpleVar (-,4)} : Absyn.exp
+- Parse.parse "test.tig";
+val it = AssignExp {exp=IntExp 5,pos=6,var=SimpleVar (-,4)} : Absyn.exp
+- Parse.parse "test.tig";
+test.tig:1.1:syntax error: replacing  DIVIDE with  BREAK
+test.tig:6.6:syntax error: inserting  BREAK
+val it =
+  OpExp
+    {left=OpExp {left=OpExp #,oper=TimesOp,pos=3,right=BreakExp #},
+     oper=DivideOp,pos=3,
+     right=AssignExp {exp=IntExp #,pos=99,var=SimpleVar #}} : Absyn.exp
+- Parse.parse "test.tig";
+test.tig:1.1:syntax error: replacing  DIVIDE with  BREAK
+test.tig:6.6:syntax error: inserting  BREAK
+val it =
+  OpExp
+    {left=OpExp {left=OpExp #,oper=TimesOp,pos=3,right=BreakExp #},
+     oper=DivideOp,pos=3,
+     right=AssignExp {exp=IntExp #,pos=99,var=SimpleVar #}} : Absyn.exp
+- Parse.parse "test.tig";
+test.tig:1.1:syntax error: replacing  DIVIDE with  BREAK
+test.tig:6.6:syntax error: inserting  BREAK
+val it =
+  OpExp
+    {left=OpExp {left=OpExp #,oper=TimesOp,pos=3,right=BreakExp #},
+     oper=DivideOp,pos=3,
+     right=AssignExp {exp=IntExp #,pos=99,var=SimpleVar #}} : Absyn.exp
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+["/usr/local/smlnj/bin/ml-ulex" --ml-lex-mode "tiger.lex"]
+[ml-ulex: parsing]
+[ml-ulex: DFA gen]
+ 95 states in full DFA
+[ml-ulex: SML gen]
+[parsing (sources.cm):tiger.lex.sml]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[compiling (sources.cm):errormsg.sml]
+[code: 2668, data: 156, env: 452 bytes]
+[compiling (sources.cm):tiger.lex.sml]
+[code: 137716, data: 368, env: 3012 bytes]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+
+uncaught exception Fail [Fail: stuck state]
+  raised at: tiger.lex.sml:151.46-151.64
+             tiger.lex.sml:2281.45
+             parse.sml:17.61
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-ulex" --ml-lex-mode "tiger.lex"]
+[ml-ulex: parsing]
+[ml-ulex: DFA gen]
+ 94 states in full DFA
+[ml-ulex: SML gen]
+[parsing (sources.cm):tiger.lex.sml]
+[compiling (sources.cm):tiger.lex.sml]
+[code: 138080, data: 368, env: 3012 bytes]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+test.tig:1.3:illegal character  
+test.tig:1.4:illegal character l
+test.tig:1.5:illegal character e
+test.tig:1.6:illegal character t
+test.tig:1.7:illegal character  
+test.tig:1.8:illegal character v
+test.tig:1.9:illegal character a
+test.tig:1.10:illegal character r
+test.tig:1.11:illegal character  
+test.tig:1.12:illegal character a
+test.tig:1.13:illegal character  
+test.tig:1.14:illegal character :
+test.tig:1.15:illegal character =
+test.tig:1.16:illegal character  
+test.tig:1.17:illegal character 5
+
+uncaught exception Fail [Fail: stuck state]
+  raised at: tiger.lex.sml:151.46-151.64
+             tiger.lex.sml:2276.45
+             parse.sml:17.61
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-ulex" --ml-lex-mode "tiger.lex"]
+[ml-ulex: parsing]
+[ml-ulex: DFA gen]
+ 95 states in full DFA
+[ml-ulex: SML gen]
+[parsing (sources.cm):tiger.lex.sml]
+[compiling (sources.cm):tiger.lex.sml]
+tiger.lex.sml:332.25-332.30 Error: unbound variable or constructor: state
+tiger.lex.sml:335.25-335.30 Error: unbound variable or constructor: state
+val it = false : bool
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-ulex" --ml-lex-mode "tiger.lex"]
+[ml-ulex: parsing]
+[ml-ulex: DFA gen]
+ 95 states in full DFA
+[ml-ulex: SML gen]
+[parsing (sources.cm):tiger.lex.sml]
+[compiling (sources.cm):tiger.lex.sml]
+[code: 137716, data: 368, env: 3012 bytes]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+
+uncaught exception Fail [Fail: stuck state]
+  raised at: tiger.lex.sml:151.46-151.64
+             tiger.lex.sml:2281.45
+             parse.sml:17.61
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-ulex" --ml-lex-mode "tiger.lex"]
+[ml-ulex: parsing]
+[ml-ulex: DFA gen]
+ 94 states in full DFA
+[ml-ulex: SML gen]
+[parsing (sources.cm):tiger.lex.sml]
+[compiling (sources.cm):tiger.lex.sml]
+[code: 138080, data: 368, env: 3012 bytes]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+test.tig:1.3:illegal character  
+test.tig:1.4:illegal character l
+test.tig:1.5:illegal character e
+test.tig:1.6:illegal character t
+test.tig:1.7:illegal character  
+test.tig:1.8:illegal character v
+test.tig:1.9:illegal character a
+test.tig:1.10:illegal character r
+test.tig:1.11:illegal character  
+test.tig:1.12:illegal character a
+test.tig:1.13:illegal character  
+test.tig:1.14:illegal character :
+test.tig:1.15:illegal character =
+test.tig:1.16:illegal character  
+test.tig:1.17:illegal character 5
+
+uncaught exception Fail [Fail: stuck state]
+  raised at: tiger.lex.sml:151.46-151.64
+             tiger.lex.sml:2276.45
+             parse.sml:17.61
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- Parse.parse "test.tig";
+stdIn:1.2-1.13 Error: unbound structure: Parse in path Parse.parse
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+test.tig:1.3:illegal character  
+test.tig:1.4:illegal character l
+test.tig:1.5:illegal character e
+test.tig:1.6:illegal character t
+test.tig:1.7:illegal character  
+test.tig:1.8:illegal character v
+test.tig:1.9:illegal character a
+test.tig:1.10:illegal character r
+test.tig:1.11:illegal character  
+test.tig:1.12:illegal character a
+test.tig:1.13:illegal character  
+test.tig:1.14:illegal character :
+test.tig:1.15:illegal character =
+test.tig:1.16:illegal character  
+test.tig:1.17:illegal character 5
+
+uncaught exception Fail [Fail: stuck state]
+  raised at: tiger.lex.sml:151.46-151.64
+             tiger.lex.sml:2276.45
+             parse.sml:17.61
+- Parse.parse "test.tig";
+test.tig:1.3:illegal character  
+test.tig:1.4:illegal character l
+test.tig:1.5:illegal character e
+test.tig:1.6:illegal character t
+test.tig:1.7:illegal character  
+test.tig:1.8:illegal character v
+test.tig:1.9:illegal character a
+test.tig:1.10:illegal character r
+test.tig:1.11:illegal character  
+test.tig:1.12:illegal character a
+test.tig:1.13:illegal character  
+test.tig:1.14:illegal character :
+test.tig:1.15:illegal character =
+test.tig:1.16:illegal character  
+test.tig:1.17:illegal character 5
+
+uncaught exception Fail [Fail: stuck state]
+  raised at: tiger.lex.sml:151.46-151.64
+             tiger.lex.sml:2276.45
+             parse.sml:17.61
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+["/usr/local/smlnj/bin/ml-ulex" --ml-lex-mode "tiger.lex"]
+[ml-ulex: parsing]
+[ml-ulex: DFA gen]
+ 95 states in full DFA
+[ml-ulex: SML gen]
+[parsing (sources.cm):tiger.lex.sml]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[compiling (sources.cm):tiger.lex.sml]
+[code: 137436, data: 368, env: 3012 bytes]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+test.tig:1.1:syntax error: replacing  DIVIDE with  BREAK
+test.tig:6.6:syntax error: inserting  BREAK
+val it =
+  OpExp
+    {left=OpExp {left=OpExp #,oper=TimesOp,pos=3,right=BreakExp #},
+     oper=DivideOp,pos=3,
+     right=AssignExp {exp=IntExp #,pos=99,var=SimpleVar #}} : Absyn.exp
+- Parse.parse "test.tig";
+val it =
+  LetExp
+    {body=SeqExp [(#,#)],
+     decs=[VarDec {escape=#,init=#,name=#,pos=#,typ=#},FunctionDec [#],
+           FunctionDec [#]],pos=2} : Absyn.exp
+- Parse.parse "test.tig";
+test.tig:3.1:syntax error: inserting  LET
+test.tig:3.43:syntax error found at EOF
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- Parse.parse "test.tig";]
+test.tig:1.1:syntax error: inserting  LET
+test.tig:1.43:syntax error found at EOF
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- 
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";]
+test.tig:1.1:syntax error: inserting  LET
+test.tig:1.43:syntax error found at EOF
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- Parse.parse "test.tig";]
+test.tig:1.1:syntax error: inserting  LET
+test.tig0.0:syntax error found at EOF
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 65180, data: 5668, env: 1955 bytes]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";]
+test.tig:1.1:syntax error: inserting  LET
+test.tig0.0:syntax error found at EOF
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 65180, data: 5668, env: 1955 bytes]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";]
+test.tig:1.1:syntax error: inserting  LET
+test.tig0.0:syntax error found at EOF
+
+uncaught exception Error
+  raised at: parse.sml:17.47-17.61
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 65000, data: 5656, env: 1955 bytes]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";]
+test.tig:1.1:syntax error: replacing  TYPE with  MINUS
+val it =
+  OpExp
+    {left=OpExp {left=IntExp #,oper=MinusOp,pos=6,right=VarExp #},oper=EqOp,
+     pos=6,right=VarExp (SimpleVar (#,#))} : Absyn.exp
+= 
+= 
+= Parse.parse "test.tig";]
+stdIn:3.24 Error: syntax error found at RBRACKET
+- ;
+- CM.make("sources.cm");
+[scanning sources.cm]
+["/usr/local/smlnj/bin/ml-yacc"  "tiger.grm"]
+[parsing (sources.cm):tiger.grm.sig]
+[parsing (sources.cm):tiger.grm.sml]
+[compiling (sources.cm):tiger.grm.sig]
+[code: 56, env: 980 bytes]
+[compiling (sources.cm):tiger.grm.sml]
+[code: 65000, data: 5656, env: 1955 bytes]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";]
+test.tig:1.1:syntax error: replacing  TYPE with  MINUS
+val it =
+  OpExp
+    {left=OpExp {left=IntExp #,oper=MinusOp,pos=6,right=VarExp #},oper=EqOp,
+     pos=6,right=VarExp (SimpleVar (#,#))} : Absyn.exp
+= 
+= 
+= 
+= 
+= 
+= ;
+= fdsaf
+= fsdafasf
+= fjas;f;af;af
+stdIn:8.24 Error: syntax error found at RBRACKET
+- CM.make("sources.cm");
+[scanning sources.cm]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";]
+test.tig:1.1:syntax error: replacing  VAR with  MINUS
+val it =
+  OpExp
+    {left=IntExp 0,oper=MinusOp,pos=5,
+     right=AssignExp {exp=IntExp #,pos=8,var=SimpleVar #}} : Absyn.exp
+= \
+= 
+= ldsf
+= lsd;;
+stdIn:18.24 Error: syntax error found at RBRACKET
+-  
+- Parse.parse "test.tig";]
+val it = AssignExp {exp=IntExp 5,pos=4,var=SimpleVar (-,2)} : Absyn.exp
+= fsaf;
+= sfdsdf;fsd
+stdIn:23.24 Error: syntax error found at RBRACKET
+- Parse.parse "test.tig";
+test.tig:1.1:syntax error: replacing  FUNCTION with  MINUS
+val it =
+  OpExp
+    {left=OpExp {left=IntExp #,oper=MinusOp,pos=10,right=CallExp #},oper=EqOp,
+     pos=10,right=IntExp 5} : Absyn.exp
+-   C-c C-c
+Interrupt
+-   C-c C-c
+Interrupt
+- 
+
+Process sml finished
+Standard ML of New Jersey v110.80 [built: Fri Aug 19 07:49:58 2016]
+- CM.make("sources.cm");
+[autoloading]
+[library $smlnj/cm/cm.cm is stable]
+[library $smlnj/internal/cm-sig-lib.cm is stable]
+[library $/pgraph.cm is stable]
+[library $smlnj/internal/srcpath-lib.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $SMLNJ-BASIS/(basis.cm):basis-common.cm is stable]
+[autoloading done]
+[scanning sources.cm]
+[library $/ml-yacc-lib.cm is stable]
+[attempting to load plugin $/lex-ext.cm]
+[library $/lex-ext.cm is stable]
+[library $smlnj/cm/tools.cm is stable]
+[library $smlnj/internal/cm-lib.cm is stable]
+[plugin $/lex-ext.cm loaded successfully]
+[attempting to load plugin $/mllex-tool.cm]
+[library $/mllex-tool.cm is stable]
+[plugin $/mllex-tool.cm loaded successfully]
+[attempting to load plugin $/grm-ext.cm]
+[library $/grm-ext.cm is stable]
+[plugin $/grm-ext.cm loaded successfully]
+[attempting to load plugin $/mlyacc-tool.cm]
+[library $/mlyacc-tool.cm is stable]
+[plugin $/mlyacc-tool.cm loaded successfully]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $SMLNJ-ML-YACC-LIB/ml-yacc-lib.cm is stable]
+[loading (sources.cm):tiger.grm.sig]
+[loading (sources.cm):errormsg.sml]
+[loading (sources.cm):tiger.lex.sml]
+[loading (sources.cm):table.sig]
+[loading (sources.cm):table.sml]
+[loading (sources.cm):symbol.sml]
+[loading (sources.cm):absyn.sml]
+[loading (sources.cm):tiger.grm.sml]
+[loading (sources.cm):parse.sml]
+[New bindings added.]
+val it = true : bool
+- Parse.parse "test.tig";
+test.tig:1.1:syntax error: replacing  FUNCTION with  MINUS
+val it =
+  OpExp
+    {left=OpExp {left=IntExp #,oper=MinusOp,pos=10,right=CallExp #},oper=EqOp,
+     pos=10,right=IntExp 5} : Absyn.exp
+- ;
+- fda;sdf;
+stdIn:4.1-4.4 Error: unbound variable or constructor: fda
+- 
+- Parse.parse "test.tig";
+val it =
+  LetExp
+    {body=SeqExp [(#,#)],
+     decs=[VarDec {escape=#,init=#,name=#,pos=#,typ=#},FunctionDec [#],
+           FunctionDec [#]],pos=2} : Absyn.exp
+- 
+- 
+- Parse.parse "test.tig";
+val it =
+  LetExp
+    {body=SeqExp [(#,#)],
+     decs=[VarDec {escape=#,init=#,name=#,pos=#,typ=#},FunctionDec [#],
+           FunctionDec [#],TypeDec [#]],pos=2} : Absyn.exp
+- Parse.parse "test.tig";
+val it = LetExp {body=SeqExp [(#,#)],decs=[TypeDec [#]],pos=2} : Absyn.exp
+- 
