@@ -1,5 +1,11 @@
 structure A = Absyn
-		  
+
+fun addTypeDec (oldType, A.TypeDec(newTypes)) = A.TypeDec(oldType::newTypes)
+  | addTypeDec (oldType, _) = A.TypeDec([oldType]) 
+
+fun addFuncDec (oldFuncDec, A.FunctionDec(newFuncDecs)) = A.FunctionDec(oldFuncDec::newFuncDecs)
+  | addFuncDec (oldFuncDec, _)  = A.FunctionDec([oldFuncDec])
+
 %%
 %term
     EOF 
@@ -17,7 +23,7 @@ structure A = Absyn
 	| program of A.exp
 	| lvalue of A.var
 	| lvaluetail of A.var-> A.var
-	| record of (A.symbol * A.exp * pos) list
+	| record of A.exp
 	| array of A.exp
 	| sequence of A.exp
 	| fncallexp of A.exp
@@ -55,7 +61,7 @@ structure A = Absyn
 %prefer THEN ELSE LPAREN
 
 (* LOW PRECEDENCE *)
-%nonassoc FUNCTION VAR TYPE IF THEN ELSE DO OF ASSIGN ARRAY WHILE FOR TO
+%nonassoc VAR TYPE IF THEN ELSE DO OF ASSIGN ARRAY WHILE FOR TO
 %left OR
 %left AND
 
@@ -63,6 +69,7 @@ structure A = Absyn
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left UMINUS
+%right FUNCTION
 (* HIGH PRECEDENCE *)
 
 
@@ -112,14 +119,16 @@ tyfieldstail : (* empty*) ([])
 	     | COMMA ID COLON ID tyfieldstail ({name = Symbol.symbol ID, escape = (ref true), typ = Symbol.symbol ID, pos = IDleft}::tyfieldstail)
 			
 
-tydec : TYPE ID EQ ty (A.TypeDec({name = Symbol.symbol ID, ty = ty, pos = TYPEleft}))
-			| TYPE ID EQ ty tydec (A.TypeDec({name = Symbol.symbol ID, ty = ty, pos = TYPEleft}))
+tydec : TYPE ID EQ ty (A.TypeDec([{name = Symbol.symbol ID, ty = ty, pos = TYPEleft}]))
+      | TYPE ID EQ ty tydec (addTypeDec({name = Symbol.symbol ID, ty = ty, pos = TYPEleft}, tydec))
 
 vardec: VAR ID ASSIGN exp (A.VarDec({name = Symbol.symbol ID, escape = (ref true), typ = NONE, init = exp, pos = VARleft}))
       | VAR ID COLON ID ASSIGN exp (A.VarDec({name = Symbol.symbol ID1, escape = (ref true), typ = SOME (Symbol.symbol ID2, ID2left), init = exp, pos = VARleft}))
 	     
-fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp (A.FunctionDec(tyfields))
-       | FUNCTION ID LPAREN tyfields RPAREN COLON ty EQ exp (A.FunctionDec(tyfields))
+fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp (A.FunctionDec([{ name = Symbol.symbol ID, params = tyfields, result = NONE, body = exp, pos = FUNCTIONleft}]))
+       | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp (A.FunctionDec([{ name = Symbol.symbol ID1, params = tyfields, result = SOME (Symbol.symbol ID2, ID2left ), body = exp, pos = FUNCTIONleft}]))
+			 | FUNCTION ID LPAREN tyfields RPAREN EQ exp fundec (addFuncDec({ name = Symbol.symbol ID, params = tyfields, result = NONE, body = exp, pos = FUNCTIONleft}, fundec))
+       | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp fundec (addFuncDec({ name = Symbol.symbol ID1, params = tyfields, result = SOME (Symbol.symbol ID2, ID2left ), body = exp, pos = FUNCTIONleft}, fundec))
 	     
 lvalue : ID lvaluetail (lvaluetail(A.SimpleVar(Symbol.symbol ID, IDleft)))
 
@@ -128,10 +137,10 @@ lvaluetail : (* empty*) (fn var => var)
 	   | LBRACK exp RBRACK lvaluetail (fn var => lvaluetail(A.SubscriptVar(var, exp, LBRACKleft)))
 		
 fields : (* empty *) ([])
-       | ID EQ exp fieldtail (A.FieldVar(exp, Symbol.symbol ID, IDleft)::fieldtail)
+       | ID EQ exp fieldtail ((Symbol.symbol ID, exp, IDleft)::fieldtail)
 
 fieldtail : (* empty *) ([])
-	  | COMMA ID EQ exp fieldtail (A.FieldVar(exp, Symbol.symbol ID, IDleft)::fieldtail)
+	  | COMMA ID EQ exp fieldtail ((Symbol.symbol ID, exp, IDleft)::fieldtail)
 
 record : ID LBRACE fields RBRACE (A.RecordExp({fields = fields, typ = Symbol.symbol ID, pos = IDleft}))
 

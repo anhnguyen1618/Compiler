@@ -16,7 +16,7 @@ state 0:
 	NIL	shift 12
 
 	exp	goto 11
-	program	goto 154
+	program	goto 156
 	lvalue	goto 10
 	record	goto 9
 	array	goto 8
@@ -167,11 +167,11 @@ state 12:
 
 state 13:
 
-	control : BREAK .  (reduce by rule 68)
+	control : BREAK .  (reduce by rule 70)
 
 
 
-	.	reduce by rule 68
+	.	reduce by rule 70
 
 
 state 14:
@@ -359,7 +359,7 @@ state 22:
 
 	lvaluetail	goto 50
 
-	.	reduce by rule 32
+	.	reduce by rule 34
 
 
 state 23:
@@ -844,7 +844,9 @@ state 42:
 state 43:
 
 	fundec : FUNCTION . ID LPAREN tyfields RPAREN EQ exp 
-	fundec : FUNCTION . ID LPAREN tyfields RPAREN COLON ty EQ exp 
+	fundec : FUNCTION . ID LPAREN tyfields RPAREN COLON ID EQ exp 
+	fundec : FUNCTION . ID LPAREN tyfields RPAREN EQ exp fundec 
+	fundec : FUNCTION . ID LPAREN tyfields RPAREN COLON ID EQ exp fundec 
 
 	ID	shift 72
 
@@ -933,7 +935,7 @@ state 46:
 
 state 47:
 
-	mathexp : MINUS exp .  (reduce by rule 50)
+	mathexp : MINUS exp .  (reduce by rule 52)
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
 	mathexp : exp . TIMES exp 
@@ -949,7 +951,7 @@ state 47:
 
 
 
-	.	reduce by rule 50
+	.	reduce by rule 52
 
 
 state 48:
@@ -994,16 +996,16 @@ state 49:
 
 	seqexptail	goto 77
 
-	.	reduce by rule 46
+	.	reduce by rule 48
 
 
 state 50:
 
-	lvalue : ID lvaluetail .  (reduce by rule 31)
+	lvalue : ID lvaluetail .  (reduce by rule 33)
 
 
 
-	.	reduce by rule 31
+	.	reduce by rule 33
 
 
 state 51:
@@ -1024,7 +1026,7 @@ state 52:
 
 	fields	goto 80
 
-	.	reduce by rule 35
+	.	reduce by rule 37
 
 
 state 53:
@@ -1088,7 +1090,7 @@ state 54:
 	control	goto 1
 	args	goto 83
 
-	.	reduce by rule 41
+	.	reduce by rule 43
 
 
 state 55:
@@ -1105,7 +1107,7 @@ state 55:
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
-	assign : lvalue ASSIGN exp .  (reduce by rule 63)
+	assign : lvalue ASSIGN exp .  (reduce by rule 65)
 
 	PLUS	shift 35
 	MINUS	shift 34
@@ -1121,7 +1123,7 @@ state 55:
 	OR	shift 24
 
 
-	.	reduce by rule 63
+	.	reduce by rule 65
 
 
 state 56:
@@ -1138,7 +1140,7 @@ state 56:
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
-	boolexp : exp OR exp .  (reduce by rule 62)
+	boolexp : exp OR exp .  (reduce by rule 64)
 
 	PLUS	shift 35
 	MINUS	shift 34
@@ -1153,7 +1155,7 @@ state 56:
 	AND	shift 25
 
 
-	.	reduce by rule 62
+	.	reduce by rule 64
 
 
 state 57:
@@ -1169,7 +1171,7 @@ state 57:
 	compexp : exp . GT exp 
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
-	boolexp : exp AND exp .  (reduce by rule 61)
+	boolexp : exp AND exp .  (reduce by rule 63)
 	boolexp : exp . OR exp 
 
 	PLUS	shift 35
@@ -1184,7 +1186,7 @@ state 57:
 	GE	shift 26
 
 
-	.	reduce by rule 61
+	.	reduce by rule 63
 
 
 state 58:
@@ -1199,7 +1201,89 @@ state 58:
 	compexp : exp . LE exp 
 	compexp : exp . GT exp 
 	compexp : exp . GE exp 
-	compexp : exp GE exp .  (reduce by rule 60)
+	compexp : exp GE exp .  (reduce by rule 62)
+	boolexp : exp . AND exp 
+	boolexp : exp . OR exp 
+
+	EOF	reduce by rule 62
+	COMMA	reduce by rule 62
+	SEMICOLON	reduce by rule 62
+	RPAREN	reduce by rule 62
+	RBRACK	reduce by rule 62
+	RBRACE	reduce by rule 62
+	PLUS	shift 35
+	MINUS	shift 34
+	TIMES	shift 33
+	DIVIDE	shift 32
+	AND	reduce by rule 62
+	OR	reduce by rule 62
+	THEN	reduce by rule 62
+	ELSE	reduce by rule 62
+	TO	reduce by rule 62
+	DO	reduce by rule 62
+	END	reduce by rule 62
+	FUNCTION	reduce by rule 62
+	VAR	reduce by rule 62
+	TYPE	reduce by rule 62
+
+
+	.	error
+
+
+state 59:
+
+	mathexp : exp . PLUS exp 
+	mathexp : exp . MINUS exp 
+	mathexp : exp . TIMES exp 
+	mathexp : exp . DIVIDE exp 
+	compexp : exp . EQ exp 
+	compexp : exp . NEQ exp 
+	compexp : exp . LT exp 
+	compexp : exp . LE exp 
+	compexp : exp . GT exp 
+	compexp : exp GT exp .  (reduce by rule 61)
+	compexp : exp . GE exp 
+	boolexp : exp . AND exp 
+	boolexp : exp . OR exp 
+
+	EOF	reduce by rule 61
+	COMMA	reduce by rule 61
+	SEMICOLON	reduce by rule 61
+	RPAREN	reduce by rule 61
+	RBRACK	reduce by rule 61
+	RBRACE	reduce by rule 61
+	PLUS	shift 35
+	MINUS	shift 34
+	TIMES	shift 33
+	DIVIDE	shift 32
+	AND	reduce by rule 61
+	OR	reduce by rule 61
+	THEN	reduce by rule 61
+	ELSE	reduce by rule 61
+	TO	reduce by rule 61
+	DO	reduce by rule 61
+	END	reduce by rule 61
+	FUNCTION	reduce by rule 61
+	VAR	reduce by rule 61
+	TYPE	reduce by rule 61
+
+
+	.	error
+
+
+state 60:
+
+	mathexp : exp . PLUS exp 
+	mathexp : exp . MINUS exp 
+	mathexp : exp . TIMES exp 
+	mathexp : exp . DIVIDE exp 
+	compexp : exp . EQ exp 
+	compexp : exp . NEQ exp 
+	compexp : exp . LT exp 
+	compexp : exp . LE exp 
+	compexp : exp LE exp .  (reduce by rule 60)
+	compexp : exp . GT exp 
+	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
 
@@ -1228,7 +1312,7 @@ state 58:
 	.	error
 
 
-state 59:
+state 61:
 
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
@@ -1237,9 +1321,9 @@ state 59:
 	compexp : exp . EQ exp 
 	compexp : exp . NEQ exp 
 	compexp : exp . LT exp 
+	compexp : exp LT exp .  (reduce by rule 59)
 	compexp : exp . LE exp 
 	compexp : exp . GT exp 
-	compexp : exp GT exp .  (reduce by rule 59)
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
@@ -1269,7 +1353,7 @@ state 59:
 	.	error
 
 
-state 60:
+state 62:
 
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
@@ -1277,9 +1361,9 @@ state 60:
 	mathexp : exp . DIVIDE exp 
 	compexp : exp . EQ exp 
 	compexp : exp . NEQ exp 
+	compexp : exp NEQ exp .  (reduce by rule 58)
 	compexp : exp . LT exp 
 	compexp : exp . LE exp 
-	compexp : exp LE exp .  (reduce by rule 58)
 	compexp : exp . GT exp 
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
@@ -1310,16 +1394,16 @@ state 60:
 	.	error
 
 
-state 61:
+state 63:
 
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
 	mathexp : exp . TIMES exp 
 	mathexp : exp . DIVIDE exp 
 	compexp : exp . EQ exp 
+	compexp : exp EQ exp .  (reduce by rule 57)
 	compexp : exp . NEQ exp 
 	compexp : exp . LT exp 
-	compexp : exp LT exp .  (reduce by rule 57)
 	compexp : exp . LE exp 
 	compexp : exp . GT exp 
 	compexp : exp . GE exp 
@@ -1351,95 +1435,13 @@ state 61:
 	.	error
 
 
-state 62:
-
-	mathexp : exp . PLUS exp 
-	mathexp : exp . MINUS exp 
-	mathexp : exp . TIMES exp 
-	mathexp : exp . DIVIDE exp 
-	compexp : exp . EQ exp 
-	compexp : exp . NEQ exp 
-	compexp : exp NEQ exp .  (reduce by rule 56)
-	compexp : exp . LT exp 
-	compexp : exp . LE exp 
-	compexp : exp . GT exp 
-	compexp : exp . GE exp 
-	boolexp : exp . AND exp 
-	boolexp : exp . OR exp 
-
-	EOF	reduce by rule 56
-	COMMA	reduce by rule 56
-	SEMICOLON	reduce by rule 56
-	RPAREN	reduce by rule 56
-	RBRACK	reduce by rule 56
-	RBRACE	reduce by rule 56
-	PLUS	shift 35
-	MINUS	shift 34
-	TIMES	shift 33
-	DIVIDE	shift 32
-	AND	reduce by rule 56
-	OR	reduce by rule 56
-	THEN	reduce by rule 56
-	ELSE	reduce by rule 56
-	TO	reduce by rule 56
-	DO	reduce by rule 56
-	END	reduce by rule 56
-	FUNCTION	reduce by rule 56
-	VAR	reduce by rule 56
-	TYPE	reduce by rule 56
-
-
-	.	error
-
-
-state 63:
-
-	mathexp : exp . PLUS exp 
-	mathexp : exp . MINUS exp 
-	mathexp : exp . TIMES exp 
-	mathexp : exp . DIVIDE exp 
-	compexp : exp . EQ exp 
-	compexp : exp EQ exp .  (reduce by rule 55)
-	compexp : exp . NEQ exp 
-	compexp : exp . LT exp 
-	compexp : exp . LE exp 
-	compexp : exp . GT exp 
-	compexp : exp . GE exp 
-	boolexp : exp . AND exp 
-	boolexp : exp . OR exp 
-
-	EOF	reduce by rule 55
-	COMMA	reduce by rule 55
-	SEMICOLON	reduce by rule 55
-	RPAREN	reduce by rule 55
-	RBRACK	reduce by rule 55
-	RBRACE	reduce by rule 55
-	PLUS	shift 35
-	MINUS	shift 34
-	TIMES	shift 33
-	DIVIDE	shift 32
-	AND	reduce by rule 55
-	OR	reduce by rule 55
-	THEN	reduce by rule 55
-	ELSE	reduce by rule 55
-	TO	reduce by rule 55
-	DO	reduce by rule 55
-	END	reduce by rule 55
-	FUNCTION	reduce by rule 55
-	VAR	reduce by rule 55
-	TYPE	reduce by rule 55
-
-
-	.	error
-
-
 state 64:
 
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
 	mathexp : exp . TIMES exp 
 	mathexp : exp . DIVIDE exp 
-	mathexp : exp DIVIDE exp .  (reduce by rule 54)
+	mathexp : exp DIVIDE exp .  (reduce by rule 56)
 	compexp : exp . EQ exp 
 	compexp : exp . NEQ exp 
 	compexp : exp . LT exp 
@@ -1451,7 +1453,7 @@ state 64:
 
 
 
-	.	reduce by rule 54
+	.	reduce by rule 56
 
 
 state 65:
@@ -1459,7 +1461,7 @@ state 65:
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
 	mathexp : exp . TIMES exp 
-	mathexp : exp TIMES exp .  (reduce by rule 53)
+	mathexp : exp TIMES exp .  (reduce by rule 55)
 	mathexp : exp . DIVIDE exp 
 	compexp : exp . EQ exp 
 	compexp : exp . NEQ exp 
@@ -1472,14 +1474,14 @@ state 65:
 
 
 
-	.	reduce by rule 53
+	.	reduce by rule 55
 
 
 state 66:
 
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
-	mathexp : exp MINUS exp .  (reduce by rule 52)
+	mathexp : exp MINUS exp .  (reduce by rule 54)
 	mathexp : exp . TIMES exp 
 	mathexp : exp . DIVIDE exp 
 	compexp : exp . EQ exp 
@@ -1495,13 +1497,13 @@ state 66:
 	DIVIDE	shift 32
 
 
-	.	reduce by rule 52
+	.	reduce by rule 54
 
 
 state 67:
 
 	mathexp : exp . PLUS exp 
-	mathexp : exp PLUS exp .  (reduce by rule 51)
+	mathexp : exp PLUS exp .  (reduce by rule 53)
 	mathexp : exp . MINUS exp 
 	mathexp : exp . TIMES exp 
 	mathexp : exp . DIVIDE exp 
@@ -1518,7 +1520,7 @@ state 67:
 	DIVIDE	shift 32
 
 
-	.	reduce by rule 51
+	.	reduce by rule 53
 
 
 state 68:
@@ -1588,7 +1590,9 @@ state 71:
 state 72:
 
 	fundec : FUNCTION ID . LPAREN tyfields RPAREN EQ exp 
-	fundec : FUNCTION ID . LPAREN tyfields RPAREN COLON ty EQ exp 
+	fundec : FUNCTION ID . LPAREN tyfields RPAREN COLON ID EQ exp 
+	fundec : FUNCTION ID . LPAREN tyfields RPAREN EQ exp fundec 
+	fundec : FUNCTION ID . LPAREN tyfields RPAREN COLON ID EQ exp fundec 
 
 	LPAREN	shift 89
 
@@ -1692,20 +1696,20 @@ state 75:
 
 state 76:
 
-	sequence : LPAREN seqexp RPAREN .  (reduce by rule 48)
+	sequence : LPAREN seqexp RPAREN .  (reduce by rule 50)
 
 
 
-	.	reduce by rule 48
+	.	reduce by rule 50
 
 
 state 77:
 
-	seqexp : exp seqexptail .  (reduce by rule 45)
+	seqexp : exp seqexptail .  (reduce by rule 47)
 
 
 
-	.	reduce by rule 45
+	.	reduce by rule 47
 
 
 state 78:
@@ -1748,7 +1752,7 @@ state 79:
 
 	lvaluetail	goto 94
 
-	.	reduce by rule 32
+	.	reduce by rule 34
 
 
 state 80:
@@ -1848,7 +1852,7 @@ state 84:
 
 	argtail	goto 100
 
-	.	reduce by rule 43
+	.	reduce by rule 45
 
 
 state 85:
@@ -1919,7 +1923,9 @@ state 88:
 state 89:
 
 	fundec : FUNCTION ID LPAREN . tyfields RPAREN EQ exp 
-	fundec : FUNCTION ID LPAREN . tyfields RPAREN COLON ty EQ exp 
+	fundec : FUNCTION ID LPAREN . tyfields RPAREN COLON ID EQ exp 
+	fundec : FUNCTION ID LPAREN . tyfields RPAREN EQ exp fundec 
+	fundec : FUNCTION ID LPAREN . tyfields RPAREN COLON ID EQ exp fundec 
 
 	ID	shift 110
 
@@ -1976,7 +1982,7 @@ state 91:
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
-	control : WHILE exp DO exp .  (reduce by rule 66)
+	control : WHILE exp DO exp .  (reduce by rule 68)
 
 	PLUS	shift 35
 	MINUS	shift 34
@@ -1992,7 +1998,7 @@ state 91:
 	OR	shift 24
 
 
-	.	reduce by rule 66
+	.	reduce by rule 68
 
 
 state 92:
@@ -2010,14 +2016,14 @@ state 92:
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
 	control : IF exp THEN exp . ELSE exp 
-	control : IF exp THEN exp .  (reduce by rule 65)
+	control : IF exp THEN exp .  (reduce by rule 67)
 
-	EOF	reduce by rule 65
-	COMMA	reduce by rule 65
-	SEMICOLON	reduce by rule 65
-	RPAREN	reduce by rule 65
-	RBRACK	reduce by rule 65
-	RBRACE	reduce by rule 65
+	EOF	reduce by rule 67
+	COMMA	reduce by rule 67
+	SEMICOLON	reduce by rule 67
+	RPAREN	reduce by rule 67
+	RBRACK	reduce by rule 67
+	RBRACE	reduce by rule 67
 	PLUS	shift 35
 	MINUS	shift 34
 	TIMES	shift 33
@@ -2030,13 +2036,13 @@ state 92:
 	GE	shift 26
 	AND	shift 25
 	OR	shift 24
-	THEN	reduce by rule 65
-	TO	reduce by rule 65
-	DO	reduce by rule 65
-	END	reduce by rule 65
-	FUNCTION	reduce by rule 65
-	VAR	reduce by rule 65
-	TYPE	reduce by rule 65
+	THEN	reduce by rule 67
+	TO	reduce by rule 67
+	DO	reduce by rule 67
+	END	reduce by rule 67
+	FUNCTION	reduce by rule 67
+	VAR	reduce by rule 67
+	TYPE	reduce by rule 67
 
 
 	.	error
@@ -2074,16 +2080,16 @@ state 93:
 
 	seqexptail	goto 113
 
-	.	reduce by rule 46
+	.	reduce by rule 48
 
 
 state 94:
 
-	lvaluetail : DOT ID lvaluetail .  (reduce by rule 33)
+	lvaluetail : DOT ID lvaluetail .  (reduce by rule 35)
 
 
 
-	.	reduce by rule 33
+	.	reduce by rule 35
 
 
 state 95:
@@ -2119,11 +2125,11 @@ state 95:
 
 state 96:
 
-	record : ID LBRACE fields RBRACE .  (reduce by rule 39)
+	record : ID LBRACE fields RBRACE .  (reduce by rule 41)
 
 
 
-	.	reduce by rule 39
+	.	reduce by rule 41
 
 
 state 97:
@@ -2168,25 +2174,25 @@ state 98:
 
 	lvaluetail	goto 116
 
-	.	reduce by rule 32
+	.	reduce by rule 34
 
 
 state 99:
 
-	fncallexp : ID LPAREN args RPAREN .  (reduce by rule 49)
+	fncallexp : ID LPAREN args RPAREN .  (reduce by rule 51)
 
 
 
-	.	reduce by rule 49
+	.	reduce by rule 51
 
 
 state 100:
 
-	args : exp argtail .  (reduce by rule 42)
+	args : exp argtail .  (reduce by rule 44)
 
 
 
-	.	reduce by rule 42
+	.	reduce by rule 44
 
 
 state 101:
@@ -2222,11 +2228,11 @@ state 101:
 
 state 102:
 
-	control : LET decs IN seqexp END .  (reduce by rule 69)
+	control : LET decs IN seqexp END .  (reduce by rule 71)
 
 
 
-	.	reduce by rule 69
+	.	reduce by rule 71
 
 
 state 103:
@@ -2316,7 +2322,9 @@ state 108:
 state 109:
 
 	fundec : FUNCTION ID LPAREN tyfields . RPAREN EQ exp 
-	fundec : FUNCTION ID LPAREN tyfields . RPAREN COLON ty EQ exp 
+	fundec : FUNCTION ID LPAREN tyfields . RPAREN COLON ID EQ exp 
+	fundec : FUNCTION ID LPAREN tyfields . RPAREN EQ exp fundec 
+	fundec : FUNCTION ID LPAREN tyfields . RPAREN COLON ID EQ exp fundec 
 
 	RPAREN	shift 123
 
@@ -2398,11 +2406,11 @@ state 112:
 
 state 113:
 
-	seqexptail : SEMICOLON exp seqexptail .  (reduce by rule 47)
+	seqexptail : SEMICOLON exp seqexptail .  (reduce by rule 49)
 
 
 
-	.	reduce by rule 47
+	.	reduce by rule 49
 
 
 state 114:
@@ -2471,16 +2479,16 @@ state 115:
 
 	fieldtail	goto 128
 
-	.	reduce by rule 37
+	.	reduce by rule 39
 
 
 state 116:
 
-	lvaluetail : LBRACK exp RBRACK lvaluetail .  (reduce by rule 34)
+	lvaluetail : LBRACK exp RBRACK lvaluetail .  (reduce by rule 36)
 
 
 
-	.	reduce by rule 34
+	.	reduce by rule 36
 
 
 state 117:
@@ -2546,7 +2554,7 @@ state 118:
 
 	argtail	goto 131
 
-	.	reduce by rule 43
+	.	reduce by rule 45
 
 
 state 119:
@@ -2612,7 +2620,9 @@ state 122:
 state 123:
 
 	fundec : FUNCTION ID LPAREN tyfields RPAREN . EQ exp 
-	fundec : FUNCTION ID LPAREN tyfields RPAREN . COLON ty EQ exp 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN . COLON ID EQ exp 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN . EQ exp fundec 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN . COLON ID EQ exp fundec 
 
 	COLON	shift 136
 	EQ	shift 135
@@ -2679,7 +2689,7 @@ state 126:
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
-	control : IF exp THEN exp ELSE exp .  (reduce by rule 64)
+	control : IF exp THEN exp ELSE exp .  (reduce by rule 66)
 
 	PLUS	shift 35
 	MINUS	shift 34
@@ -2695,7 +2705,7 @@ state 126:
 	OR	shift 24
 
 
-	.	reduce by rule 64
+	.	reduce by rule 66
 
 
 state 127:
@@ -2707,16 +2717,16 @@ state 127:
 
 	lvaluetail	goto 116
 
-	.	reduce by rule 32
+	.	reduce by rule 34
 
 
 state 128:
 
-	fields : ID EQ exp fieldtail .  (reduce by rule 36)
+	fields : ID EQ exp fieldtail .  (reduce by rule 38)
 
 
 
-	.	reduce by rule 36
+	.	reduce by rule 38
 
 
 state 129:
@@ -2731,7 +2741,7 @@ state 129:
 
 state 130:
 
-	array : ID LBRACK exp RBRACK OF exp .  (reduce by rule 40)
+	array : ID LBRACK exp RBRACK OF exp .  (reduce by rule 42)
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
 	mathexp : exp . TIMES exp 
@@ -2759,16 +2769,16 @@ state 130:
 	OR	shift 24
 
 
-	.	reduce by rule 40
+	.	reduce by rule 42
 
 
 state 131:
 
-	argtail : COMMA exp argtail .  (reduce by rule 44)
+	argtail : COMMA exp argtail .  (reduce by rule 46)
 
 
 
-	.	reduce by rule 44
+	.	reduce by rule 46
 
 
 state 132:
@@ -2825,6 +2835,7 @@ state 134:
 state 135:
 
 	fundec : FUNCTION ID LPAREN tyfields RPAREN EQ . exp 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN EQ . exp fundec 
 
 	ID	shift 22
 	INT	shift 21
@@ -2855,13 +2866,11 @@ state 135:
 
 state 136:
 
-	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON . ty EQ exp 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON . ID EQ exp 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON . ID EQ exp fundec 
 
-	ID	shift 106
-	LBRACE	shift 105
-	ARRAY	shift 104
+	ID	shift 141
 
-	ty	goto 141
 
 	.	error
 
@@ -2933,6 +2942,7 @@ state 140:
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
 	fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp .  (reduce by rule 29)
+	fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp . fundec 
 
 	PLUS	shift 35
 	MINUS	shift 34
@@ -2946,16 +2956,19 @@ state 140:
 	GE	shift 26
 	AND	shift 25
 	OR	shift 24
+	FUNCTION	shift 43
 
+	fundec	goto 146
 
 	.	reduce by rule 29
 
 
 state 141:
 
-	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ty . EQ exp 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ID . EQ exp 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ID . EQ exp fundec 
 
-	EQ	shift 146
+	EQ	shift 147
 
 
 	.	error
@@ -2974,7 +2987,7 @@ state 143:
 
 	tyfieldstail : COMMA . ID COLON ID tyfieldstail 
 
-	ID	shift 147
+	ID	shift 148
 
 
 	.	error
@@ -2994,7 +3007,7 @@ state 144:
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
-	control : FOR ID ASSIGN exp TO exp DO exp .  (reduce by rule 67)
+	control : FOR ID ASSIGN exp TO exp DO exp .  (reduce by rule 69)
 
 	PLUS	shift 35
 	MINUS	shift 34
@@ -3010,43 +3023,12 @@ state 144:
 	OR	shift 24
 
 
-	.	reduce by rule 67
+	.	reduce by rule 69
 
 
 state 145:
 
 	fieldtail : COMMA ID EQ . exp fieldtail 
-
-	ID	shift 22
-	INT	shift 21
-	STRING	shift 20
-	LPAREN	shift 19
-	MINUS	shift 18
-	IF	shift 17
-	WHILE	shift 16
-	FOR	shift 15
-	LET	shift 14
-	BREAK	shift 13
-	NIL	shift 12
-
-	exp	goto 148
-	lvalue	goto 10
-	record	goto 9
-	array	goto 8
-	sequence	goto 7
-	fncallexp	goto 6
-	mathexp	goto 5
-	compexp	goto 4
-	boolexp	goto 3
-	assign	goto 2
-	control	goto 1
-
-	.	error
-
-
-state 146:
-
-	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ty EQ . exp 
 
 	ID	shift 22
 	INT	shift 21
@@ -3075,17 +3057,58 @@ state 146:
 	.	error
 
 
+state 146:
+
+	fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp fundec .  (reduce by rule 31)
+
+
+
+	.	reduce by rule 31
+
+
 state 147:
 
-	tyfieldstail : COMMA ID . COLON ID tyfieldstail 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ . exp 
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ . exp fundec 
 
-	COLON	shift 150
+	ID	shift 22
+	INT	shift 21
+	STRING	shift 20
+	LPAREN	shift 19
+	MINUS	shift 18
+	IF	shift 17
+	WHILE	shift 16
+	FOR	shift 15
+	LET	shift 14
+	BREAK	shift 13
+	NIL	shift 12
 
+	exp	goto 150
+	lvalue	goto 10
+	record	goto 9
+	array	goto 8
+	sequence	goto 7
+	fncallexp	goto 6
+	mathexp	goto 5
+	compexp	goto 4
+	boolexp	goto 3
+	assign	goto 2
+	control	goto 1
 
 	.	error
 
 
 state 148:
+
+	tyfieldstail : COMMA ID . COLON ID tyfieldstail 
+
+	COLON	shift 151
+
+
+	.	error
+
+
+state 149:
 
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
@@ -3115,12 +3138,12 @@ state 148:
 	AND	shift 25
 	OR	shift 24
 
-	fieldtail	goto 151
+	fieldtail	goto 152
 
-	.	reduce by rule 37
+	.	reduce by rule 39
 
 
-state 149:
+state 150:
 
 	mathexp : exp . PLUS exp 
 	mathexp : exp . MINUS exp 
@@ -3134,7 +3157,8 @@ state 149:
 	compexp : exp . GE exp 
 	boolexp : exp . AND exp 
 	boolexp : exp . OR exp 
-	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ty EQ exp .  (reduce by rule 30)
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp .  (reduce by rule 30)
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp . fundec 
 
 	PLUS	shift 35
 	MINUS	shift 34
@@ -3148,42 +3172,53 @@ state 149:
 	GE	shift 26
 	AND	shift 25
 	OR	shift 24
+	FUNCTION	shift 43
 
+	fundec	goto 153
 
 	.	reduce by rule 30
 
 
-state 150:
+state 151:
 
 	tyfieldstail : COMMA ID COLON . ID tyfieldstail 
 
-	ID	shift 152
+	ID	shift 154
 
 
 	.	error
 
 
-state 151:
-
-	fieldtail : COMMA ID EQ exp fieldtail .  (reduce by rule 38)
-
-
-
-	.	reduce by rule 38
-
-
 state 152:
+
+	fieldtail : COMMA ID EQ exp fieldtail .  (reduce by rule 40)
+
+
+
+	.	reduce by rule 40
+
+
+state 153:
+
+	fundec : FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp fundec .  (reduce by rule 32)
+
+
+
+	.	reduce by rule 32
+
+
+state 154:
 
 	tyfieldstail : COMMA ID COLON ID . tyfieldstail 
 
 	COMMA	shift 143
 
-	tyfieldstail	goto 153
+	tyfieldstail	goto 155
 
 	.	reduce by rule 23
 
 
-state 153:
+state 155:
 
 	tyfieldstail : COMMA ID COLON ID tyfieldstail .  (reduce by rule 24)
 
@@ -3192,7 +3227,7 @@ state 153:
 	.	reduce by rule 24
 
 
-state 154:
+state 156:
 
 
 	EOF	accept
@@ -3200,5 +3235,5 @@ state 154:
 
 	.	error
 
-481 of 1070 action table entries left after compaction
-439 goto table entries
+484 of 1072 action table entries left after compaction
+440 goto table entries
