@@ -9,7 +9,7 @@
   | AND | OR | ASSIGN
   | ARRAY | IF | THEN | ELSE | WHILE | FOR | TO | DO | LET | IN | END | OF 
   | BREAK | NIL
-  | FUNCTION | VAR | TYPE 
+  | FUNCTION | VAR | TYPE | HELLO
 
 %nonterm  exp
 	| program
@@ -55,7 +55,7 @@
 %prefer THEN ELSE LPAREN
 
 (* LOW PRECEDENCE *)
-%nonassoc FUNCTION VAR TYPE IF THEN ELSE DO OF ASSIGN ARRAY WHILE FOR TO
+%nonassoc FUNCTION VAR TYPE IF THEN ELSE DO OF ASSIGN ARRAY WHILE FOR TO HELLO
 %left OR
 %left AND
 
@@ -96,6 +96,7 @@ exp: lvalue ()
 	 
 
 decs : dec decs ()
+     | (**) ()
 			    
 dec : tydec ()
     | vardec ()
@@ -112,7 +113,8 @@ tyfieldstail : (* empty*) ()
 	     | COMMA ID COLON ty tyfieldstail ()
 			
 
-tydec : TYPE ID EQ ty ()
+tydec : HELLO ()
+      | HELLO tydec ()
 
 vardec: VAR ID ASSIGN exp ()
       | VAR ID COLON ty ASSIGN exp ()

@@ -1,0 +1,39 @@
+structure A = Absyn
+structure T = Types
+		  
+structure Semant = struct
+    type venv = Env.enventry Symbol.table
+    type tenv = Types.ty Symbol.table
+    type expty = {exp: Translate.exp, ty: T.ty}
+
+    fun checkInt ({exp, ty = T.INT}, pos) = ()
+      | checkInt ({exp, ty = _ }, pos) = error pos "integer required"
+	
+
+    fun checkSeqExp ([]) = ()
+			
+			
+
+    fun transVar(vEnv: venv, tEnv: tenv, exp: Absyn.var) = ()
+
+    fun transExp(vEnv: venv, tEnv: tenv, exp: Absyn.exp): expty =
+	let
+	    fun checkTypeOp ({left, oper, right, pos}) = (checkInt trExp(left); checkInt trExp(right); {exp = (), ty = T.INT})
+								      
+	    fun trExp (A.VarExp(var)) = transVar(vEnt, tEnv, var)
+	      | trExp (A.NilExp) = {exp = (), ty: T.NIL}
+	      | trExp (A.IntExp(e)) = {exp = (), ty: T.INT}
+	      | trExp (A.StringExp(e)) = {exp = (), ty: T.STRING}
+	      | trExp (A.CallExp(e)) = {exp = (), ty: T.STRING} (* add later*)
+	      | trExp (A.OpExp(e)) => checkTypeOp(e)
+	      | trExp (RecordExp(e)) => {exp = (), ty: T.STRING} (* later *)
+	      | trExp (SeqExp(e)) => checkSeqExp(e)
+	in	    
+	    trExp exp
+	end
+	    
+
+
+    fun transProg(exp: Absyn.exp): unit = 1
+    
+end
