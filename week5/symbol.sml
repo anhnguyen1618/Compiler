@@ -7,6 +7,7 @@ sig
   val empty : 'a table
   val enter : 'a table * symbol * 'a -> 'a table
   val look  : 'a table * symbol -> 'a option
+  val eq : symbol * symbol -> boolean
 end
 
 structure Symbol :> SYMBOL =
@@ -35,6 +36,8 @@ struct
 
   structure Table = IntMapTable(type key = symbol
 				fun getInt(s,n) = n)
+
+  fun eq (a,b) = a = b 
 
   type 'a table= 'a Table.table
   val empty = Table.empty
