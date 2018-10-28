@@ -13,7 +13,8 @@ struct
 	  val lexer = LrParser.Stream.streamify (Lex.makeLexer get)
 	  val (absyn, _) = TigerP.parse(30,lexer,parseerror,())
        in TextIO.closeIn file;
-	   absyn
+	  Semant.transExp(Env.base_venv, Env.base_tenv, absyn);
+	  absyn
       end handle LrParser.ParseError => raise ErrorMsg.Error
 
 end

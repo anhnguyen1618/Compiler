@@ -1,8 +1,10 @@
 let var a := 5
-    function f() : int = g(a)
-    function g(i: int) = f()
-    type n = tring
-    type x = HDS
+    var b := 6
+    type myint = int
+    type  arrtype = array of myint
+    var arr1:arrtype := arrtype [10] of 0
+    type rectype = {name:string, age:int}
+    var rec1:rectype := rectype {name="Nobody", age= 100}
 in 
-  f()
+  a + b
 end

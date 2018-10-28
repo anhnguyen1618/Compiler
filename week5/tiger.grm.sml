@@ -845,11 +845,11 @@ end
 |  ( 23, ( ( _, ( MlyValue.tyfieldstail tyfieldstail1, _, 
 tyfieldstail1right)) :: ( _, ( MlyValue.ID ID2, _, _)) :: _ :: ( _, ( 
 MlyValue.ID ID1, (IDleft as ID1left), _)) :: rest671)) => let val  
-result = MlyValue.tyfields (fn _ => let val  (ID as ID1) = ID1 ()
+result = MlyValue.tyfields (fn _ => let val  ID1 = ID1 ()
  val  ID2 = ID2 ()
  val  (tyfieldstail as tyfieldstail1) = tyfieldstail1 ()
  in (
-{name = Symbol.symbol ID, escape = (ref true), typ = Symbol.symbol ID, pos = IDleft}::tyfieldstail
+{name = Symbol.symbol ID1, escape = (ref true), typ = Symbol.symbol ID2, pos = IDleft}::tyfieldstail
 )
 end)
  in ( LrTable.NT 19, ( result, ID1left, tyfieldstail1right), rest671)
@@ -862,12 +862,12 @@ end
 |  ( 25, ( ( _, ( MlyValue.tyfieldstail tyfieldstail1, _, 
 tyfieldstail1right)) :: ( _, ( MlyValue.ID ID2, _, _)) :: _ :: ( _, ( 
 MlyValue.ID ID1, IDleft, _)) :: ( _, ( _, COMMA1left, _)) :: rest671))
- => let val  result = MlyValue.tyfieldstail (fn _ => let val  (ID as 
-ID1) = ID1 ()
+ => let val  result = MlyValue.tyfieldstail (fn _ => let val  ID1 = 
+ID1 ()
  val  ID2 = ID2 ()
  val  (tyfieldstail as tyfieldstail1) = tyfieldstail1 ()
  in (
-{name = Symbol.symbol ID, escape = (ref true), typ = Symbol.symbol ID, pos = IDleft}::tyfieldstail
+{name = Symbol.symbol ID1, escape = (ref true), typ = Symbol.symbol ID2, pos = IDleft}::tyfieldstail
 )
 end)
  in ( LrTable.NT 20, ( result, COMMA1left, tyfieldstail1right), 

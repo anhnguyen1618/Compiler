@@ -17,7 +17,7 @@ structure Semant = struct
 	    fun lookUpType (s, p) =
 		case S.look(tEnv, s) of
 		    SOME t => t
-		  | NONE => (Err.error p ("Type " ^ S.name(s) ^ "has not been declared"); T.NIL)
+		  | NONE => (Err.error p ("Type " ^ S.name(s) ^ " has not been declared"); T.NIL)
 	    fun mapFieldToRecord {name, typ, pos, escape = _} = (name, lookUpType(typ, pos))
 		    
 	    fun checkRecord fields = T.RECORD (map mapFieldToRecord fields, ref ())
@@ -45,7 +45,7 @@ structure Semant = struct
 						     then {venv = S.enter(vEnv, name, E.VarEntry{ty = ty}), tenv = tEnv}
 						     else (Err.error p ("can't assign exp type " ^ T.name(ty) ^ " to type " ^ S.name(s));
 							   {venv = vEnv, tenv = tEnv})
-					 | NONE => (Err.error pos ("Type " ^ S.name(s) ^ "has not been declared"); {venv = vEnv, tenv = tEnv}))
+					 | NONE => (Err.error pos ("Type " ^ S.name(s) ^ " has not been declared"); {venv = vEnv, tenv = tEnv}))
 		      | NONE => {venv = S.enter(vEnv, name, E.VarEntry{ty = ty}), tenv = tEnv}
 		end
 
