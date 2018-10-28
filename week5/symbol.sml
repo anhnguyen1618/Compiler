@@ -7,7 +7,7 @@ sig
   val empty : 'a table
   val enter : 'a table * symbol * 'a -> 'a table
   val look  : 'a table * symbol -> 'a option
-  val eq : symbol * symbol -> boolean
+  val eq : symbol * symbol -> bool
 end
 
 structure Symbol :> SYMBOL =
@@ -32,7 +32,7 @@ struct
 		      (name,i)
 		  end
 
-  fun name(s,n) = s
+  fun name (s: string,n: int): string = s
 
   structure Table = IntMapTable(type key = symbol
 				fun getInt(s,n) = n)

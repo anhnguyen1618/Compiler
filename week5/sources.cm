@@ -8,7 +8,13 @@ absyn.sml
 errormsg.sml
 table.sig
 table.sml
+types.sml
+env.sig
+env.sml
 symbol.sml
 parse.sml
+translate.sml
 tiger.lex
+semantic.sml
 tiger.grm
+
