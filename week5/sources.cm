@@ -5,6 +5,7 @@ $/ml-yacc-lib.cm
 $/smlnj-lib.cm
 
 absyn.sml
+prabsyn.sml
 errormsg.sml
 table.sig
 table.sml

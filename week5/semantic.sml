@@ -94,7 +94,7 @@ structure Semant = struct
 		    
 	    fun trDec (A.VarDec e ) = checkVarDec e
 	      | trDec (A.TypeDec e) = checkTypeDec e
-	      | trDec (A.FunctionDec(e)) = checkFuncDec e
+	      | trDec (A.FunctionDec e) = checkFuncDec e
 		
 	in
 	    trDec exp
@@ -106,7 +106,7 @@ structure Semant = struct
 		case S.look(vEnv, s) of
 		    SOME(E.VarEntry({ty})) => {exp = (), ty = (*actual*) ty}
 		  | SOME _ => {exp = (), ty = T.NIL}
-		  | NONE => (Err.error pos ("This valuable '" ^ S.name(s) ^"' has not been declared"); {exp = (), ty = T.NIL})
+		  | NONE => (Err.error pos ("valuable '" ^ S.name(s) ^"' has not been declared"); {exp = (), ty = T.NIL})
 
 	    and checkFieldVar (obj, s, pos) =
 		let
@@ -182,23 +182,23 @@ structure Semant = struct
 			SOME (T.RECORD (types, refer)) =>
 			let
 			    fun checkFields [] = {exp = (), ty = T.UNIT}
-			      | checkFields ((s, t)::tl) =
+			      | checkFields ((s, t, p)::tl) =
 				let
-				    val matchedField = List.find (fn (symbol, _, _) => S.eq(s, symbol)) fieldExps
+				    val matchedField = List.find (fn (symbol, _) => S.eq(s, symbol)) types
 				in
 				    ((case matchedField of
-					  SOME(symbol, typeExp, pos) =>
+					  SOME(symbol, typeExp) =>
 					  checkTypeEq (
 					      t,
 					      typeExp,
-					      pos,
+					      p,
 					      "Mismatched types of fields property. Expect: " ^ T.name(t) ^ " . Received: "^ T.name(typeExp)
 					  )
-					| NONE  => Err.error pos ("Field " ^ S.name(s) ^ " is missing"));
+					| NONE  => Err.error pos ("Field '" ^ S.name(s) ^ "' is unknown in type " ^ S.name(typ)));
 				     checkFields(tl))
 				end
 			in
-			    (checkFields types; {exp = (), ty = T.RECORD (types, refer)})
+			    (checkFields fieldExps; {exp = (), ty = T.RECORD (types, refer)})
 			end
 			    
 		      | SOME _ => (Err.error pos (S.name(typ) ^ " does not have type record"); {exp = (), ty = T.RECORD ([], ref ())})

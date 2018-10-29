@@ -6,5 +6,5 @@ let var a := 5
     type rectype = {name:string, age:int}
     var rec1:rectype := rectype {name="Nobody", age= 100}
 in 
-  a + b
+  a + rec1.he
 end

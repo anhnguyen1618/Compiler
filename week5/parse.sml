@@ -14,6 +14,7 @@ struct
 	  val (absyn, _) = TigerP.parse(30,lexer,parseerror,())
        in TextIO.closeIn file;
 	  Semant.transExp(Env.base_venv, Env.base_tenv, absyn);
+	  PrintAbsyn.print (TextIO.stdOut, absyn);
 	  absyn
       end handle LrParser.ParseError => raise ErrorMsg.Error
 
