@@ -238,7 +238,7 @@ structure Semant = struct
 						     { exp = (), ty = T.UNIT })
 		   
 	    and checkForExp ({escape = _, var, lo, hi, body, pos}) = (checkTypeEq (#ty (trExp lo), T.INT, pos, "from-for clause does not have type int");
-						     checkTypeEq (#ty (trExp hi), T.UNIT, pos, "to-for clause does not have type int");
+						     checkTypeEq (#ty (trExp hi), T.INT, pos, "to-for clause does not have type int");
 						     (* checkTypeEq (#ty (trExp body), T.UNIT, pos, "body of for clause does not have type unit"); *)
 						     trExp body;
 						     { exp = (), ty = T.UNIT })

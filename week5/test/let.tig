@@ -1,0 +1,7 @@
+let
+    var a: int := 5
+    var b: int := 6
+    var c: int := 7
+in
+    c := a - b
+end
