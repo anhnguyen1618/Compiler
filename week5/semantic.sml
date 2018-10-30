@@ -181,7 +181,7 @@ structure Semant = struct
 		    case S.look(tEnv, typ) of
 			SOME (T.RECORD (types, refer)) =>
 			let
-			    fun checkFields [] = {exp = (), ty = T.UNIT}
+			    fun checkFields [] = ()
 			      | checkFields ((s, t, p)::tl) =
 				let
 				    val matchedField = List.find (fn (symbol, _) => S.eq(s, symbol)) types
@@ -198,7 +198,12 @@ structure Semant = struct
 				     checkFields(tl))
 				end
 			in
-			    (checkFields fieldExps; {exp = (), ty = T.RECORD (types, refer)})
+			    (
+			      if List.length fieldExps <> List.length types
+			      then Err.error pos ("RecordExp and record type '" ^ S.name(typ) ^ "' doesn't match")
+			      else checkFields fieldExps;
+			      {exp = (), ty = T.RECORD (types, refer)}
+			    )
 			end
 			    
 		      | SOME _ => (Err.error pos (S.name(typ) ^ " does not have type record"); {exp = (), ty = T.RECORD ([], ref ())})
@@ -259,16 +264,16 @@ structure Semant = struct
 							
 	    and trExp (A.VarExp(var)) = transVar(vEnv, tEnv, var)
 	      | trExp (A.NilExp) = {exp = (), ty = T.NIL}
-	      | trExp (A.IntExp(e)) = {exp = (), ty = T.INT}
-	      | trExp (A.StringExp(e)) = {exp = (), ty = T.STRING}
-	      | trExp (A.CallExp(e)) = checkFnCallExp e
-	      | trExp (A.OpExp(e)) = checkTypeOp e
+	      | trExp (A.IntExp _) = {exp = (), ty = T.INT}
+	      | trExp (A.StringExp _) = {exp = (), ty = T.STRING}
+	      | trExp (A.CallExp e) = checkFnCallExp e
+	      | trExp (A.OpExp e) = checkTypeOp e
 	      | trExp (A.RecordExp e) = checkRecordExp e
-	      | trExp (A.SeqExp(e)) = checkSeqExp e
-	      | trExp (A.AssignExp(e)) = checkAssignExp e
-	      | trExp (A.IfExp(e)) = checkIfExp e
-	      | trExp (A.WhileExp(e)) = checkWhileExp e
-	      | trExp (A.ForExp(e)) = checkForExp e
+	      | trExp (A.SeqExp e) = checkSeqExp e
+	      | trExp (A.AssignExp e) = checkAssignExp e
+	      | trExp (A.IfExp e) = checkIfExp e
+	      | trExp (A.WhileExp e) = checkWhileExp e
+	      | trExp (A.ForExp e) = checkForExp e
 	      | trExp (A.BreakExp pos) = {exp = (), ty = T.STRING} (* later *)
 	      | trExp (A.LetExp e) = checkLetExp e
 	      | trExp (A.ArrayExp e) = checkArrayExp e

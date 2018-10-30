@@ -2018,12 +2018,6 @@ state 92:
 	control : IF exp THEN exp . ELSE exp 
 	control : IF exp THEN exp .  (reduce by rule 68)
 
-	EOF	reduce by rule 68
-	COMMA	reduce by rule 68
-	SEMICOLON	reduce by rule 68
-	RPAREN	reduce by rule 68
-	RBRACK	reduce by rule 68
-	RBRACE	reduce by rule 68
 	PLUS	shift 35
 	MINUS	shift 34
 	TIMES	shift 33
@@ -2034,19 +2028,10 @@ state 92:
 	LE	shift 28
 	GT	shift 27
 	GE	shift 26
-	AND	shift 25
-	OR	shift 24
-	THEN	reduce by rule 68
-	TO	reduce by rule 68
-	DO	reduce by rule 68
-	IN	reduce by rule 68
-	END	reduce by rule 68
-	FUNCTION	reduce by rule 68
-	VAR	reduce by rule 68
-	TYPE	reduce by rule 68
+	ELSE	shift 112
 
 
-	.	error
+	.	reduce by rule 68
 
 
 state 93:
@@ -2698,8 +2683,6 @@ state 126:
 	LE	shift 28
 	GT	shift 27
 	GE	shift 26
-	AND	shift 25
-	OR	shift 24
 
 
 	.	reduce by rule 67
@@ -3162,5 +3145,5 @@ state 154:
 
 	.	error
 
-476 of 1051 action table entries left after compaction
+459 of 1034 action table entries left after compaction
 429 goto table entries

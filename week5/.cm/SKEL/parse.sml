@@ -1,2 +1,0 @@
-Skeleton 5
-d2f7d"Env"d"Semant"Cd"TextIO"d"Absyn"d"ErrorMsg"d"PrintAbsyn"ä¢LrParser"Nad"Parse"jh3aä¢TigerLrVals"jh1aä¢Token"gp2ÿ=ÿ(gp1e"TigerLrValsFun"aä¢Lex"jh1aä¢Tokens"gp2ÿÿ‚gp1e"TigerLexFun"ad"TigerP"jh3aä¢ParserData"gp2ÿÿƒaÿ‚gp1ÿ‚aÿ=gp1ÿ=gp1e"Join"h0

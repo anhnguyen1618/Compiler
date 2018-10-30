@@ -1,10 +1,1 @@
-let var a := 5
-    var b := 6
-    type myint = int
-    type  arrtype = array of myint
-    var arr1:arrtype := arrtype [10] of 0
-    type rectype = {name:string, age:int}
-    var rec1:rectype := rectype {name="Nobody", age= 100}
-in 
-  a + rec1.he
-end
+if 0 = 0 then 0 else 1
