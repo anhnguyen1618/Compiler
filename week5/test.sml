@@ -46,6 +46,8 @@ val testBoolAndOr = case test "boolAnd" of
                     then' = A.IntExp(1),
                     else' = SOME(A.IntExp(3)), pos = _}) => true
                 | _ => false
+
+val testFunc = test "func"
                 
 (*
 

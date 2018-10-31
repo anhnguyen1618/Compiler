@@ -62,11 +62,13 @@ fun addFuncDec (oldFuncDec, A.FunctionDec(newFuncDecs)) = A.FunctionDec(oldFuncD
 %prefer THEN ELSE LPAREN
 
 (* LOW PRECEDENCE *)
-%nonassoc FUNCTION VAR TYPE IF DO OF ASSIGN ARRAY WHILE FOR TO
+%nonassoc VAR TYPE IF DO OF ASSIGN ARRAY WHILE FOR TO
 %left OR
 %left AND
 %right THEN
 %right ELSE
+%right FUNCTION
+%right TYPE
 
 %nonassoc EQ NEQ LT LE GT GE
 %left PLUS MINUS

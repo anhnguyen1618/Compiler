@@ -71,23 +71,34 @@ structure Semant = struct
 		    fun checkResultType (expectType, resultType) =
 			if T.eq(expectType, T.UNIT) then true
 			else T.eq(expectType, resultType)
-			
-		    fun addNewFuncEntry ({name, params, result, body, pos}, acc) = 
+
+		    fun addFuncHeaders ({name, params, result, body, pos}, acc) =
+			let
+			    val typeList = map (#ty o getType) params
+			    val resultType = getTypeForResult result
+			    val _ = print (S.name(name) ^ "\n")
+			in
+			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType})
+			end
+						
+		    fun addNewFuncEntry ({name, params, result, body, pos}, curVenv) = 
+																   
 			let
 			    val typeList = map getType params
 			    val resultType = getTypeForResult result
-			    val resultVenv = S.enter(acc, name, E.FunEntry{formals = (map #ty typeList), result = resultType})
 			    val addParamsToBody = fn ({name, ty}, temp) => S.enter(temp, name, E.VarEntry({ty = ty}))
 
-			    val bodyVenv = foldl addParamsToBody resultVenv typeList
+			    val bodyVenv = foldl addParamsToBody curVenv typeList
 			    val {exp = _, ty = tyBody } = transExp(bodyVenv, tEnv, body)
 			in
 			    (if checkResultType(resultType, tyBody) then ()
 			     else (Err.error pos ("return type " ^ T.name(tyBody) ^ " does not match with " ^ T.name(resultType)));
-			    resultVenv)
-			end
+			    curVenv)
+			end			    
+
+		    val baseEnv = foldl addFuncHeaders vEnv fs
 			    	
-		    val newvEnv = foldl addNewFuncEntry vEnv fs
+		    val newvEnv = foldl addNewFuncEntry baseEnv fs
 		in
 		    {venv = newvEnv, tenv = tEnv}
 		end

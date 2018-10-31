@@ -1,0 +1,7 @@
+let
+    type a = int
+    type b = string
+
+in
+	do_nothing1(0, "str2")
+end
