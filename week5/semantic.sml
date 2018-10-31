@@ -76,7 +76,6 @@ structure Semant = struct
 			let
 			    val typeList = map (#ty o getType) params
 			    val resultType = getTypeForResult result
-			    val _ = print (S.name(name) ^ "\n")
 			in
 			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType})
 			end

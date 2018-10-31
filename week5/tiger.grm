@@ -1,10 +1,10 @@
 structure A = Absyn
 
-fun addTypeDec (oldType, A.TypeDec(newTypes)) = A.TypeDec(oldType::newTypes)
-  | addTypeDec (oldType, _) = A.TypeDec([oldType]) 
+fun addTypeDec (A.TypeDec(oldTypes), newTypes) = A.TypeDec(oldTypes @ newTypes)
+  | addTypeDec (_, newTypes) = A.TypeDec(newTypes)
 
-fun addFuncDec (oldFuncDec, A.FunctionDec(newFuncDecs)) = A.FunctionDec(oldFuncDec::newFuncDecs)
-  | addFuncDec (oldFuncDec, _)  = A.FunctionDec([oldFuncDec])
+fun addFuncDec (A.FunctionDec(oldFuncDecs), newFuncDecs) = A.FunctionDec(oldFuncDecs @ newFuncDecs)
+  | addFuncDec (_, newFuncDecs) = A.FunctionDec(newFuncDecs)
 
 %%
 %term
@@ -62,13 +62,11 @@ fun addFuncDec (oldFuncDec, A.FunctionDec(newFuncDecs)) = A.FunctionDec(oldFuncD
 %prefer THEN ELSE LPAREN
 
 (* LOW PRECEDENCE *)
-%nonassoc VAR TYPE IF DO OF ASSIGN ARRAY WHILE FOR TO
+%nonassoc FUNCTION TYPE VAR TYPE IF DO OF ASSIGN ARRAY WHILE FOR TO
 %left OR
 %left AND
 %right THEN
 %right ELSE
-%right FUNCTION
-%right TYPE
 
 %nonassoc EQ NEQ LT LE GT GE
 %left PLUS MINUS
@@ -125,13 +123,13 @@ tyfieldstail : (* empty*) ([])
 			
 
 tydec : TYPE ID EQ ty (A.TypeDec([{name = Symbol.symbol ID, ty = ty, pos = TYPEleft}]))
-      | TYPE ID EQ ty tydec (addTypeDec({name = Symbol.symbol ID, ty = ty, pos = TYPEleft}, tydec))
+      | tydec TYPE ID EQ ty (addTypeDec(tydec, [{name = Symbol.symbol ID, ty = ty, pos = TYPEleft}]))
 
 vardec: VAR ID ASSIGN exp (A.VarDec({name = Symbol.symbol ID, escape = (ref true), typ = NONE, init = exp, pos = VARleft}))
       | VAR ID COLON ID ASSIGN exp (A.VarDec({name = Symbol.symbol ID1, escape = (ref true), typ = SOME (Symbol.symbol ID2, ID2left), init = exp, pos = VARleft}))
 	     
 fundec : FUNCTION ID LPAREN tyfields RPAREN funcreturntype EQ exp (A.FunctionDec([{ name = Symbol.symbol ID, params = tyfields, result = funcreturntype, body = exp, pos = FUNCTIONleft}]))
-       | FUNCTION ID LPAREN tyfields RPAREN funcreturntype EQ exp fundec (addFuncDec({ name = Symbol.symbol ID, params = tyfields, result = funcreturntype, body = exp, pos = FUNCTIONleft}, fundec))
+       | fundec FUNCTION ID LPAREN tyfields RPAREN funcreturntype EQ exp (addFuncDec(fundec, [{ name = Symbol.symbol ID, params = tyfields, result = funcreturntype, body = exp, pos = FUNCTIONleft}]))
 
 funcreturntype: (*empty*) (NONE)
 	      | COLON ID  (SOME (Symbol.symbol ID, IDleft ))

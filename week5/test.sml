@@ -47,7 +47,13 @@ val testBoolAndOr = case test "boolAnd" of
                     else' = SOME(A.IntExp(3)), pos = _}) => true
                 | _ => false
 
-val testFunc = test "func"
+val testFunc = case test "func" of
+                A.LetExp{
+                    decs = [A.FunctionDec[_, _]],
+                    body = A.SeqExp([(A.CallExp{func = _, args = [A.IntExp(0), A.StringExp("str2", _)], pos = _}, _)]),
+                    pos = _
+                } => true
+            |   _ => false
                 
 (*
 

@@ -120,6 +120,9 @@ fun parseInt (ns, p, k) =
    | NONE   => (ErrorMsg.error p ("failed to parse integer " ^ ns)
 		;k())
 
+fun parseString s = (String.implode o (List.filter (fn x => x <> #"\"")) o String.explode) s
+
+
 
 
       end
@@ -326,7 +329,8 @@ fun yyAction43 (strm, lastMatch : yymatch) = let
 fun yyAction44 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (Tokens.STRING(yytext, yypos, yypos + size yytext))
+        yystrm := strm;
+        (Tokens.STRING(parseString(yytext), yypos, yypos + size yytext))
       end
 fun yyAction45 (strm, lastMatch : yymatch) = (yystrm := strm;
       (YYBEGIN COMMENT; continue()))

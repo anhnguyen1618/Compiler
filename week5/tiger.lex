@@ -16,6 +16,9 @@ fun parseInt (ns, p, k) =
    | NONE   => (ErrorMsg.error p ("failed to parse integer " ^ ns)
 		;k())
 
+fun parseString s = (String.implode o (List.filter (fn x => x <> #"\"")) o String.explode) s
+
+
 %%
   %s COMMENT;
   %header (functor TigerLexFun(structure Tokens: Tiger_TOKENS));
@@ -66,7 +69,7 @@ fun parseInt (ns, p, k) =
 
 <INITIAL>[a-zA-Z][a-zA-Z0-9_]* => (Tokens.ID(yytext, yypos, yypos + size yytext));
 <INITIAL>[0-9]+ => (parseInt(yytext, yypos, continue));
-<INITIAL>[\"][^\"]*[\"] => (Tokens.STRING(yytext, yypos, yypos + size yytext));
+<INITIAL>\"([^\"]*)\" => (Tokens.STRING(parseString(yytext), yypos, yypos + size yytext));
 <COMMENT>"/*"  	=> (YYBEGIN COMMENT; continue());
 <COMMENT>"*/"  	=> (YYBEGIN INITIAL; continue());
 .       => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());
