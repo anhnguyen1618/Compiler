@@ -54,7 +54,7 @@ structure Semant = struct
 
 	    fun checkTypeDec (xs) =
 		let
-		    val addDumbType ({name, ty = _, pos = _}, tEnv) = S.enter(tEnv, name, T.Name(name, ref NONE))
+		    fun addDumbType ({name, ty = _, pos = _}, tEnv) = S.enter(tEnv, name, T.NAME(name, ref NONE))
 		    val dumbTenv = foldl addDumbType tEnv xs
 		    fun f ({name, ty, pos}, {venv, tenv}) = {tenv = S.enter(tenv, name, transTy(tenv, ty)), venv = venv}
 		in
@@ -117,9 +117,24 @@ structure Semant = struct
 			       
     and transVar (vEnv: venv, tEnv: tenv, exp: Absyn.var) =
 	let
+	    fun actual_ty (T.NAME(n, result)) =
+		    (case !result of
+			 SOME t => t
+		       | NONE =>
+			 (case S.look(tEnv, n) of
+			      SOME t => let
+					    val typ = actual_ty t
+					in
+					    result := SOME(typ);
+					    typ
+					end
+			    | NONE => T.NIL))
+		    
+	      | actual_ty (e) = e 
+		
 	    fun checkSimpleVar (s, pos) =
 		case S.look(vEnv, s) of
-		    SOME(E.VarEntry({ty})) => {exp = (), ty = (*actual*) ty}
+		    SOME(E.VarEntry({ty})) => {exp = (), ty = actual_ty ty}
 		  | SOME _ => {exp = (), ty = T.NIL}
 		  | NONE => (Err.error pos ("valuable '" ^ S.name(s) ^"' has not been declared"); {exp = (), ty = T.NIL})
 
@@ -207,7 +222,7 @@ structure Semant = struct
 					      t,
 					      typeExp,
 					      p,
-					      "Mismatched types of fields property. Expect: " ^ T.name(t) ^ " . Received: "^ T.name(typeExp)
+					      "Mismatched types of fields property: '"^S.name(s)^"'. Expect: " ^ T.name(typeExp) ^ " . Received: "^ T.name(t)
 					  )
 					| NONE  => Err.error pos ("Field '" ^ S.name(s) ^ "' is unknown in type " ^ S.name(typ)));
 				     checkFields(tl))

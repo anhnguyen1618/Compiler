@@ -56,6 +56,8 @@ val testFunc = case test "func" of
 		|   _ => false
 
 val testVarNil = test "varNil"
+
+val testRecurType = test "recurType"
                 
 (*
 
