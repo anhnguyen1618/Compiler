@@ -12,6 +12,26 @@ structure Semant = struct
     fun checkTypeEq (firstType, secondType, pos, errormsg) =
 	if T.eq(firstType, secondType) then () else (Err.error pos errormsg)
 
+    fun actual_ty tEnv ty =
+	let
+	    fun h (T.NAME(n, result)) =
+		(case !result of
+		     SOME t => t
+		   | NONE =>
+		     (case S.look(tEnv, n) of
+			  SOME t => let
+			   val typ = h t
+		       in
+			   result := SOME(typ);
+			   typ
+		       end
+			| NONE => T.NIL))
+	      | h (e) = e
+	in
+	    h ty
+	end
+	    
+
     fun	transTy (tEnv, ty) =
 	let
 	    fun lookUpType (s, p) =
@@ -35,6 +55,7 @@ structure Semant = struct
 	    
     and transDec (vEnv: venv, tEnv: tenv, exp: Absyn.dec) =
 	let
+	    val actual_ty = (actual_ty tEnv) o #ty
 	    fun checkVarDec ({name, typ, init, pos, escape = _}) =
 		let
 		    val {exp = _, ty} = transExp(vEnv, tEnv, init)
@@ -79,7 +100,7 @@ structure Semant = struct
 
 		    fun addFuncHeaders ({name, params, result, body, pos}, acc) =
 			let
-			    val typeList = map (#ty o getType) params
+			    val typeList = map (actual_ty o getType) params
 			    val resultType = getTypeForResult result
 			in
 			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType})
@@ -117,20 +138,8 @@ structure Semant = struct
 			       
     and transVar (vEnv: venv, tEnv: tenv, exp: Absyn.var) =
 	let
-	    fun actual_ty (T.NAME(n, result)) =
-		    (case !result of
-			 SOME t => t
-		       | NONE =>
-			 (case S.look(tEnv, n) of
-			      SOME t => let
-					    val typ = actual_ty t
-					in
-					    result := SOME(typ);
-					    typ
-					end
-			    | NONE => T.NIL))
-		    
-	      | actual_ty (e) = e 
+	    val actual_ty = actual_ty tEnv
+	    val actual_ty_exp = actual_ty o #ty
 		
 	    fun checkSimpleVar (s, pos) =
 		case S.look(vEnv, s) of
@@ -140,7 +149,7 @@ structure Semant = struct
 
 	    and checkFieldVar (obj, s, pos) =
 		let
-		    val typeOfObj = #ty (trVar obj)
+		    val typeOfObj = actual_ty_exp (trVar obj)
 		in
 		    case typeOfObj of
 			T.RECORD (tys, _) =>
@@ -155,7 +164,7 @@ structure Semant = struct
 		end
 
 	    and checkArrayVar (var, sizeExp, pos) =
-		case #ty (trVar var) of
+		case actual_ty_exp (trVar var) of
 		    T.ARRAY (ty, _) =>
 		    let
 			val {exp = _, ty = sizety} = transExp(vEnv, tEnv, sizeExp)
@@ -177,6 +186,9 @@ structure Semant = struct
 
     and transExp (vEnv: venv, tEnv: tenv, exp: Absyn.exp): expty =
 	let
+	    val actual_ty = actual_ty tEnv
+	    val actual_ty_exp = actual_ty o #ty
+				      
 	    fun checkTypeOp ({left, oper, right, pos}) = (
 		checkInt (trExp(left), pos);
 		checkInt (trExp(right), pos);
@@ -186,7 +198,7 @@ structure Semant = struct
 		let
 		    fun checkParam ((exp, ty), _) =
 			let
-			    val actualType = #ty (trExp exp)
+			    val actualType = actual_ty_exp (trExp exp)
 			in
 			    checkTypeEq (
 				ty,
@@ -206,7 +218,7 @@ structure Semant = struct
 
 	    and checkRecordExp {fields, typ, pos} =
 		let
-		    val fieldExps = map (fn (symbol, exp, pos) => (symbol, #ty (trExp exp), pos)) fields
+		    val fieldExps = map (fn (symbol, exp, pos) => (symbol, actual_ty_exp (trExp exp), pos)) fields
 		in
 		    case S.look(tEnv, typ) of
 			SOME (T.RECORD (types, refer)) =>
@@ -220,7 +232,7 @@ structure Semant = struct
 					  SOME(symbol, typeExp) =>
 					  checkTypeEq (
 					      t,
-					      typeExp,
+					      actual_ty(typeExp),
 					      p,
 					      "Mismatched types of fields property: '"^S.name(s)^"'. Expect: " ^ T.name(typeExp) ^ " . Received: "^ T.name(t)
 					  )
@@ -255,21 +267,21 @@ structure Semant = struct
 		let
 		    val typeThenExp = trExp thenExp
 		in
-		    (checkTypeEq (#ty (trExp testExp), T.INT, pos, "if test clause does not have type int");
+		    (checkTypeEq (actual_ty_exp (trExp testExp), T.INT, pos, "if test clause does not have type int");
 		     case elseOption of
 		         NONE => typeThenExp
-		       | SOME elseExp => (checkTypeEq (#ty typeThenExp, #ty (trExp elseExp), pos, "Mismatched types between then and else");
+		       | SOME elseExp => (checkTypeEq (actual_ty_exp typeThenExp, actual_ty_exp (trExp elseExp), pos, "Mismatched types between then and else");
 					  typeThenExp))
 		end
 
-	    and checkWhileExp ({test, body, pos}) = (checkTypeEq (#ty (trExp test), T.INT, pos, "while test clause does not have type int");
-						     (*checkTypeEq (#ty (trExp body), T.UNIT, pos, "body clause does not have type unit");*)
+	    and checkWhileExp ({test, body, pos}) = (checkTypeEq (actual_ty_exp (trExp test), T.INT, pos, "while test clause does not have type int");
+						     (*checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body clause does not have type unit");*)
 						     trExp body;
 						     { exp = (), ty = T.UNIT })
 		   
-	    and checkForExp ({escape = _, var, lo, hi, body, pos}) = (checkTypeEq (#ty (trExp lo), T.INT, pos, "from-for clause does not have type int");
-						     checkTypeEq (#ty (trExp hi), T.INT, pos, "to-for clause does not have type int");
-						     (* checkTypeEq (#ty (trExp body), T.UNIT, pos, "body of for clause does not have type unit"); *)
+	    and checkForExp ({escape = _, var, lo, hi, body, pos}) = (checkTypeEq (actual_ty_exp (trExp lo), T.INT, pos, "from-for clause does not have type int");
+						     checkTypeEq (actual_ty_exp (trExp hi), T.INT, pos, "to-for clause does not have type int");
+						     (* checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body of for clause does not have type unit"); *)
 						     trExp body;
 						     { exp = (), ty = T.UNIT })
 											   
@@ -284,8 +296,8 @@ structure Semant = struct
 	    and checkArrayExp ({typ, size, init, pos}) =
 		case S.look(tEnv, typ) of
 		    SOME (T.ARRAY(ty, unique)) =>
-		    (checkTypeEq (#ty (trExp size), T.INT, pos, "Size of array must have type " ^ T.name(T.INT));
-		     checkTypeEq (#ty (trExp init), ty, pos, "Initialize value of array does not have type " ^ T.name(ty));
+		    (checkTypeEq (actual_ty_exp (trExp size), T.INT, pos, "Size of array must have type " ^ T.name(T.INT));
+		     checkTypeEq (actual_ty_exp (trExp init), ty, pos, "Initialize value of array does not have type " ^ T.name(ty));
 		     {exp = (), ty = T.ARRAY(ty, unique)})
 		  | SOME _ => (Err.error pos (S.name(typ) ^ " does not exist"); {exp = (), ty = T.ARRAY(T.NIL, ref ())})
 		  | NONE => (Err.error pos ("Type " ^ S.name(typ) ^ " could not be found"); {exp = (), ty = T.ARRAY(T.NIL, ref ())})
