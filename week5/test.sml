@@ -53,7 +53,9 @@ val testFunc = case test "func" of
                     body = A.SeqExp([(A.CallExp{func = _, args = [A.IntExp(0), A.StringExp("str2", _)], pos = _}, _)]),
                     pos = _
                 } => true
-            |   _ => false
+		|   _ => false
+
+val testVarNil = test "varNil"
                 
 (*
 

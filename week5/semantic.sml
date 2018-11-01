@@ -46,14 +46,19 @@ structure Semant = struct
 						     else (Err.error p ("can't assign exp type " ^ T.name(ty) ^ " to type " ^ S.name(s));
 							   {venv = vEnv, tenv = tEnv})
 					 | NONE => (Err.error pos ("Type " ^ S.name(s) ^ " has not been declared"); {venv = vEnv, tenv = tEnv}))
-		      | NONE => {venv = S.enter(vEnv, name, E.VarEntry{ty = ty}), tenv = tEnv}
+		      | NONE => ((if T.eq(ty, T.NIL)
+				  then (Err.error pos ("Can't assign Nil to non-record type variable"))
+				  else ());
+				 {venv = S.enter(vEnv, name, E.VarEntry{ty = ty}), tenv = tEnv})
 		end
 
 	    fun checkTypeDec (xs) =
 		let
+		    val addDumbType ({name, ty = _, pos = _}, tEnv) = S.enter(tEnv, name, T.Name(name, ref NONE))
+		    val dumbTenv = foldl addDumbType tEnv xs
 		    fun f ({name, ty, pos}, {venv, tenv}) = {tenv = S.enter(tenv, name, transTy(tenv, ty)), venv = venv}
 		in
-		    foldl f {venv = vEnv, tenv = tEnv} xs
+		    foldl f {venv = vEnv, tenv = dumbTenv} xs
 		end
 
 	    fun checkFuncDec (fs) =

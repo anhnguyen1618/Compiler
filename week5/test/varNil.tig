@@ -1,0 +1,6 @@
+let
+	type rec = { name : string }
+	var a:rec := nil
+in
+	a
+end
