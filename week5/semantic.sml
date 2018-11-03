@@ -5,6 +5,12 @@ structure Semant = struct
     type venv = E.enventry Symbol.table
     type tenv = Types.ty Symbol.table
     type expty = {exp: Translate.exp, ty: T.ty}
+		     
+    val nestedLoopLevel = ref 0
+    fun changeNestedLoopLevel(oper) = nestedLoopLevel := oper(!nestedLoopLevel, 1)
+    fun increaseNestedLevel () = changeNestedLoopLevel op+
+    fun decreaseNestedLevel () = changeNestedLoopLevel op-
+    fun getNestedLoopLevel () = !nestedLoopLevel
 
     fun checkInt ({exp, ty = T.INT}, pos) = ()
       | checkInt ({exp, ty = _ }, pos) = Err.error pos "integer required"
@@ -30,6 +36,70 @@ structure Semant = struct
 	in
 	    h ty
 	end
+
+
+    fun printCircular circularArrays =
+	let
+	    fun printHelper (h::[]) = print (h ^ "\n")
+	      | printHelper (h::tl) = (print (h ^ " -> "); printHelper tl)
+	      | printHelper ([]) = () 
+	in
+	    if List.length circularArrays > 0 then
+		(print "Circular type decs:\n";
+		foldl (fn (x, _) => printHelper x) () circularArrays)
+	    else ()
+	end
+	      
+    fun checkCircular (xs) =
+	let
+	 val typeNodes  = map (fn x => (x,ref (#name(x)), ref false, ref false)) xs
+	 fun traverse ({name, ty, pos}, startNode, isVisited, isCir) =
+	     if !isVisited then (false, []) else
+	     ( isVisited := true;
+	       case ty of
+		   A.NameTy(next, _) =>
+		   let
+		       val nextNode = List.find (fn ({name, ty, pos}, _, _, _) => S.eq(name, next)) typeNodes
+		   in
+		       case nextNode of
+			   SOME (e, nextStartNode, nextIsVisited, nextIsCir) =>
+			   if !nextIsVisited andalso S.eq(!startNode, !nextStartNode)
+			   then
+			       (nextIsCir := true;
+				Err.error (#pos e) ("Circular type declaration: " ^ S.name(#name e));
+				(true, [S.name(name), S.name(next)]))
+			   else if !nextIsVisited then (false, [])
+			   else
+			       (nextStartNode := !startNode;
+				let
+				    val (addNew, cirNodes) = traverse (e, nextStartNode, nextIsVisited, nextIsCir)
+				in
+				    if List.length cirNodes > 0 andalso addNew
+				    then
+					(not (!isCir), S.name(name)::cirNodes)
+				    else (false, cirNodes)
+				end
+				    
+			       )
+			 | NONE => (false, [])
+
+		   end
+		 | _ => (false, []))
+									   
+									   
+	 fun h ((e, startNode, isVisited, isCir), cir) =
+	     if !isVisited then cir else
+	     (let
+		 val (_, cirNodes) = traverse (e, startNode, isVisited, isCir)
+	     in
+		 if List.length cirNodes > 0
+		 then cirNodes::cir
+		 else cir
+	     end)
+	in
+	    foldl h [] typeNodes
+	end
+	    
 	    
 
     fun	transTy (tEnv, ty) =
@@ -79,6 +149,7 @@ structure Semant = struct
 		    val dumbTenv = foldl addDumbType tEnv xs
 		    fun f ({name, ty, pos}, {venv, tenv}) = {tenv = S.enter(tenv, name, transTy(tenv, ty)), venv = venv}
 		in
+		    (printCircular o checkCircular) xs;
 		    foldl f {venv = vEnv, tenv = dumbTenv} xs
 		end
 
@@ -274,16 +345,20 @@ structure Semant = struct
 					  typeThenExp))
 		end
 
-	    and checkWhileExp ({test, body, pos}) = (checkTypeEq (actual_ty_exp (trExp test), T.INT, pos, "while test clause does not have type int");
+	    and checkWhileExp ({test, body, pos}) = (increaseNestedLevel();
+						     checkTypeEq (actual_ty_exp (trExp test), T.INT, pos, "while test clause does not have type int");
 						     (*checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body clause does not have type unit");*)
 						     trExp body;
+						     decreaseNestedLevel();
 						     { exp = (), ty = T.UNIT })
 		   
-	    and checkForExp ({escape = _, var, lo, hi, body, pos}) = (checkTypeEq (actual_ty_exp (trExp lo), T.INT, pos, "from-for clause does not have type int");
-						     checkTypeEq (actual_ty_exp (trExp hi), T.INT, pos, "to-for clause does not have type int");
-						     (* checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body of for clause does not have type unit"); *)
-						     trExp body;
-						     { exp = (), ty = T.UNIT })
+	    and checkForExp ({escape = _, var, lo, hi, body, pos}) = (increaseNestedLevel();
+								      checkTypeEq (actual_ty_exp (trExp lo), T.INT, pos, "from-for clause does not have type int");
+								      checkTypeEq (actual_ty_exp (trExp hi), T.INT, pos, "to-for clause does not have type int");
+								      (* checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body of for clause does not have type unit"); *)
+								      trExp body;
+								      decreaseNestedLevel();
+								      { exp = (), ty = T.UNIT })
 											   
 	    and checkLetExp ({decs, body, pos}) =
 		let
@@ -316,7 +391,8 @@ structure Semant = struct
 	      | trExp (A.IfExp e) = checkIfExp e
 	      | trExp (A.WhileExp e) = checkWhileExp e
 	      | trExp (A.ForExp e) = checkForExp e
-	      | trExp (A.BreakExp pos) = {exp = (), ty = T.STRING} (* later *)
+	      | trExp (A.BreakExp pos) = (if getNestedLoopLevel() > 0 then () else Err.error pos "Break exp is not nested inside loop";
+					  {exp = (), ty = T.STRING})
 	      | trExp (A.LetExp e) = checkLetExp e
 	      | trExp (A.ArrayExp e) = checkArrayExp e
 	in	    

@@ -58,7 +58,10 @@ val testFunc = case test "func" of
 val testVarNil = test "varNil"
 
 val testRecurType = test "recurType"
-                
+
+val testCircularType = test "circularType"
+
+val testNestedBreak = test "nestedBreak"           
 (*
 
 val testCompare = test "compare"

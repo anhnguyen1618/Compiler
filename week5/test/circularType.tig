@@ -1,0 +1,10 @@
+let
+    type a = b
+    type b = c
+    type c = a
+    type d = a
+    type e = f
+    type f = e
+in
+    1
+end
