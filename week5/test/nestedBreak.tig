@@ -1,3 +1,5 @@
  (for i:=0 to 100 do 
+        /* /* THis is a comment */ */
         (for j:= 10 to 100 do (1; break);
         break); break)
+            

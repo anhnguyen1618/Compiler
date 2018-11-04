@@ -6,9 +6,8 @@ type lexresult = (svalue, pos) token
 
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
-fun err(p1,p2) = ErrorMsg.error p1
-
-fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
+fun err (p1,p2) = ErrorMsg.error p1
+val nestedComment = ref 0
 
 fun parseInt (ns, p, k) =
   case Int.fromString (ns) of
@@ -18,6 +17,20 @@ fun parseInt (ns, p, k) =
 
 fun parseString s = (String.implode o (List.filter (fn x => x <> #"\"")) o String.explode) s
 
+fun changeNestedComment oper = nestedComment := oper(!nestedComment, 1)
+
+fun increaseNestedComment() = changeNestedComment op+
+
+fun decreaseNestedComment() = changeNestedComment op-
+
+fun getNestedCommentLevel() = !nestedComment
+
+fun eof () = let
+                val pos = hd(!linePos)
+             in
+  (print "end of file \n";if getNestedCommentLevel() > 0 then ErrorMsg.error pos "Unescaped comment" else ();
+                Tokens.EOF(pos,pos))
+             end
 
 %%
   %s COMMENT;
@@ -70,7 +83,12 @@ fun parseString s = (String.implode o (List.filter (fn x => x <> #"\"")) o Strin
 <INITIAL>[a-zA-Z][a-zA-Z0-9_]* => (Tokens.ID(yytext, yypos, yypos + size yytext));
 <INITIAL>[0-9]+ => (parseInt(yytext, yypos, continue));
 <INITIAL>\"([^\"]*)\" => (Tokens.STRING(parseString(yytext), yypos, yypos + size yytext));
-<COMMENT>"/*"  	=> (YYBEGIN COMMENT; continue());
-<COMMENT>"*/"  	=> (YYBEGIN INITIAL; continue());
+<INITIAL>"/*"  	=> (YYBEGIN COMMENT; increaseNestedComment(); continue());
+<COMMENT>"/*"   => (increaseNestedComment(); continue());
+<COMMENT> .     => (continue());
+<COMMENT>"*/"   => (decreaseNestedComment();
+		    if getNestedCommentLevel() = 0 then YYBEGIN INITIAL else ();
+		    continue());
+
 .       => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());
 
