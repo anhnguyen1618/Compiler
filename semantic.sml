@@ -23,15 +23,14 @@ structure Semant = struct
 	    fun h (T.NAME(n, result)) =
 		(case !result of
 		     SOME t => t
-		   | NONE =>
-		     (case S.look(tEnv, n) of
-			  SOME t => let
-			   val typ = h t
-		       in
-			   result := SOME(typ);
-			   typ
-		       end
-			| NONE => T.NIL))
+		   | NONE => ( case S.look(tEnv, n) of
+				   SOME t =>
+				   let val typ = h t
+				   in
+				       result := SOME(typ);
+				       typ
+				   end
+				 | NONE => T.NIL))
 	      | h (e) = e
 	in
 	    h ty
@@ -123,24 +122,27 @@ structure Semant = struct
 	    trTy ty
 	end
 	    
-    and transDec (vEnv: venv, tEnv: tenv, exp: Absyn.dec) =
+    and transDec (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.dec) =
 	let
 	    val actual_ty = (actual_ty tEnv) o #ty
 	    fun checkVarDec ({name, typ, init, pos, escape = _}) =
 		let
-		    val {exp = _, ty} = transExp(vEnv, tEnv, init)
+		    val {exp = _, ty} = transExp(vEnv, tEnv, level, init)
 		in
 		    case typ of
 			SOME (s, p) => (case S.look(tEnv, s) of
 					   SOME t => if T.eq(t, ty)
-						     then {venv = S.enter(vEnv, name, E.VarEntry{ty = ty}), tenv = tEnv}
+						     then {venv = S.enter(vEnv, name, E.VarEntry{ty = ty, access = Translate.allocLocal(level)(true)}),
+							   tenv = tEnv}
 						     else (Err.error p ("can't assign exp type " ^ T.name(ty) ^ " to type " ^ S.name(s));
 							   {venv = vEnv, tenv = tEnv})
-					 | NONE => (Err.error pos ("Type " ^ S.name(s) ^ " has not been declared"); {venv = vEnv, tenv = tEnv}))
+					 | NONE => (Err.error pos ("Type " ^ S.name(s) ^ " has not been declared");
+						    {venv = vEnv, tenv = tEnv}))
 		      | NONE => ((if T.eq(ty, T.NIL)
 				  then (Err.error pos ("Can't assign Nil to non-record type variable"))
 				  else ());
-				 {venv = S.enter(vEnv, name, E.VarEntry{ty = ty}), tenv = tEnv})
+				 {venv = S.enter(vEnv, name, E.VarEntry{ty = ty, access = Translate.allocLocal(level)(true)}),
+				  tenv = tEnv})
 		end
 
 	    fun checkTypeDec (xs) =
@@ -173,8 +175,12 @@ structure Semant = struct
 			let
 			    val typeList = map (actual_ty o getType) params
 			    val resultType = getTypeForResult result
+			    (* change escape *)
+			    val escapes = map (fn x => true) params
+			    val label = Temp.newlabel()
+			    val newLevel = Translate.newLevel{parent = level, name = label, formals = escapes}
 			in
-			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType})
+			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType, label = label, level = newLevel})
 			end
 						
 		    fun addNewFuncEntry ({name, params, result, body, pos}, curVenv) = 
@@ -182,10 +188,19 @@ structure Semant = struct
 			let
 			    val typeList = map getType params
 			    val resultType = getTypeForResult result
-			    val addParamsToBody = fn ({name, ty}, temp) => S.enter(temp, name, E.VarEntry({ty = ty}))
+			    val funcLevel = case S.look(curVenv, name) of
+						SOME(E.FunEntry e) => #level e
+					      | _ => Translate.newLevel {parent=level, name=Temp.newlabel(), formals=[]}
 
-			    val bodyVenv = foldl addParamsToBody curVenv typeList
-			    val {exp = _, ty = tyBody } = transExp(bodyVenv, tEnv, body)
+			    val paramAccesses = Translate.formals funcLevel
+							      
+			    val addParamsToBody = fn ({name, ty}, (temp, i)) =>
+						     (S.enter(temp, name,
+							 E.VarEntry({ ty = ty,
+								      access = List.nth(paramAccesses, i)})), i + 1)
+
+			    val (bodyVenv, _) = foldl addParamsToBody (curVenv, 0) typeList
+			    val {exp = _, ty = tyBody } = transExp(bodyVenv, tEnv, funcLevel, body)
 			in
 			    (if checkResultType(resultType, tyBody) then ()
 			     else (Err.error pos ("return type " ^ T.name(tyBody) ^ " does not match with " ^ T.name(resultType)));
@@ -207,16 +222,17 @@ structure Semant = struct
 	    trDec exp
 	end
 			       
-    and transVar (vEnv: venv, tEnv: tenv, exp: Absyn.var) =
+    and transVar (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.var) =
 	let
 	    val actual_ty = actual_ty tEnv
 	    val actual_ty_exp = actual_ty o #ty
 		
 	    fun checkSimpleVar (s, pos) =
 		case S.look(vEnv, s) of
-		    SOME(E.VarEntry({ty})) => {exp = (), ty = actual_ty ty}
+		    SOME(E.VarEntry({ty, access})) => {exp = (), ty = actual_ty ty}
 		  | SOME _ => {exp = (), ty = T.NIL}
-		  | NONE => (Err.error pos ("valuable '" ^ S.name(s) ^"' has not been declared"); {exp = (), ty = T.NIL})
+		  | NONE => (Err.error pos ("valuable '" ^ S.name(s) ^"' has not been declared");
+			     {exp = (), ty = T.NIL})
 
 	    and checkFieldVar (obj, s, pos) =
 		let
@@ -229,16 +245,22 @@ structure Semant = struct
 			in
 			    case matchedField of
 				SOME (_, ty) => {exp = (), ty = ty}
-			      | NONE => (Err.error pos ("Property '" ^ S.name(s) ^ "' does not exist on type '" ^ T.name(typeOfObj) ^ "'"); {exp = (), ty = T.NIL})
+			      | NONE => (Err.error pos ("Property '"
+							^ S.name(s) ^ "' does not exist on type '"
+							^ T.name(typeOfObj) ^ "'");
+					 {exp = (), ty = T.NIL})
 			end
-		      | _ => (Err.error pos ("Can't access property '" ^ S.name(s) ^ "' of type '"^ T.name(typeOfObj) ^ "'"); {exp = (), ty = T.NIL})
+		      | _ => (Err.error pos ("Can't access property '"
+					     ^ S.name(s) ^ "' of type '"
+					     ^ T.name(typeOfObj) ^ "'");
+			      {exp = (), ty = T.NIL})
 		end
 
 	    and checkArrayVar (var, sizeExp, pos) =
 		case actual_ty_exp (trVar var) of
 		    T.ARRAY (ty, _) =>
 		    let
-			val {exp = _, ty = sizety} = transExp(vEnv, tEnv, sizeExp)
+			val {exp = _, ty = sizety} = transExp(vEnv, tEnv, level, sizeExp)
 						    
 		    in
 			if T.eq(sizety, T.INT)
@@ -255,7 +277,7 @@ structure Semant = struct
 	end
 
 
-    and transExp (vEnv: venv, tEnv: tenv, exp: Absyn.exp): expty =
+    and transExp (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.exp): expty =
 	let
 	    val actual_ty = actual_ty tEnv
 	    val actual_ty_exp = actual_ty o #ty
@@ -280,11 +302,13 @@ structure Semant = struct
 			end
 		in
 		    case S.look(vEnv, func) of
-			SOME (E.FunEntry({formals, result})) => (
+			SOME (E.FunEntry({formals, result, label, level})) => (
 			 (foldl checkParam () (ListPair.zip(args, formals)));
 			 {exp = (), ty = result})
-		      | SOME _ => (Err.error pos (S.name(func) ^ " does not have type function"); {exp = (), ty = T.UNIT})
-		      | NONE => (Err.error pos ("Function " ^ S.name(func) ^ " can't be found"); {exp = (), ty = T.UNIT})
+		      | SOME _ => (Err.error pos (S.name(func) ^ " does not have type function");
+				   {exp = (), ty = T.UNIT})
+		      | NONE => (Err.error pos ("Function " ^ S.name(func) ^ " can't be found");
+				 {exp = (), ty = T.UNIT})
 		end
 
 	    and checkRecordExp {fields, typ, pos} =
@@ -305,7 +329,9 @@ structure Semant = struct
 					      t,
 					      actual_ty(typeExp),
 					      p,
-					      "Mismatched types of fields property: '"^S.name(s)^"'. Expect: " ^ T.name(typeExp) ^ " . Received: "^ T.name(t)
+					      "Mismatched types of fields property: '"
+					      ^S.name(s)^"'. Expect: " ^ T.name(typeExp)
+					      ^ " . Received: "^ T.name(t)
 					  )
 					| NONE  => Err.error pos ("Field '" ^ S.name(s) ^ "' is unknown in type " ^ S.name(typ)));
 				     checkFields(tl))
@@ -319,15 +345,17 @@ structure Semant = struct
 			    )
 			end
 			    
-		      | SOME _ => (Err.error pos (S.name(typ) ^ " does not have type record"); {exp = (), ty = T.RECORD ([], ref ())})
-		      | NONE => (Err.error pos ("type " ^ S.name(typ)  ^ " can't be found"); {exp = (), ty = T.RECORD ([], ref ())})
+		      | SOME _ => (Err.error pos (S.name(typ) ^ " does not have type record");
+				   {exp = (), ty = T.RECORD ([], ref ())})
+		      | NONE => (Err.error pos ("type " ^ S.name(typ)  ^ " can't be found");
+				 {exp = (), ty = T.RECORD ([], ref ())})
 		end
 
 	    and checkSeqExp (xs) = foldl (fn ((exp, pos), _) => trExp exp) {exp=(), ty=T.UNIT} xs
 
 	    and checkAssignExp ({var, exp, pos}) =
 		let
-		    val {ty = typeLeft, exp = _} = transVar(vEnv, tEnv, var)
+		    val {ty = typeLeft, exp = _} = transVar(vEnv, tEnv, level, var)
 		    val {ty = typeRight, exp = _} = trExp exp
 		    val msg = "Can't assign type " ^ T.name(typeRight) ^ " to type " ^ T.name(typeLeft)
 		in
@@ -341,31 +369,37 @@ structure Semant = struct
 		    (checkTypeEq (actual_ty_exp (trExp testExp), T.INT, pos, "if test clause does not have type int");
 		     case elseOption of
 		         NONE => typeThenExp
-		       | SOME elseExp => (checkTypeEq (actual_ty_exp typeThenExp, actual_ty_exp (trExp elseExp), pos, "Mismatched types between then and else");
+		       | SOME elseExp => (checkTypeEq (actual_ty_exp typeThenExp,
+						       actual_ty_exp (trExp elseExp),
+						       pos,
+						       "Mismatched types between then and else");
 					  typeThenExp))
 		end
 
-	    and checkWhileExp ({test, body, pos}) = (increaseNestedLevel();
-						     checkTypeEq (actual_ty_exp (trExp test), T.INT, pos, "while test clause does not have type int");
-						     (*checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body clause does not have type unit");*)
-						     trExp body;
-						     decreaseNestedLevel();
-						     { exp = (), ty = T.UNIT })
-		   
-	    and checkForExp ({escape = _, var, lo, hi, body, pos}) = (increaseNestedLevel();
-								      checkTypeEq (actual_ty_exp (trExp lo), T.INT, pos, "from-for clause does not have type int");
-								      checkTypeEq (actual_ty_exp (trExp hi), T.INT, pos, "to-for clause does not have type int");
-								      (* checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body of for clause does not have type unit"); *)
-								      trExp body;
-								      decreaseNestedLevel();
-								      { exp = (), ty = T.UNIT })
-											   
+	    and checkWhileExp ({test, body, pos}) =
+		(increaseNestedLevel();
+		 checkTypeEq (actual_ty_exp (trExp test), T.INT, pos, "while test clause does not have type int");
+		 (*checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body clause does not have type unit");*)
+		 trExp body;
+		 decreaseNestedLevel();
+		 { exp = (), ty = T.UNIT })
+
+							
+	    and checkForExp ({escape = _, var, lo, hi, body, pos}) =
+		(increaseNestedLevel();
+		 checkTypeEq (actual_ty_exp (trExp lo), T.INT, pos, "from-for clause does not have type int");
+		 checkTypeEq (actual_ty_exp (trExp hi), T.INT, pos, "to-for clause does not have type int");
+		 (* checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body of for clause does not have type unit"); *)
+		 trExp body;
+		 decreaseNestedLevel();
+		 { exp = (), ty = T.UNIT })
+		    
 	    and checkLetExp ({decs, body, pos}) =
 		let
-		    val helper = fn (dec, {venv = vEnv, tenv = tEnv}) => transDec(vEnv, tEnv, dec)
+		    val helper = fn (dec, {venv = vEnv, tenv = tEnv}) => transDec(vEnv, tEnv, level, dec)
 		    val {venv = vEnv, tenv = tEnv} = foldl helper {venv = vEnv, tenv = tEnv} decs
 		in
-		    transExp (vEnv, tEnv, body)
+		    transExp (vEnv, tEnv, level, body)
 		end
 
 	    and checkArrayExp ({typ, size, init, pos}) =
@@ -379,7 +413,7 @@ structure Semant = struct
 		
 		    
 							
-	    and trExp (A.VarExp(var)) = transVar(vEnv, tEnv, var)
+	    and trExp (A.VarExp(var)) = transVar(vEnv, tEnv, level, var)
 	      | trExp (A.NilExp) = {exp = (), ty = T.NIL}
 	      | trExp (A.IntExp _) = {exp = (), ty = T.INT}
 	      | trExp (A.StringExp _) = {exp = (), ty = T.STRING}

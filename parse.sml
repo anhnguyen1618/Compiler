@@ -13,7 +13,7 @@ struct
 	  val lexer = LrParser.Stream.streamify (Lex.makeLexer get)
 	  val (absyn, _) = TigerP.parse(30,lexer,parseerror,())
        in TextIO.closeIn file;
-	  Semant.transExp(Env.base_venv, Env.base_tenv, absyn);
+	  Semant.transExp(Env.base_venv, Env.base_tenv, Translate.outermost, absyn);
 	  print ("AST of " ^ filename ^ ":\n\n");
 	  PrintAbsyn.print (TextIO.stdOut, absyn);
 	  print "\n-------------------\n";

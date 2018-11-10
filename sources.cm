@@ -14,6 +14,10 @@ env.sig
 env.sml
 symbol.sml
 parse.sml
+temp.sig
+temp.sml
+frame.sig
+mipsframe.sml
 translate.sml
 tiger.lex
 semantic.sml
