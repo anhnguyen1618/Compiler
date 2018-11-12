@@ -12,12 +12,13 @@ struct
 	  fun parseerror(s,p1,p2) = ErrorMsg.error p1 s
 	  val lexer = LrParser.Stream.streamify (Lex.makeLexer get)
 	  val (absyn, _) = TigerP.parse(30,lexer,parseerror,())
-       in TextIO.closeIn file;
-	  Semant.transExp(Env.base_venv, Env.base_tenv, Translate.outermost, absyn);
-	  print ("AST of " ^ filename ^ ":\n\n");
-	  PrintAbsyn.print (TextIO.stdOut, absyn);
-	  print "\n-------------------\n";
-	  absyn
+      in TextIO.closeIn file;
+	 FindEscape absyn;
+	 Semant.transExp(Env.base_venv, Env.base_tenv, Translate.outermost, absyn);
+	 print ("AST of " ^ filename ^ ":\n\n");
+	 PrintAbsyn.print (TextIO.stdOut, absyn);
+	 print "\n-------------------\n";
+	 absyn
       end handle LrParser.ParseError => raise ErrorMsg.Error
 
 end
