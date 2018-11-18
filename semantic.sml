@@ -229,10 +229,10 @@ structure Semant = struct
 		
 	    fun checkSimpleVar (s, pos) =
 		case S.look(vEnv, s) of
-		    SOME(E.VarEntry({ty, access})) => {exp = (), ty = actual_ty ty}
-		  | SOME _ => {exp = (), ty = T.NIL}
+		    SOME(E.VarEntry({ty, access})) => {exp = Translate.simpleVar(access, level), ty = actual_ty ty}
+		  | SOME _ => {exp = Translate.Ex(Tr.CONST 0), ty = T.NIL}
 		  | NONE => (Err.error pos ("valuable '" ^ S.name(s) ^"' has not been declared");
-			     {exp = (), ty = T.NIL})
+			     {exp = Translate.Ex(Tr.CONST 0), ty = T.NIL})
 
 	    and checkFieldVar (obj, s, pos) =
 		let
