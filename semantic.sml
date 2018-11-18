@@ -230,9 +230,9 @@ structure Semant = struct
 	    fun checkSimpleVar (s, pos) =
 		case S.look(vEnv, s) of
 		    SOME(E.VarEntry({ty, access})) => {exp = Translate.simpleVar(access, level), ty = actual_ty ty}
-		  | SOME _ => {exp = Translate.Ex(Tr.CONST 0), ty = T.NIL}
+		  | SOME _ => {exp = Tr.intExp(0), ty = T.NIL}
 		  | NONE => (Err.error pos ("valuable '" ^ S.name(s) ^"' has not been declared");
-			     {exp = Translate.Ex(Tr.CONST 0), ty = T.NIL})
+			     {exp = Tr.intExp(0), ty = T.NIL})
 
 	    and checkFieldVar (obj, s, pos) =
 		let
@@ -313,7 +313,9 @@ structure Semant = struct
 
 	    and checkRecordExp {fields, typ, pos} =
 		let
-		    val fieldExps = map (fn (symbol, exp, pos) => (symbol, actual_ty_exp (trExp exp), pos)) fields
+		    val preFields = map (fn (symbol, exp, pos) => (symbol, trExp(exp), pos)) fields
+		    val fieldValsIR = map (#exp o #2) preFields
+		    val fieldExps = map (fn (symbol, exp, pos) => (symbol, actual_ty_exp exp, pos)) preprocessFields
 		in
 		    case S.look(tEnv, typ) of
 			SOME (T.RECORD (types, refer)) =>
@@ -341,7 +343,7 @@ structure Semant = struct
 			      if List.length fieldExps <> List.length types
 			      then Err.error pos ("RecordExp and record type '" ^ S.name(typ) ^ "' doesn't match")
 			      else checkFields fieldExps;
-			      {exp = (), ty = T.RECORD (types, refer)}
+			      {exp = Translate.recordDec(fieldValsIR), ty = T.RECORD (types, refer)}
 			    )
 			end
 			    
@@ -421,7 +423,7 @@ structure Semant = struct
 							
 	    and trExp (A.VarExp(var)) = transVar(vEnv, tEnv, level, var)
 	      | trExp (A.NilExp) = {exp = (), ty = T.NIL}
-	      | trExp (A.IntExp e) = {exp = Translate.Ex(Tr.CONST e), ty = T.INT}
+	      | trExp (A.IntExp e) = {exp = Translate.intExp(e), ty = T.INT}
 	      | trExp (A.StringExp _) = {exp = (), ty = T.STRING}
 	      | trExp (A.CallExp e) = checkFnCallExp e
 	      | trExp (A.OpExp e) = checkTypeOp e

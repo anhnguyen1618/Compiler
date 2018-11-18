@@ -13,6 +13,8 @@ sig
 
     val simpleVar : access * level -> exp
     val arrayDec : exp * exp -> exp
+    val recordDec: exp list -> exp
+    val intExp : int -> exp
 end
     
 
@@ -93,6 +95,20 @@ fun generateSLChain (TOP, TOP, currentFP) = currentFP
 fun simpleVar ((decLevel, access), usedLevel) = Tr.exp access generateSLChain(decLevel, usedLevel, Tr.TEMP(F.FP))
 
 fun arrayDec (sizeEx, initEx) =
-    Ex (F.externalCall("tig_initArray", [unEx sizeExp, unEx initEx])
+    Ex (F.externalCall("tig_initArray", [unEx sizeExp, unEx initEx]))
+
+fun recordDec (fields) =
+    let
+	val length = List.length fields
+	val r = Temp.newtemp()
+	val allocRecStm = Tr.MOVE(Tr.TEMP(r), Tr.CALL(Tr.NAME(Temp.namedlabel ("malloc")), Tr.CONST(length * F.wordSize)))
+	fun calFieldAddr offset = Tr.MEM(Tr.BINOP(Tr.PLUS, Tr.TEMP(r), Tr.CONST(offset * F.wordSize)))
+	fun createFieldStm (cur, (stms, offset)) = (Tr.MOVE(callFieldAddr(offset), unEx cur)::stms, offset - 1)
+	val (fieldStms, _) = foldr createFieldStm ([], length -1) fields
+    in
+	Tr.ESEQ(seq(allocRecStm::fieldStms))
+    end
+
+fun intExp e = Ex (Tr.CONST e)
 	       
 end
