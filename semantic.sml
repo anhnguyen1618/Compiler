@@ -405,9 +405,15 @@ structure Semant = struct
 	    and checkArrayExp ({typ, size, init, pos}) =
 		case S.look(tEnv, typ) of
 		    SOME (T.ARRAY(ty, unique)) =>
-		    (checkTypeEq (actual_ty_exp (trExp size), T.INT, pos, "Size of array must have type " ^ T.name(T.INT));
-		     checkTypeEq (actual_ty_exp (trExp init), ty, pos, "Initialize value of array does not have type " ^ T.name(ty));
-		     {exp = (), ty = T.ARRAY(ty, unique)})
+		    let
+			val sizeResult = trExp size
+			val initResult = trExp init
+		    in
+			(checkTypeEq (actual_ty_exp sizeResult, T.INT, pos, "Size of array must have type " ^ T.name(T.INT));
+			 checkTypeEq (actual_ty_exp initResult, ty, pos, "Initialize value of array does not have type " ^ T.name(ty));
+			 {exp = Translate.arrayDec(#exp size, #exp init), ty = T.ARRAY(ty, unique)})
+		    end
+			
 		  | SOME _ => (Err.error pos (S.name(typ) ^ " does not exist"); {exp = (), ty = T.ARRAY(T.NIL, ref ())})
 		  | NONE => (Err.error pos ("Type " ^ S.name(typ) ^ " could not be found"); {exp = (), ty = T.ARRAY(T.NIL, ref ())})
 		
@@ -415,7 +421,7 @@ structure Semant = struct
 							
 	    and trExp (A.VarExp(var)) = transVar(vEnv, tEnv, level, var)
 	      | trExp (A.NilExp) = {exp = (), ty = T.NIL}
-	      | trExp (A.IntExp _) = {exp = (), ty = T.INT}
+	      | trExp (A.IntExp e) = {exp = Translate.Ex(Tr.CONST e), ty = T.INT}
 	      | trExp (A.StringExp _) = {exp = (), ty = T.STRING}
 	      | trExp (A.CallExp e) = checkFnCallExp e
 	      | trExp (A.OpExp e) = checkTypeOp e

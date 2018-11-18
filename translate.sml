@@ -12,6 +12,7 @@ sig
     val allocLocal: level -> bool -> access
 
     val simpleVar : access * level -> exp
+    val arrayDec : exp * exp -> exp
 end
     
 
@@ -90,5 +91,8 @@ fun generateSLChain (TOP, TOP, currentFP) = currentFP
 	
 
 fun simpleVar ((decLevel, access), usedLevel) = Tr.exp access generateSLChain(decLevel, usedLevel, Tr.TEMP(F.FP))
+
+fun arrayDec (sizeEx, initEx) =
+    Ex (F.externalCall("tig_initArray", [unEx sizeExp, unEx initEx])
 	       
 end

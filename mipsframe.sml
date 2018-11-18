@@ -36,6 +36,7 @@ fun allocLocal f esc =
 fun exp InFrame(offset) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, Tr.CONST offset))
   | exp InReg(temp) _ = Tr.TEMP temp
 
-	
+fun externalCall (name, args) = Tr.CALL(Tr.NAME(Temp.namedlabel name), args)
+				
 end
     
