@@ -15,6 +15,7 @@ sig
     val arrayDec : exp * exp -> exp
     val recordDec: exp list -> exp
     val intExp : int -> exp
+    val fieldVar: exp * int -> exp
 end
     
 
@@ -110,5 +111,7 @@ fun recordDec (fields) =
     end
 
 fun intExp e = Ex (Tr.CONST e)
+
+fun fieldVar (recordTemp, index) = Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx recordTemp, Tr.CONST(F.wordSize * index))))
 	       
 end

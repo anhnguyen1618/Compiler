@@ -236,24 +236,27 @@ structure Semant = struct
 
 	    and checkFieldVar (obj, s, pos) =
 		let
-		    val typeOfObj = actual_ty_exp (trVar obj)
+		    val {exp = recExp, ty = ty } = trVar obj
+		    val typeOfObj = actual_ty ty
 		in
 		    case typeOfObj of
 			T.RECORD (tys, _) =>
 			let
+			    val index = ref -1
+			    (*TODO: find a way to find correct index of the field when declared, not using the one from the typedec*)
 			    val matchedField = List.find (fn (symbol, _) => S.eq(s, symbol)) tys
 			in
 			    case matchedField of
-				SOME (_, ty) => {exp = (), ty = ty}
+				SOME (_, ty) => {exp = Translate.fieldVar(recExp, !index), ty = ty}
 			      | NONE => (Err.error pos ("Property '"
 							^ S.name(s) ^ "' does not exist on type '"
 							^ T.name(typeOfObj) ^ "'");
-					 {exp = (), ty = T.NIL})
+					 {exp = Translate.intExp(0), ty = T.NIL})
 			end
 		      | _ => (Err.error pos ("Can't access property '"
 					     ^ S.name(s) ^ "' of type '"
 					     ^ T.name(typeOfObj) ^ "'");
-			      {exp = (), ty = T.NIL})
+			      {exp = Translate.intExp(0), ty = T.NIL})
 		end
 
 	    and checkArrayVar (var, sizeExp, pos) =
@@ -348,9 +351,9 @@ structure Semant = struct
 			end
 			    
 		      | SOME _ => (Err.error pos (S.name(typ) ^ " does not have type record");
-				   {exp = (), ty = T.RECORD ([], ref ())})
+				   {exp = Translate.intExp(0), ty = T.RECORD ([], ref ())})
 		      | NONE => (Err.error pos ("type " ^ S.name(typ)  ^ " can't be found");
-				 {exp = (), ty = T.RECORD ([], ref ())})
+				 {exp = Translate.intExp(0), ty = T.RECORD ([], ref ())})
 		end
 
 	    and checkSeqExp (xs) = foldl (fn ((exp, pos), _) => trExp exp) {exp=(), ty=T.UNIT} xs
