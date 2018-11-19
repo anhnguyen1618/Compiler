@@ -122,17 +122,22 @@ structure Semant = struct
 	    trTy ty
 	end
 	    
-    and transDec (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.dec) =
+    and transDec (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.dec, break: Temp.label) =
 	let
 	    val actual_ty = (actual_ty tEnv) o #ty
 	    fun checkVarDec ({name, typ, init, pos, escape = _}) =
 		let
-		    val {exp = _, ty} = transExp(vEnv, tEnv, level, init)
+		    val {exp = _, ty} = transExp(vEnv, tEnv, level, init, break)
 		in
 		    case typ of
 			SOME (s, p) => (case S.look(tEnv, s) of
 					   SOME t => if T.eq(t, ty)
-						     then {venv = S.enter(vEnv, name, E.VarEntry{ty = ty, access = Translate.allocLocal(level)(true)}),
+						     then {venv = S.enter(
+							       vEnv,
+							       name,
+							       E.VarEntry{
+								   ty = ty,
+								   access = Translate.allocLocal(level)(true)}),
 							   tenv = tEnv}
 						     else (Err.error p ("can't assign exp type " ^ T.name(ty) ^ " to type " ^ S.name(s));
 							   {venv = vEnv, tenv = tEnv})
@@ -200,7 +205,7 @@ structure Semant = struct
 								      access = List.nth(paramAccesses, i)})), i + 1)
 
 			    val (bodyVenv, _) = foldl addParamsToBody (curVenv, 0) typeList
-			    val {exp = _, ty = tyBody } = transExp(bodyVenv, tEnv, funcLevel, body)
+			    val {exp = _, ty = tyBody } = transExp(bodyVenv, tEnv, funcLevel, body, break)
 			in
 			    (if checkResultType(resultType, tyBody) then ()
 			     else (Err.error pos ("return type " ^ T.name(tyBody) ^ " does not match with " ^ T.name(resultType)));
@@ -222,7 +227,7 @@ structure Semant = struct
 	    trDec exp
 	end
 			       
-    and transVar (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.var) =
+    and transVar (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.var, break: Temp.label) =
 	let
 	    val actual_ty = actual_ty tEnv
 	    val actual_ty_exp = actual_ty o #ty
@@ -267,7 +272,7 @@ structure Semant = struct
 		    case typeOfArr of
 			T.ARRAY (ty, _) =>
 			let
-			    val {exp = sizeIrExp, ty = sizety} = transExp(vEnv, tEnv, level, sizeExp)
+			    val {exp = sizeIrExp, ty = sizety} = transExp(vEnv, tEnv, level, sizeExp, break)
 									 
 			in
 			    if T.eq(sizety, T.INT)
@@ -291,29 +296,42 @@ structure Semant = struct
 	    val actual_ty = actual_ty tEnv
 	    val actual_ty_exp = actual_ty o #ty
 				      
-	    fun checkTypeOp ({left, oper, right, pos}) = (
-		checkInt (trExp(left), pos);
-		checkInt (trExp(right), pos);
-		{exp = (), ty = T.INT})
+	    fun checkTypeOp ({left, oper, right, pos}) =
+		let
+		    val (leftResult, rightResult) = (trExp left, trExp right)
+		    val {exp = leftIr, ty = leftTy} = leftResult
+		    val {exp = rightIr, ty = rightTy} = rightResult
+		in
+		    checkTypeEq (actual_ty leftTy, T.INT, pos, "Interger is require");
+		    checkTypeEq (actual_ty rightTy, T.INT, pos, "Interger is require");
+		    {exp = Translate.binExp(leftIr, oper, rightIr), ty = T.INT})
+		end
 
 	    and checkFnCallExp ({func, args, pos}) =
 		let
-		    fun checkParam ((exp, ty), _) =
+		    fun checkParam ((exp, ty), acc): Translate.exp list =
 			let
-			    val actualType = actual_ty_exp (trExp exp)
+			    val {exp = argIr, ty = argTy } = trExp exp
+			    val actualArgType = actual_ty argTy
 			in
-			    checkTypeEq (
+			    (checkTypeEq (
 				ty,
-				actualType,
+				actualArgType,
 				pos,
-				"Mismatched types of function args. Expect: " ^ T.name(ty) ^ " . Received: "^ T.name(actualType)
-			    )
+				"Mismatched types of function args. Expect: "
+				^ T.name(ty) ^ " . Received: "
+				^ T.name(actualArgType)
+			      ); argIr :: acc)
 			end
 		in
 		    case S.look(vEnv, func) of
-			SOME (E.FunEntry({formals, result, label, level})) => (
-			 (foldl checkParam () (ListPair.zip(args, formals)));
-			 {exp = (), ty = result})
+			SOME (E.FunEntry({formals, result, label, level = decLevel})) =>
+			let
+			    val argIrs = foldr checkParam [] (ListPair.zip(args, formals))
+			in
+			    {exp = Translate.funCallExp(decLevel, level, label, argIrs), ty = result})
+			end
+
 		      | SOME _ => (Err.error pos (S.name(func) ^ " does not have type function");
 				   {exp = (), ty = T.UNIT})
 		      | NONE => (Err.error pos ("Function " ^ S.name(func) ^ " can't be found");
@@ -374,7 +392,7 @@ structure Semant = struct
 
 	    and checkAssignExp ({var, exp, pos}) =
 		let
-		    val {ty = typeLeft, exp = _} = transVar(vEnv, tEnv, level, var)
+		    val {ty = typeLeft, exp = _} = transVar(vEnv, tEnv, level, var, break)
 		    val {ty = typeRight, exp = _} = trExp exp
 		    val msg = "Can't assign type " ^ T.name(typeRight) ^ " to type " ^ T.name(typeLeft)
 		in
@@ -383,16 +401,24 @@ structure Semant = struct
 
 	    and checkIfExp ({test = testExp, then' = thenExp, else' = elseOption, pos}) =
 		let
-		    val typeThenExp = trExp thenExp
+		    val {exp = testIr, ty = testTy} = trExp testExp
+		    val {exp = thenIr, ty = thenTy} = trExp thenExp
 		in
-		    (checkTypeEq (actual_ty_exp (trExp testExp), T.INT, pos, "if test clause does not have type int");
+		    (checkTypeEq (actual_ty testTy, T.INT, pos, "if test clause does not have type int");
 		     case elseOption of
-		         NONE => typeThenExp
-		       | SOME elseExp => (checkTypeEq (actual_ty_exp typeThenExp,
-						       actual_ty_exp (trExp elseExp),
-						       pos,
-						       "Mismatched types between then and else");
-					  typeThenExp))
+		         NONE => {exp = Translate.ifExp(testIr, thenIr, NONE), ty}
+		       | SOME elseExp =>
+			 let
+			     val {exp = elseIr, ty = elseTy} = trExp elseExp
+			 in
+			     (checkTypeEq (actual_ty thenTy,
+					   actual_ty elseTy,
+					   pos,
+					   "Mismatched types between then and else");
+			      Translate.ifExp(testIr, thenIr, SOME(elseIr))))
+			 end
+			     
+				 
 		end
 
 	    and checkWhileExp ({test, body, pos}) =
@@ -423,7 +449,7 @@ structure Semant = struct
 		    
 	    and checkLetExp ({decs, body, pos}) =
 		let
-		    val helper = fn (dec, {venv = vEnv, tenv = tEnv}) => transDec(vEnv, tEnv, level, dec)
+		    val helper = fn (dec, {venv = vEnv, tenv = tEnv}) => transDec(vEnv, tEnv, level, dec, label)
 		    val {venv = vEnv, tenv = tEnv} = foldl helper {venv = vEnv, tenv = tEnv} decs
 		in
 		    transExp (vEnv, tEnv, level, body, break)
@@ -446,7 +472,7 @@ structure Semant = struct
 		
 		    
 							
-	    and trExp (A.VarExp(var)) = transVar(vEnv, tEnv, level, var)
+	    and trExp (A.VarExp(var)) = transVar(vEnv, tEnv, level, var, break)
 	      | trExp (A.NilExp) = {exp = (), ty = T.NIL}
 	      | trExp (A.IntExp e) = {exp = Translate.intExp(e), ty = T.INT}
 	      | trExp (A.StringExp _) = {exp = (), ty = T.STRING}

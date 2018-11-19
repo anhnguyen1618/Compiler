@@ -19,6 +19,9 @@ sig
     val subscriptVar: exp * exp -> exp
     val whileExp: exp * exp -> exp
     val breakExp: Temp.label -> exp
+    val ifExp: exp * exp * exp option -> exp
+    val opExp: exp * A.oper * exp -> exp
+    val funCallExp: level * level * label * exp list -> exp
 end
     
 
@@ -144,5 +147,67 @@ fun whileExp (testExp, bodyExp, done) =
 
 fun breakExp doneLabel =
     Nx Tr.JUMP(Tr.NAME(doneLabel), [doneLabel])
+
+(* Come back and optimise Cx case later *)
+fun ifExp (test, then', else') =
+    let
+	val t = Temp.newlabel()
+	val f = Temp.newlabel()
+	val r = Temp.newtemp()
+	val join = Temp.newlabel()
+	val func = unCx test
+	val tempo = Tr.TEMP r
+	val stms = case else' of
+		     | SOME elseExp => seq [
+					  func(t, f),
+					  Tr.LABEL(t),
+					  Tr.MOVE(tempo, unEx(then')),
+					  Tr.JUMP(Tr.NAME(join), [join]),
+					  Tr.LABEL(f),
+					  Tr.MOVE(tempo, unEx(elseExp)),
+					  Tr.JUMP(Tr.NAME(join), [join]),
+					  Tr.LABEL(join)
+				      ]
+		     | NONE => seq [
+				  func(t, f),
+				  Tr.LABEL(t),
+				  Tr.MOVE(tempo, unEx(then')),
+				  Tr.JUMP(Tr.NAME(join), [join]),
+				  Tr.LABEL(f),
+				  Tr.JUMP(Tr.NAME(join), [join]),
+				  Tr.LABEL(join)
+			      ]
+    in
+	Ex Tr.ESEQ(stms, tempo)
+    end
+
+
+
+fun opExp (left, oper: A.oper, right) =
+    let
+	fun opCx(oper: Tr.binop) = Cx (fn (t, f) => Tr.CJUMP(oper, unEx(left), unEx (right), t, f))
+	fun opEx(oper: Tr.biop) = Ex Tr.BINOP(oper, unEx (left), unEx (right))
+    in
+	case oper of
+	  | A.PlusOp => opEx Tr.PLUS
+	  | A.MinusOp => opEx Tr.MINUS
+	  | A.TimesOp => opEx Tr.MUL 
+	  | A.DivideOp => opEx Tr.DIV
+	  | A.EqOp => opCx Tr.EQ
+	  | A.NeqOp => opCx Tr.NE
+	  | A.LtOp => opCx Tr.LT
+	  | A.LeOp => opCx Tr.LE
+	  | A.GtOp => opCx Tr.GT
+	  | A.GeOp => opCx Tr.GE
+    end
+
+fun funCallExp (decLevel, usedLevel, label, args) =
+    let
+	val funAddr = generateSLChain(decLevel, usedLevel, Tr.TEMP(F.FP))
+	val newArgs = funAddr::(map unEx args)
+    in
+	Ex Tr.CALL(label, newArgs)
+    end
 	
+
 end
