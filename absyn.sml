@@ -47,6 +47,40 @@ withtype field = {name: symbol, escape: bool ref,
 		   result: (symbol * pos) option,
 		   body: exp,
 		   pos: pos}
+
+fun rewriteForExp {var, escape, lo, hi, body, pos} =
+    LetExp{
+	decs = [VarDec {
+		     name = var,
+		     escape = escape,
+		     typ = SOME(Symbol.symbol("int"), pos),
+		     init = lo, pos},
+		VarDec {
+		    name = Symbol.symbol("_limit"),
+		    escape = ref(false),
+		    typ = SOME(Symbol.symbol("int"), pos),
+		    init = hi, pos = pos}],
+	body = WhileExp {
+	    test = OpExp {
+		left = SimpleVar(Symbol.symbol("_limit"), pos)
+		oper = GeOp,
+		right = SimpleVar(var, pos),
+		pos = pos
+	    },
+	    body = SeqExp[body, AssignExp{
+			      var = SimpleVar(var, pos),
+			      exp = OpExp{
+				  left = SimpleVar(var, pos),
+				  oper = PlusOp,
+				  right = IntExp(1),
+				  pos = pos
+			      },
+			      pos = pos}],
+	    pos = pos
+	},
+	pos = pos
+    }
+    
      
 end
         

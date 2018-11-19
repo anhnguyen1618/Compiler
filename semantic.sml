@@ -242,9 +242,9 @@ structure Semant = struct
 		    case typeOfObj of
 			T.RECORD (tys, _) =>
 			let
-			    val index = ref -1
-			    (*TODO: find a way to find correct index of the field when declared, not using the one from the typedec*)
-			    val matchedField = List.find (fn (symbol, _) => S.eq(s, symbol)) tys
+			    val index = ref (~1)
+						 
+			    val matchedField = List.find (fn (symbol, _) => (index := !index + 1; S.eq(s, symbol))) tys
 			in
 			    case matchedField of
 				SOME (_, ty) => {exp = Translate.fieldVar(recExp, !index), ty = ty}
@@ -260,17 +260,23 @@ structure Semant = struct
 		end
 
 	    and checkArrayVar (var, sizeExp, pos) =
-		case actual_ty_exp (trVar var) of
-		    T.ARRAY (ty, _) =>
-		    let
-			val {exp = _, ty = sizety} = transExp(vEnv, tEnv, level, sizeExp)
-						    
-		    in
-			if T.eq(sizety, T.INT)
-			then {exp = (), ty = ty}
-			else (Err.error pos "index of array is not int"; {exp = (), ty = T.NIL})
-		    end
-		  | _ => (Err.error pos ("Can't access member of non-array type"); {exp = (), ty = T.NIL})		    
+		let
+		    val {exp = arrayExp, ty = ty} = trVar var
+		    val typeOfArr = actual_ty ty
+		in
+		    case typeOfArr of
+			T.ARRAY (ty, _) =>
+			let
+			    val {exp = sizeIrExp, ty = sizety} = transExp(vEnv, tEnv, level, sizeExp)
+									 
+			in
+			    if T.eq(sizety, T.INT)
+			    then {exp = Translate.subscriptVar(arrayExp, sizeIrExp), ty = ty}
+			    else (Err.error pos "index of array is not int"; {exp = Translate.intExp(0), ty = T.NIL})
+			end
+		      | _ => (Err.error pos ("Can't access member of non-array type"); {exp = Translate.intExp(0), ty = T.NIL})		    
+		end
+		    
 		    
 	    and trVar (A.SimpleVar e) = checkSimpleVar e
 	      | trVar (A.FieldVar e) = checkFieldVar e
@@ -280,7 +286,7 @@ structure Semant = struct
 	end
 
 
-    and transExp (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.exp): expty =
+    and transExp (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.exp, break: Temp.label): expty =
 	let
 	    val actual_ty = actual_ty tEnv
 	    val actual_ty_exp = actual_ty o #ty
@@ -323,30 +329,38 @@ structure Semant = struct
 		    case S.look(tEnv, typ) of
 			SOME (T.RECORD (types, refer)) =>
 			let
-			    fun checkFields [] = ()
+			    fun checkFields [] = []
 			      | checkFields ((s, t, p)::tl) =
 				let
 				    val matchedField = List.find (fn (symbol, _) => S.eq(s, symbol)) types
 				in
-				    ((case matchedField of
+				    case matchedField of
 					  SOME(symbol, typeExp) =>
-					  checkTypeEq (
+					  (checkTypeEq (
 					      t,
 					      actual_ty(typeExp),
 					      p,
 					      "Mismatched types of fields property: '"
 					      ^S.name(s)^"'. Expect: " ^ T.name(typeExp)
 					      ^ " . Received: "^ T.name(t)
+					    ); (symbol,typeExp)::checkFields(tl))
+					| NONE  =>
+					  (
+					    Err.error pos ("Field '" ^ S.name(s) ^ "' is unknown in type " ^ S.name(typ));
+					    checkFields(tl)
 					  )
-					| NONE  => Err.error pos ("Field '" ^ S.name(s) ^ "' is unknown in type " ^ S.name(typ)));
-				     checkFields(tl))
 				end
 			in
 			    (
 			      if List.length fieldExps <> List.length types
-			      then Err.error pos ("RecordExp and record type '" ^ S.name(typ) ^ "' doesn't match")
-			      else checkFields fieldExps;
-			      {exp = Translate.recordDec(fieldValsIR), ty = T.RECORD (types, refer)}
+			      then (Err.error pos ("RecordExp and record type '" ^ S.name(typ) ^ "' doesn't match");
+				    {exp = Translate.recordDec(fieldValsIR), ty = T.RECORD (types, refer)})
+			      else
+				  let
+				      val typesInCreateOrder = checkFields fieldExps;
+				  in
+				      {exp = Translate.recordDec(fieldValsIR), ty = T.RECORD (typesInCreateOrder, refer)}
+				  end
 			    )
 			end
 			    
@@ -382,29 +396,37 @@ structure Semant = struct
 		end
 
 	    and checkWhileExp ({test, body, pos}) =
-		(increaseNestedLevel();
-		 checkTypeEq (actual_ty_exp (trExp test), T.INT, pos, "while test clause does not have type int");
-		 (*checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body clause does not have type unit");*)
-		 trExp body;
-		 decreaseNestedLevel();
-		 { exp = (), ty = T.UNIT })
+		let
+		    val _ = increaseNestedLevel()
+		    val {exp = testExp, ty = testTy} = trExp test
+		    val doneLabel = Temp.newlabel()
+		    val {exp = bodyExp, ty = _} = transExp (vEnv, tEnv, level, body, doneLabel)
+		    val _ = decreaseNestedLevel()
+
+		in
+		    checkTypeEq (actual_ty testTy, T.INT, pos, "while test clause does not have type int");		      
+		    { exp = Translate.whileExp(testExp, bodyExp, doneLabel), ty = T.UNIT }
+		end
+		    
 
 							
-	    and checkForExp ({escape = _, var, lo, hi, body, pos}) =
-		(increaseNestedLevel();
-		 checkTypeEq (actual_ty_exp (trExp lo), T.INT, pos, "from-for clause does not have type int");
-		 checkTypeEq (actual_ty_exp (trExp hi), T.INT, pos, "to-for clause does not have type int");
-		 (* checkTypeEq (actual_ty (trExp body), T.UNIT, pos, "body of for clause does not have type unit"); *)
-		 trExp body;
-		 decreaseNestedLevel();
-		 { exp = (), ty = T.UNIT })
+	    and checkForExp (e) =
+		let
+		    val whileAST = T.rewriteForExp(e)
+		    (* val loTy = (actual_ty_exp o trExp o #lo) e
+		    val hiTy = (actual_ty_exp o trExp o #hi) e
+		    val _ = checkTypeEq (loTy, T.INT, pos, "from-for clause does not have type int")
+		    val _ = checkTypeEq (hiTy, T.INT, pos, "to-for clause does not have type int") *)
+		in
+		    trExp whileAST
+		end		    
 		    
 	    and checkLetExp ({decs, body, pos}) =
 		let
 		    val helper = fn (dec, {venv = vEnv, tenv = tEnv}) => transDec(vEnv, tEnv, level, dec)
 		    val {venv = vEnv, tenv = tEnv} = foldl helper {venv = vEnv, tenv = tEnv} decs
 		in
-		    transExp (vEnv, tEnv, level, body)
+		    transExp (vEnv, tEnv, level, body, break)
 		end
 
 	    and checkArrayExp ({typ, size, init, pos}) =
@@ -437,7 +459,7 @@ structure Semant = struct
 	      | trExp (A.WhileExp e) = checkWhileExp e
 	      | trExp (A.ForExp e) = checkForExp e
 	      | trExp (A.BreakExp pos) = (if getNestedLoopLevel() > 0 then () else Err.error pos "Break exp is not nested inside loop";
-					  {exp = (), ty = T.STRING})
+					  {exp = Translate.breakExp(break), ty = T.STRING})
 	      | trExp (A.LetExp e) = checkLetExp e
 	      | trExp (A.ArrayExp e) = checkArrayExp e
 	in	    

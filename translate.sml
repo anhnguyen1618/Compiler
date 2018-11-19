@@ -16,6 +16,9 @@ sig
     val recordDec: exp list -> exp
     val intExp : int -> exp
     val fieldVar: exp * int -> exp
+    val subscriptVar: exp * exp -> exp
+    val whileExp: exp * exp -> exp
+    val breakExp: Temp.label -> exp
 end
     
 
@@ -106,12 +109,40 @@ fun recordDec (fields) =
 	fun calFieldAddr offset = Tr.MEM(Tr.BINOP(Tr.PLUS, Tr.TEMP(r), Tr.CONST(offset * F.wordSize)))
 	fun createFieldStm (cur, (stms, offset)) = (Tr.MOVE(callFieldAddr(offset), unEx cur)::stms, offset - 1)
 	val (fieldStms, _) = foldr createFieldStm ([], length -1) fields
+	val finalLocationExp = Tr.TEMP(r)
     in
-	Tr.ESEQ(seq(allocRecStm::fieldStms))
+	Tr.ESEQ(seq(allocRecStm::fieldStms), finalLocationExp)
     end
 
 fun intExp e = Ex (Tr.CONST e)
 
 fun fieldVar (recordTemp, index) = Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx recordTemp, Tr.CONST(F.wordSize * index))))
-	       
+
+fun subscriptVar (arrayTemp, indexExp) =
+    case unEx indexExp of
+      | Tr.CONST index => fieldVar(arrayTemp, index)
+      | _ => (Err.error 0 "This should not happened because type of size is int";
+	      intExp 0)
+
+fun whileExp (testExp, bodyExp, done) =
+    let
+	val test = Temp.newlabel()
+	val body = Temp.newlabel()
+	val funControl = unCx testExp
+	val bodyStm = unNx bodyExp
+    in
+	Nx (seq [
+		 Tr.JUMP(Tr.NAME(test), [test]),
+		 Tr.LABEL(test),
+		 funControl(body, done),
+		 Tr.LABEL(body),
+		 bodyStm,
+		 Tr.JUMP(Tr.NAME(test), [test]),
+		 Tr.LABEL(done)
+	   ])
+    end
+
+fun breakExp doneLabel =
+    Nx Tr.JUMP(Tr.NAME(doneLabel), [doneLabel])
+	
 end
