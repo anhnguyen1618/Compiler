@@ -1,6 +1,3 @@
-structure A = Absyn
-structure Err = ErrorMsg
-structure S = Symbol
 
 structure Env :> ENV = 
 struct

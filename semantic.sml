@@ -5,6 +5,7 @@ structure Semant = struct
     type venv = E.enventry Symbol.table
     type tenv = Types.ty Symbol.table
     type expty = {exp: Translate.exp, ty: T.ty}
+    type decty =  {venv : venv, tenv: tenv, expList: Translate.exp list}
 		     
     val nestedLoopLevel = ref 0
     fun changeNestedLoopLevel(oper) = nestedLoopLevel := oper(!nestedLoopLevel, 1)
@@ -101,8 +102,8 @@ structure Semant = struct
 	    
 	    
 
-    fun	transTy (tEnv, ty) =
-	let
+    fun	transTy (tEnv: tenv, ty: A.ty): T.ty =
+	(let
 	    fun lookUpType (s, p) =
 		case S.look(tEnv, s) of
 		    SOME t => t
@@ -115,20 +116,20 @@ structure Semant = struct
 
 	    fun checkArrayTy e = T.ARRAY(lookUpType e, ref())
 			 
-	    fun trTy (A.NameTy e) = checkNameTy e
-	      | trTy (A.RecordTy e) = checkRecord e
-	      | trTy (A.ArrayTy e) = checkArrayTy e
+	    fun trTy (A.NameTy e): T.ty = checkNameTy e
+	      | trTy (A.RecordTy e): T.ty = checkRecord e
+	      | trTy (A.ArrayTy e): T.ty = checkArrayTy e
 	in
 	    trTy ty
-	end
+	end)
 	    
-    and transDec (vEnv: venv, tEnv: tenv, level: Translate.level, exps: Absyn.dec list, break: Temp.label) =
+    and transDec (vEnv: venv, tEnv: tenv, level: Translate.level, exps: Absyn.dec list, break: Temp.label): decty =
 	let
 	    val actual_ty = (actual_ty tEnv) o #ty
 	    fun checkVarDec (vEnv: venv, tEnv: tenv, {name, typ, init, pos, escape = _}, expList) =
 		let
 		    val {exp = initValueIrExp, ty} = transExp(vEnv, tEnv, level, init, break)
-		    fun createAssignStm access = expList @ [Tr.assignStm(Tr.simpleVar(access, level), initValueIrExp)]
+		    fun createAssignStm access = expList @ [Translate.assignStm(Translate.simpleVar(access, level), initValueIrExp)]
 		in
 		    case typ of
 			SOME (s, p) => (case S.look(tEnv, s) of
@@ -145,7 +146,7 @@ structure Semant = struct
 							     }
 							 end
 						     else (Err.error p ("can't assign exp type " ^ T.name(ty) ^ " to type " ^ S.name(s));
-							   {venv = vEnv, tenv = tEnv, explist = expList})
+							   {venv = vEnv, tenv = tEnv, expList = expList})
 					 | NONE => (Err.error pos ("Type " ^ S.name(s) ^ " has not been declared");
 						    {venv = vEnv, tenv = tEnv, expList = expList}))
 		      | NONE => ((if T.eq(ty, T.NIL)
@@ -162,7 +163,7 @@ structure Semant = struct
 		let
 		    fun addDumbType ({name, ty = _, pos = _}, tEnv) = S.enter(tEnv, name, T.NAME(name, ref NONE))
 		    val dumbTenv = foldl addDumbType tEnv xs
-		    fun f ({name, ty, pos}, {venv, tenv, expList}) = {tenv = S.enter(tenv, name, transTy(tenv, ty)), venv = venv, expList}
+		    fun f ({name, ty, pos}, {venv, tenv, expList}) = {tenv = S.enter(tenv, name, transTy(tenv, ty)), venv = venv, expList = expList}
 		in
 		    (printCircular o checkCircular) xs;
 		    foldl f {venv = vEnv, tenv = dumbTenv, expList = expList} xs
@@ -231,13 +232,13 @@ structure Semant = struct
 	      | trDec (vEnv, tEnv, A.TypeDec(e), expList) = checkTypeDec (vEnv, tEnv, e, expList)
 	      | trDec (vEnv, tEnv, A.FunctionDec(e), expList) = checkFuncDec (vEnv, tEnv, e, expList)
 						       
-	    val helper = fn (dec, {venv = vEnv, tenv = tEnv, expList}) => transDec(vEnv, tEnv, dec, expList)
+	    val helper = fn (dec, {venv = vEnv, tenv = tEnv, expList}) => trDec(vEnv, tEnv, dec, expList)
 	    val result = foldl helper {venv = vEnv, tenv = tEnv, expList = []} exps	
 	in
 	    result
 	end
 			       
-    and transVar (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.var, break: Temp.label) =
+    and transVar (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.var, break: Temp.label): expty =
 	let
 	    val actual_ty = actual_ty tEnv
 	    val actual_ty_exp = actual_ty o #ty
@@ -245,9 +246,9 @@ structure Semant = struct
 	    fun checkSimpleVar (s, pos) =
 		case S.look(vEnv, s) of
 		    SOME(E.VarEntry({ty, access})) => {exp = Translate.simpleVar(access, level), ty = actual_ty ty}
-		  | SOME _ => {exp = Tr.intExp(0), ty = T.NIL}
+		  | SOME _ => {exp = Translate.intExp(0), ty = T.NIL}
 		  | NONE => (Err.error pos ("valuable '" ^ S.name(s) ^"' has not been declared");
-			     {exp = Tr.intExp(0), ty = T.NIL})
+			     {exp = Translate.intExp(0), ty = T.NIL})
 
 	    and checkFieldVar (obj, s, pos) =
 		let
@@ -314,7 +315,7 @@ structure Semant = struct
 		in
 		    checkTypeEq (actual_ty leftTy, T.INT, pos, "Interger is require");
 		    checkTypeEq (actual_ty rightTy, T.INT, pos, "Interger is require");
-		    {exp = Translate.binExp(leftIr, oper, rightIr), ty = T.INT})
+		    {exp = Translate.opExp(leftIr, oper, rightIr), ty = T.INT}
 		end
 
 	    and checkFnCallExp ({func, args, pos}) =
@@ -339,20 +340,20 @@ structure Semant = struct
 			let
 			    val argIrs = foldr checkParam [] (ListPair.zip(args, formals))
 			in
-			    {exp = Translate.funCallExp(decLevel, level, label, argIrs), ty = result})
+			    {exp = Translate.funCallExp(decLevel, level, label, argIrs), ty = result}
 			end
 
 		      | SOME _ => (Err.error pos (S.name(func) ^ " does not have type function");
-				   {exp = (), ty = T.UNIT})
+				   {exp = Translate.nilExp(), ty = T.UNIT})
 		      | NONE => (Err.error pos ("Function " ^ S.name(func) ^ " can't be found");
-				 {exp = (), ty = T.UNIT})
+				 {exp = Translate.nilExp(), ty = T.UNIT})
 		end
 
 	    and checkRecordExp {fields, typ, pos} =
 		let
 		    val preFields = map (fn (symbol, exp, pos) => (symbol, trExp(exp), pos)) fields
-		    val fieldValsIR = map (#exp o #2) preFields
-		    val fieldExps = map (fn (symbol, exp, pos) => (symbol, actual_ty_exp exp, pos)) preprocessFields
+		    val fieldValsIR = map (fn (_, {exp, ty =_}, _) => exp) preFields
+		    val fieldExps = map (fn (symbol, exp, pos) => (symbol, actual_ty_exp exp, pos)) preFields
 		in
 		    case S.look(tEnv, typ) of
 			SOME (T.RECORD (types, refer)) =>
@@ -398,15 +399,16 @@ structure Semant = struct
 				 {exp = Translate.intExp(0), ty = T.RECORD ([], ref ())})
 		end
 
-	    and checkSeqExp (xs) = foldl (fn ((exp, pos), _) => trExp exp) {exp=(), ty=T.UNIT} xs
+	    (*TODO: Handle SEQIR correctly here*)
+	    and checkSeqExp (xs) = foldl (fn ((exp, pos), _) => trExp exp) {exp=Translate.nilExp(), ty=T.UNIT} xs
 
 	    and checkAssignExp ({var, exp, pos}) =
 		let
-		    val {ty = typeLeft, exp = _} = transVar(vEnv, tEnv, level, var, break)
-		    val {ty = typeRight, exp = _} = trExp exp
+		    val {ty = typeLeft, exp = leftExp} = transVar(vEnv, tEnv, level, var, break)
+		    val {ty = typeRight, exp = rightExp} = trExp exp
 		    val msg = "Can't assign type " ^ T.name(typeRight) ^ " to type " ^ T.name(typeLeft)
 		in
-		    (checkTypeEq (typeLeft, typeRight, pos, msg); { exp=(), ty=T.UNIT })
+		    (checkTypeEq (typeLeft, typeRight, pos, msg); {exp=Translate.assignStm(leftExp, rightExp), ty=T.UNIT })
 		end
 
 	    and checkIfExp ({test = testExp, then' = thenExp, else' = elseOption, pos}) =
@@ -416,7 +418,7 @@ structure Semant = struct
 		in
 		    (checkTypeEq (actual_ty testTy, T.INT, pos, "if test clause does not have type int");
 		     case elseOption of
-		         NONE => {exp = Translate.ifExp(testIr, thenIr, NONE), ty}
+		         NONE => {exp = Translate.ifExp(testIr, thenIr, NONE), ty= thenTy}
 		       | SOME elseExp =>
 			 let
 			     val {exp = elseIr, ty = elseTy} = trExp elseExp
@@ -425,10 +427,8 @@ structure Semant = struct
 					   actual_ty elseTy,
 					   pos,
 					   "Mismatched types between then and else");
-			      Translate.ifExp(testIr, thenIr, SOME(elseIr))))
-			 end
-			     
-				 
+			      {exp = Translate.ifExp(testIr, thenIr, SOME(elseIr)), ty = elseTy})
+			 end)
 		end
 
 	    and checkWhileExp ({test, body, pos}) =
@@ -448,7 +448,7 @@ structure Semant = struct
 							
 	    and checkForExp (e) =
 		let
-		    val whileAST = T.rewriteForExp(e)
+		    val whileAST = A.rewriteForExp(e)
 		    (* val loTy = (actual_ty_exp o trExp o #lo) e
 		    val hiTy = (actual_ty_exp o trExp o #hi) e
 		    val _ = checkTypeEq (loTy, T.INT, pos, "from-for clause does not have type int")
@@ -473,18 +473,18 @@ structure Semant = struct
 		    in
 			(checkTypeEq (actual_ty_exp sizeResult, T.INT, pos, "Size of array must have type " ^ T.name(T.INT));
 			 checkTypeEq (actual_ty_exp initResult, ty, pos, "Initialize value of array does not have type " ^ T.name(ty));
-			 {exp = Translate.arrayDec(#exp size, #exp init), ty = T.ARRAY(ty, unique)})
+			 {exp = Translate.arrayDec(#exp sizeResult, #exp initResult), ty = T.ARRAY(ty, unique)})
 		    end
 			
-		  | SOME _ => (Err.error pos (S.name(typ) ^ " does not exist"); {exp = (), ty = T.ARRAY(T.NIL, ref ())})
-		  | NONE => (Err.error pos ("Type " ^ S.name(typ) ^ " could not be found"); {exp = (), ty = T.ARRAY(T.NIL, ref ())})
+		  | SOME _ => (Err.error pos (S.name(typ) ^ " does not exist"); {exp = Translate.unitExp(), ty = T.ARRAY(T.NIL, ref ())})
+		  | NONE => (Err.error pos ("Type " ^ S.name(typ) ^ " could not be found"); {exp = Translate.unitExp(), ty = T.ARRAY(T.NIL, ref ())})
 		
 		    
 							
 	    and trExp (A.VarExp(var)) = transVar(vEnv, tEnv, level, var, break)
-	      | trExp (A.NilExp) = {exp = (), ty = T.NIL}
+	      | trExp (A.NilExp) = {exp = Translate.nilExp(), ty = T.NIL}
 	      | trExp (A.IntExp e) = {exp = Translate.intExp(e), ty = T.INT}
-	      | trExp (A.StringExp _) = {exp = (), ty = T.STRING}
+	      | trExp (A.StringExp (str, _)) = {exp = Translate.stringExp(str), ty = T.STRING}
 	      | trExp (A.CallExp e) = checkFnCallExp e
 	      | trExp (A.OpExp e) = checkTypeOp e
 	      | trExp (A.RecordExp e) = checkRecordExp e
@@ -501,8 +501,14 @@ structure Semant = struct
 	    trExp exp
 	end
 
-    fun transProg(exp: Absyn.exp): unit = ()
-
+    fun transProg (my_exp : A.exp) = 
+	let
+	    val mainlabel = Temp.newlabel()
+	    val _ = FindEscape.findEscape my_exp
+	    (*val mainexp = #exp Semant.transExp(Env.base_venv, Env.base_tenv, Translate.outermost, absyn) *)
+	in
+	    Translate.getResult()
+	end
 					      
     
 end

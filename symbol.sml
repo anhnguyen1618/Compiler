@@ -44,3 +44,5 @@ struct
   val enter = Table.enter
   val look = Table.look
 end
+
+structure S = Symbol

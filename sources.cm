@@ -17,6 +17,7 @@ parse.sml
 findescape.sml
 temp.sig
 temp.sml
+tree.sml
 frame.sig
 mipsframe.sml
 translate.sml

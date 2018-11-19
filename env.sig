@@ -1,4 +1,3 @@
-structure T = Types
 signature ENV = sig
     type access
 	     

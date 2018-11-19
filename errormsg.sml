@@ -50,4 +50,6 @@ struct
        raise Error)
 
 end  (* structure ErrorMsg *)
+
+structure Err = ErrorMsg
   

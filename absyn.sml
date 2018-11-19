@@ -54,7 +54,7 @@ fun rewriteForExp {var, escape, lo, hi, body, pos} =
 		     name = var,
 		     escape = escape,
 		     typ = SOME(Symbol.symbol("int"), pos),
-		     init = lo, pos},
+		     init = lo, pos = pos},
 		VarDec {
 		    name = Symbol.symbol("_limit"),
 		    escape = ref(false),
@@ -62,20 +62,20 @@ fun rewriteForExp {var, escape, lo, hi, body, pos} =
 		    init = hi, pos = pos}],
 	body = WhileExp {
 	    test = OpExp {
-		left = SimpleVar(Symbol.symbol("_limit"), pos)
+		left = VarExp(SimpleVar(Symbol.symbol("_limit"), pos)),
 		oper = GeOp,
-		right = SimpleVar(var, pos),
+		right = VarExp(SimpleVar(var, pos)),
 		pos = pos
 	    },
-	    body = SeqExp[body, AssignExp{
+	    body = SeqExp[(body, pos), (AssignExp{
 			      var = SimpleVar(var, pos),
 			      exp = OpExp{
-				  left = SimpleVar(var, pos),
+				  left = VarExp(SimpleVar(var, pos)),
 				  oper = PlusOp,
 				  right = IntExp(1),
 				  pos = pos
 			      },
-			      pos = pos}],
+			      pos = pos}, pos)],
 	    pos = pos
 	},
 	pos = pos
@@ -83,4 +83,6 @@ fun rewriteForExp {var, escape, lo, hi, body, pos} =
     
      
 end
+
+structure A = Absyn
         

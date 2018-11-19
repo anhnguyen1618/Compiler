@@ -62,3 +62,5 @@ struct
           | UNIT => "unit"
 end
 
+structure T = Types
+

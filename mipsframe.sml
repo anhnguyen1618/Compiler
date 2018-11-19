@@ -3,7 +3,10 @@ structure MipsFrame : FRAME = struct
 datatype access = InFrame of int | InReg of Temp.temp
 type frame = {name: Temp.label, formals: access list,
 	      numLocals: int ref, curOffset: int ref}
+datatype frag = PROC of {body: Tree.stm, frame: frame}
+	      | STRING of Temp.label * string
 
+val FP = Temp.newtemp()
 val wordSize = 4
 val START_OFF_SET= ~44
 
@@ -33,8 +36,8 @@ fun allocLocal f esc =
 	else (decreaseOffset(); InFrame(!curOffset))
     end
 
-fun exp InFrame(offset) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, Tr.CONST offset))
-  | exp InReg(temp) _ = Tr.TEMP temp
+fun exp (InFrame(offset)) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, Tr.CONST offset))
+  | exp (InReg(temp)) _ = Tr.TEMP temp
 
 fun externalCall (name, args) = Tr.CALL(Tr.NAME(Temp.namedlabel name), args)
 				
