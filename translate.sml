@@ -22,6 +22,7 @@ sig
     val ifExp: exp * exp * exp option -> exp
     val opExp: exp * A.oper * exp -> exp
     val funCallExp: level * level * label * exp list -> exp
+    val assignStm: exp * exp -> exp
 end
     
 
@@ -208,6 +209,8 @@ fun funCallExp (decLevel, usedLevel, label, args) =
     in
 	Ex Tr.CALL(label, newArgs)
     end
-	
+
+fun assignStm (addrExp, value) =
+    Nx Tr.MOVE(unEx(addrExp), unEx(value))
 
 end

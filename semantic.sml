@@ -122,45 +122,53 @@ structure Semant = struct
 	    trTy ty
 	end
 	    
-    and transDec (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.dec, break: Temp.label) =
+    and transDec (vEnv: venv, tEnv: tenv, level: Translate.level, exps: Absyn.dec list, break: Temp.label) =
 	let
 	    val actual_ty = (actual_ty tEnv) o #ty
-	    fun checkVarDec ({name, typ, init, pos, escape = _}) =
+	    fun checkVarDec (vEnv: venv, tEnv: tenv, {name, typ, init, pos, escape = _}, expList) =
 		let
-		    val {exp = _, ty} = transExp(vEnv, tEnv, level, init, break)
+		    val {exp = initValueIrExp, ty} = transExp(vEnv, tEnv, level, init, break)
+		    fun createAssignStm access = expList @ [Tr.assignStm(Tr.simpleVar(access, level), initValueIrExp)]
 		in
 		    case typ of
 			SOME (s, p) => (case S.look(tEnv, s) of
 					   SOME t => if T.eq(t, ty)
-						     then {venv = S.enter(
-							       vEnv,
-							       name,
-							       E.VarEntry{
-								   ty = ty,
-								   access = Translate.allocLocal(level)(true)}),
-							   tenv = tEnv}
+						     then
+							 let
+							     val access = Translate.allocLocal(level)(true)
+							     val newVenv = S.enter(vEnv, name,
+							       E.VarEntry{ty = ty, access = access})
+							 in
+							     {venv = newVenv,
+							      tenv = tEnv,
+							      expList = createAssignStm (access)
+							     }
+							 end
 						     else (Err.error p ("can't assign exp type " ^ T.name(ty) ^ " to type " ^ S.name(s));
-							   {venv = vEnv, tenv = tEnv})
+							   {venv = vEnv, tenv = tEnv, explist = expList})
 					 | NONE => (Err.error pos ("Type " ^ S.name(s) ^ " has not been declared");
-						    {venv = vEnv, tenv = tEnv}))
+						    {venv = vEnv, tenv = tEnv, expList = expList}))
 		      | NONE => ((if T.eq(ty, T.NIL)
 				  then (Err.error pos ("Can't assign Nil to non-record type variable"))
 				  else ());
-				 {venv = S.enter(vEnv, name, E.VarEntry{ty = ty, access = Translate.allocLocal(level)(true)}),
-				  tenv = tEnv})
+				 {
+				   venv = S.enter(vEnv, name, E.VarEntry{ty = ty, access = Translate.allocLocal(level)(true)}),
+				   tenv = tEnv,
+				   expList = expList
+				})
 		end
 
-	    fun checkTypeDec (xs) =
+	    fun checkTypeDec (vEnv: venv, tEnv: tenv, xs, expList) =
 		let
 		    fun addDumbType ({name, ty = _, pos = _}, tEnv) = S.enter(tEnv, name, T.NAME(name, ref NONE))
 		    val dumbTenv = foldl addDumbType tEnv xs
-		    fun f ({name, ty, pos}, {venv, tenv}) = {tenv = S.enter(tenv, name, transTy(tenv, ty)), venv = venv}
+		    fun f ({name, ty, pos}, {venv, tenv, expList}) = {tenv = S.enter(tenv, name, transTy(tenv, ty)), venv = venv, expList}
 		in
 		    (printCircular o checkCircular) xs;
-		    foldl f {venv = vEnv, tenv = dumbTenv} xs
+		    foldl f {venv = vEnv, tenv = dumbTenv, expList = expList} xs
 		end
 
-	    fun checkFuncDec (fs) =
+	    fun checkFuncDec (vEnv: venv, tEnv: tenv, fs, expList) =
 		let
 		    fun lookTypeUp (s, p) =
 			case S.look(tEnv, s) of
@@ -216,15 +224,17 @@ structure Semant = struct
 			    	
 		    val newvEnv = foldl addNewFuncEntry baseEnv fs
 		in
-		    {venv = newvEnv, tenv = tEnv}
+		    {venv = newvEnv, tenv = tEnv, expList = expList}
 		end
 		    
-	    fun trDec (A.VarDec e ) = checkVarDec e
-	      | trDec (A.TypeDec e) = checkTypeDec e
-	      | trDec (A.FunctionDec e) = checkFuncDec e
-		
+	    fun trDec (vEnv, tEnv, A.VarDec(e), expList) = checkVarDec (vEnv, tEnv, e, expList)
+	      | trDec (vEnv, tEnv, A.TypeDec(e), expList) = checkTypeDec (vEnv, tEnv, e, expList)
+	      | trDec (vEnv, tEnv, A.FunctionDec(e), expList) = checkFuncDec (vEnv, tEnv, e, expList)
+						       
+	    val helper = fn (dec, {venv = vEnv, tenv = tEnv, expList}) => transDec(vEnv, tEnv, dec, expList)
+	    val result = foldl helper {venv = vEnv, tenv = tEnv, expList = []} exps	
 	in
-	    trDec exp
+	    result
 	end
 			       
     and transVar (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.var, break: Temp.label) =
@@ -449,8 +459,7 @@ structure Semant = struct
 		    
 	    and checkLetExp ({decs, body, pos}) =
 		let
-		    val helper = fn (dec, {venv = vEnv, tenv = tEnv}) => transDec(vEnv, tEnv, level, dec, label)
-		    val {venv = vEnv, tenv = tEnv} = foldl helper {venv = vEnv, tenv = tEnv} decs
+		    val {venv = vEnv, tenv = tEnv, expList} = transDec(vEnv, tEnv, level, decs, break)
 		in
 		    transExp (vEnv, tEnv, level, body, break)
 		end
