@@ -241,7 +241,6 @@ structure Semant = struct
     and transVar (vEnv: venv, tEnv: tenv, level: Translate.level, exp: Absyn.var, break: Temp.label): expty =
 	let
 	    val actual_ty = actual_ty tEnv
-	    val actual_ty_exp = actual_ty o #ty
 		
 	    fun checkSimpleVar (s, pos) =
 		case S.look(vEnv, s) of
