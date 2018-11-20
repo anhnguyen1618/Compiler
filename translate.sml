@@ -28,6 +28,7 @@ sig
     val stringExp: string -> exp
     val nilExp: unit -> exp
     val unitExp: unit -> exp
+    val seqExp: exp list -> exp
 end
     
 
@@ -108,6 +109,7 @@ fun allocLocal lv esc =
       | TOP => (outermost, F.allocLocal (F.newFrame{name = Temp.newlabel(), formals = []}) esc)
 
 fun generateSLChain (TOP, TOP, currentFP) = currentFP
+  | generateSLChain (NESTED _, TOP, currentFP) = (Err.error 0 "Impossible"; currentFP)
   | generateSLChain (TOP, NESTED usedLevel, currentFP) = generateSLChain (TOP, #parent usedLevel, Tr.MEM (currentFP))
   | generateSLChain (NESTED decLevel, NESTED usedLevel, currentFP) =
     if (#uniq decLevel) = (#uniq usedLevel)
@@ -242,5 +244,24 @@ fun stringExp lit =
     end
 
 fun getResult () = !frags
+
+fun seqHelper [] = (Tr.EXP(Tr.CONST(0)), Tr.CONST(0))
+  | seqHelper (x::[]) = (Tr.EXP(Tr.CONST(0)), unEx(x))
+  | seqHelper (h::tl) =
+    let
+	val (next, last) = seqHelper tl
+    in
+	(Tr.SEQ(unNx(h), next), last)
+    end
+	
+
+
+fun seqExp exps =
+    let
+	val (seqStms, lastExp) = seqHelper exps
+    in
+	Ex (Tr.ESEQ(seqStms, lastExp))
+    end
+	
 
 end

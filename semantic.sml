@@ -399,7 +399,17 @@ structure Semant = struct
 		end
 
 	    (*TODO: Handle SEQIR correctly here*)
-	    and checkSeqExp (xs) = foldl (fn ((exp, pos), _) => trExp exp) {exp=Translate.nilExp(), ty=T.UNIT} xs
+	    and checkSeqExp (xs) =
+		case List.length xs of
+		    0 => {exp=Translate.nilExp(), ty=T.UNIT}
+		  | _ => 
+		    let
+			val results = map (fn (exp, _) => trExp exp) xs
+			val irExps = map #exp results
+		    in
+			List.last results
+		    end
+
 
 	    and checkAssignExp ({var, exp, pos}) =
 		let
