@@ -233,6 +233,23 @@ fun funCallExp (decLevel, usedLevel, label, args) =
 fun assignStm (addrExp, value) =
     Nx(Tr.MOVE(unEx(addrExp), unEx(value)))
 
+fun seqHelper [] = (Tr.EXP(Tr.CONST(0)), Tr.CONST(0))
+  | seqHelper (x::[]) = (Tr.EXP(Tr.CONST(0)), unEx(x))
+  | seqHelper (h::tl) =
+    let
+	val (next, last) = seqHelper tl
+    in
+	(Tr.SEQ(unNx(h), next), last)
+    end
+
+fun seqExp exps =
+    let
+	val (seqStms, lastExp) = seqHelper exps
+    in
+	Ex (Tr.ESEQ(seqStms, lastExp))
+    end
+
+
 fun procEntryExit (_, body) = body
 
 fun stringExp lit =
@@ -245,23 +262,6 @@ fun stringExp lit =
 
 fun getResult () = !frags
 
-fun seqHelper [] = (Tr.EXP(Tr.CONST(0)), Tr.CONST(0))
-  | seqHelper (x::[]) = (Tr.EXP(Tr.CONST(0)), unEx(x))
-  | seqHelper (h::tl) =
-    let
-	val (next, last) = seqHelper tl
-    in
-	(Tr.SEQ(unNx(h), next), last)
-    end
-	
-
-
-fun seqExp exps =
-    let
-	val (seqStms, lastExp) = seqHelper exps
-    in
-	Ex (Tr.ESEQ(seqStms, lastExp))
-    end
 	
 
 end

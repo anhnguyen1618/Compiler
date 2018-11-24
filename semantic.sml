@@ -398,7 +398,6 @@ structure Semant = struct
 				 {exp = Translate.intExp(0), ty = T.RECORD ([], ref ())})
 		end
 
-	    (*TODO: Handle SEQIR correctly here*)
 	    and checkSeqExp (xs) =
 		case List.length xs of
 		    0 => {exp=Translate.nilExp(), ty=T.UNIT}
