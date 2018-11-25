@@ -14,7 +14,7 @@ val START_OFF_SET= ~44
 fun newFrame {name: Temp.label, formals: bool list}: frame =
     let
 	fun allocLocals ([], _) = []
-	  | allocLocals (h::t, offset) = let val access = if h then InFrame(offset) else InReg(Temp.newtemp())
+	  | allocLocals (h::t, offset) = let val access = if h then InFrame(offset) else InReg(Temp.newtemp()) (*TODO: handle args number 4 up here*)
 					    val newOffSet = if h then offset + wordSize else offset
 					 in access :: allocLocals(t, newOffSet) end
 	val formalAccesses = allocLocals (formals, 0)
@@ -33,8 +33,9 @@ fun allocLocal f esc =
 	fun decreaseOffset () = curOffset := !curOffset - wordSize
     in
 	numLocals := !numLocals + 1;
-	if esc then InReg(Temp.newtemp())
-	else (decreaseOffset(); InFrame(!curOffset))
+	if esc then (decreaseOffset();
+		     InFrame(!curOffset))
+	else InReg(Temp.newtemp())
     end
 
 fun exp (InFrame(offset)) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, Tr.CONST offset))
@@ -43,6 +44,6 @@ fun exp (InFrame(offset)) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, 
 fun externalCall (name, args) = Tr.CALL(Tr.NAME(Temp.namedlabel name), args)
 
 fun procEntryExit1 (frame, stm) = stm
-				
+
 end
     

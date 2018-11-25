@@ -189,12 +189,9 @@ structure Semant = struct
 			let
 			    val typeList = map (actual_ty o getType) params
 			    val resultType = getTypeForResult result
-			    (* change escape *)
-			    val escapes = map (fn x => true) params
 			    val label = Temp.newlabel()
-			    val newLevel = Translate.newLevel{parent = level, name = label, formals = escapes}
 			in
-			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType, label = label, level = newLevel})
+			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType, label = label, level = level})
 			end
 						
 		    fun addNewFuncEntry ({name, params, result, body, pos}, curVenv) = 
@@ -202,10 +199,10 @@ structure Semant = struct
 			let
 			    val typeList = map getType params
 			    val resultType = getTypeForResult result
+			    val label = Temp.newlabel()
+			    val escapes = map (fn x => true) params
+			    val funcLevel = Translate.newLevel{parent = level, name = label, formals = escapes}
 			    (* We already create new function's level in addFuncHeaders() so we just extract level from here*)
-			    val funcLevel = case S.look(curVenv, name) of
-						SOME(E.FunEntry e) => #level e
-					      | _ => Translate.newLevel {parent=level, name=Temp.newlabel(), formals=[]}
 
 			    val paramAccesses = Translate.formals funcLevel
 							      
@@ -470,8 +467,10 @@ structure Semant = struct
 	    and checkLetExp ({decs, body, pos}) =
 		let
 		    val {venv = vEnv, tenv = tEnv, expList} = transDec(vEnv, tEnv, level, decs, break)
+		    val {exp = body, ty} = transExp (vEnv, tEnv, level, body, break)
+		    val newBody = Translate.concatExpList(expList, body)
 		in
-		    transExp (vEnv, tEnv, level, body, break)
+		    {exp = newBody, ty= ty}
 		end
 
 	    and checkArrayExp ({typ, size, init, pos}) =
@@ -514,11 +513,20 @@ structure Semant = struct
     fun transProg (my_exp : A.exp) = 
 	let
 	    val mainlabel = Temp.newlabel()
+	    val mainlevel = Translate.newLevel {parent=Translate.outermost, name=mainlabel, formals=[]}
 	    val _ = FindEscape.findEscape my_exp
-	    (*val mainexp = #exp Semant.transExp(Env.base_venv, Env.base_tenv, Translate.outermost, absyn) *)
+	    (* The reason that we have to use mainlevel instead of outermost here is that we can't alloc local on outermost *)
+	    val {exp = mainexp, ty = _} = transExp(Env.base_venv, Env.base_tenv, mainlevel, my_exp, mainlabel)
+	    val _ = Translate.procEntryExit {level=mainlevel, body=mainexp};
+	    val resultIR = Translate.getResult()
+					      
+	    val printFn = fn exp => Printtree.printtree (TextIO.stdOut, exp)
 	in
-	    Translate.getResult()
+	    printFn (Translate.convertToStm mainexp)
 	end
+
+    fun testIR (name: string) =
+	transProg(Parse.parse name)
 					      
     
 end

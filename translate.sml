@@ -29,6 +29,9 @@ sig
     val unitExp: unit -> exp
     val seqExp: exp list -> exp
     val procEntryExit : {level: level, body: exp} -> unit
+    val convertToStm : exp -> Tree.stm
+    val concatExpList: exp list * exp -> exp
+    val printLevel: level -> string
 end
     
 
@@ -84,11 +87,16 @@ fun unNx (Ex e) = Tr.EXP e
 	seq[f(r, r), Tr.LABEL r]
     end
 
+val convertToStm = unNx
+
 fun unCx (Ex (Tr.CONST(1))) = (fn (t, f) => Tr.JUMP (Tr.NAME(t), [t]))
   | unCx (Ex (Tr.CONST(0))) = (fn (t, f) => Tr.JUMP (Tr.NAME(f), [f]))
   | unCx (Ex e) = (fn (t, f) => Tr.CJUMP(Tr.EQ, e, Tr.CONST(1), t, f))
   | unCx (Nx _) = (Err.error 0 "Compiler error: unCx an Nx"; fn (a, b) => Tr.LABEL(Temp.newlabel()))
   | unCx (Cx f) = f
+
+fun printLevel (NESTED {uniq, parent, frame}) = "NESTED \n"
+  | printLevel (TOP) = "TOP \n"
 	
 
 
@@ -99,7 +107,6 @@ fun seq [] = Tr.EXP(Tr.CONST 0)
 fun newLevel {parent = p, name = _, formals = formals} =
     NESTED {uniq = ref (), parent = p,
 	    frame = F.newFrame{ name = Temp.newlabel(), formals = true::formals}}
-
 fun formals TOP = []
   | formals (NESTED e) = map (fn x => (NESTED(e), x)) ((#formals o #frame) e)
 
@@ -337,6 +344,7 @@ fun stringExp lit =
 
 fun getResult () = !frags
 
-	
+
+fun concatExpList (expList, body) = Ex(Tr.ESEQ(seq(map unNx expList), unEx(body)))
 
 end
