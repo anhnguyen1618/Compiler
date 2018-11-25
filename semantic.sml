@@ -202,6 +202,7 @@ structure Semant = struct
 			let
 			    val typeList = map getType params
 			    val resultType = getTypeForResult result
+			    (* We already create new function's level in addFuncHeaders() so we just extract level from here*)
 			    val funcLevel = case S.look(curVenv, name) of
 						SOME(E.FunEntry e) => #level e
 					      | _ => Translate.newLevel {parent=level, name=Temp.newlabel(), formals=[]}
@@ -214,8 +215,9 @@ structure Semant = struct
 								      access = List.nth(paramAccesses, i)})), i + 1)
 
 			    val (bodyVenv, _) = foldl addParamsToBody (curVenv, 0) typeList
-			    val {exp = _, ty = tyBody } = transExp(bodyVenv, tEnv, funcLevel, body, break)
+			    val {exp = bodyIr, ty = tyBody } = transExp(bodyVenv, tEnv, funcLevel, body, break)
 			in
+			    Translate.procEntryExit {level = funcLevel, body = bodyIr};
 			    (if checkResultType(resultType, tyBody) then ()
 			     else (Err.error pos ("return type " ^ T.name(tyBody) ^ " does not match with " ^ T.name(resultType)));
 			    curVenv)

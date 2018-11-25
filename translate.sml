@@ -23,12 +23,12 @@ sig
     val opExp: exp * A.oper * exp -> exp
     val funCallExp: level * level * Temp.label * exp list -> exp
     val assignStm: exp * exp -> exp
-    val procEntryExit: F.frame * exp -> exp
     val getResult: unit -> F.frag list
     val stringExp: string -> exp
     val nilExp: unit -> exp
     val unitExp: unit -> exp
     val seqExp: exp list -> exp
+    val procEntryExit : {level: level, body: exp} -> unit
 end
     
 
@@ -169,8 +169,73 @@ fun whileExp (testExp, bodyExp, done) =
 fun breakExp doneLabel =
     Nx (Tr.JUMP(Tr.NAME(doneLabel), [doneLabel]))
 
-(* Come back and optimise Cx case later *)
-fun ifExp (test, then', else') =
+fun ifExp (test, Nx then', SOME(Nx else')) =
+    let
+	val testFn = unCx test
+	val t = Temp.newlabel()
+	val f = Temp.newlabel()
+	val done = Temp.newlabel()
+    in
+	Nx (
+	    seq [
+		testFn(t,f),
+		Tr.LABEL(t),
+		then',
+		Tr.JUMP(Tr.NAME(done), [done]),
+		Tr.LABEL(f),
+		else',
+		Tr.LABEL(done)
+	    ]
+	)
+    end
+
+  | ifExp (test, Nx then', NONE) =
+    let
+	val testFn = unCx test
+	val t = Temp.newlabel()
+	val done = Temp.newlabel()
+    in
+	Nx (
+	    seq [
+		testFn(t, done),
+		Tr.LABEL(t),
+		then',
+		Tr.LABEL(done)
+	    ]
+	)
+    end
+  | ifExp (test, Cx then', SOME(Cx else')) = 
+    let
+	val testFn = unCx test
+	val a = Temp.newlabel()
+	val b = Temp.newlabel()
+    in
+	Cx (fn (t, f) =>
+	       seq[
+		   testFn(a, f),
+		   Tr.LABEL(a),
+		   then' (b, f),
+		   Tr.LABEL(b),
+		   else' (t, f)
+	       ]
+	   )
+    end
+  | ifExp (test, Cx then', NONE) = 
+    let
+	val testFn = unCx test
+	val a = Temp.newlabel()
+    in
+	Cx (fn (t, f) =>
+	       seq[
+		   testFn(a, f),
+		   Tr.LABEL(a),
+		   then' (t, f)
+	       ]
+	   )
+    end
+	
+       
+  | ifExp (test, then', else') =
     let
 	val t = Temp.newlabel()
 	val f = Temp.newlabel()
@@ -250,7 +315,17 @@ fun seqExp exps =
     end
 
 
-fun procEntryExit (_, body) = body
+fun procEntryExit {level, body} =
+    let
+        val levelFrame =
+            case level of
+                TOP => (Err.error 0 "Fundec should not happen in outermost";   
+                             F.newFrame {name=Temp.newlabel(), formals=[]})
+              | NESTED ({uniq=_, parent=_, frame=frame'}) => frame'
+        val funcBody = unNx body
+    in
+        frags := F.PROC({body=funcBody, frame=levelFrame})::(!frags)
+    end
 
 fun stringExp lit =
     let

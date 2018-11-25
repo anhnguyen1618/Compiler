@@ -6,6 +6,7 @@ type frame = {name: Temp.label, formals: access list,
 datatype frag = PROC of {body: Tree.stm, frame: frame}
 	      | STRING of Temp.label * string
 
+val RV = Temp.newtemp()
 val FP = Temp.newtemp()
 val wordSize = 4
 val START_OFF_SET= ~44
@@ -40,6 +41,8 @@ fun exp (InFrame(offset)) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, 
   | exp (InReg(temp)) _ = Tr.TEMP temp
 
 fun externalCall (name, args) = Tr.CALL(Tr.NAME(Temp.namedlabel name), args)
+
+fun procEntryExit1 (frame, stm) = stm
 				
 end
     
