@@ -2,7 +2,7 @@ signature TEMP =
 sig
     eqtype temp
     val newtemp: unit -> temp
-    (* structure Table: TABLE sharing type Table.key = temp *)
+    structure Table: TABLE sharing type Table.key = temp
     val makestring: temp -> string
 
     type label = Symbol.symbol

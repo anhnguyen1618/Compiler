@@ -6,6 +6,10 @@ type label = Symbol.symbol
 val temps = ref 99
 val labelCount = ref ~1
 
+structure Table = IntMapTable(type key = int
+			      fun getInt n = n)
+
+
 fun newtemp () = (temps := !temps + 1; !temps)
 
 fun makestring t = "t" ^ Int.toString t
