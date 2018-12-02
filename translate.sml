@@ -153,7 +153,7 @@ fun subscriptVar (arrayTemp, indexExp) =
     let
 	val indexExp = unEx indexExp
     in
-	Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx recordTemp,
+	Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx arrayTemp,
 			     Tr.BINOP(Tr.MUL, indexExp, Tr.CONST(F.wordSize)))))
     end
 

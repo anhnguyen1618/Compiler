@@ -6,6 +6,8 @@ type frame = {name: Temp.label, formals: access list,
 datatype frag = PROC of {body: Tree.stm, frame: frame}
 	      | STRING of Temp.label * string
 
+type register = string
+
 (* zero register *)
 val R0 = Temp.newtemp()
 		     
@@ -84,6 +86,8 @@ val calleesaves = [
     (S6, "S6"),
     (S7, "S7")
 ]
+
+val calleesavedRegs = map (fn (x, _) => x) calleesaves
 		      
 val callersaves = [
     (T0, "T0"),
@@ -97,6 +101,8 @@ val callersaves = [
     (T8, "T8"),
     (T9, "T9")
 ]
+
+val callersaveRegs = map (fn (x, _) => x) callersaves
 		     
 val wordSize = 4
 val START_OFF_SET= ~44
@@ -105,7 +111,7 @@ val addToNameTable = fn ((t, n), table) => Temp.Table.enter(table, t, n)
 val tempMap = foldl addToNameTable Temp.Table.empty (specialregs @ argregs @ calleesaves @ callersaves)
 
 fun makestring temp = case Temp.Table.look(tempMap, temp) of
-			| SOME x => x
+			  SOME x => x
 			| NONE => Temp.makestring temp
 		       
 
@@ -143,6 +149,11 @@ fun exp (InFrame(offset)) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, 
 fun externalCall (name, args) = Tr.CALL(Tr.NAME(Temp.namedlabel name), args)
 
 fun procEntryExit1 (frame, stm) = stm
+
+fun procEntryExit2 (frame, body) =
+    body @ [Assem.OPER{assem = "",
+		       src = [R0, RA, SP] @ calleesavedRegs, (*Recover those at the end of function*)
+		       dst = [], jump = SOME([])}]
 
 end
     

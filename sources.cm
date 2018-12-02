@@ -25,5 +25,7 @@ tiger.lex
 semantic.sml
 tiger.grm
 printtree.sml
+assem.sml
+codegen.sml
 
 

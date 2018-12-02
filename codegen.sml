@@ -27,7 +27,7 @@ fun getOperStm T.PLUS = "add"
     
 fun codegen (frame) (stm: T.stm): A.instr list =
     let
-	val ilist: (A.instr) ref = ref nil
+	val ilist = ref (nil: A.instr list)
 	fun emit (x: A.instr) = (ilist := x :: !ilist)
 	fun result (gen: Temp.temp -> A.instr): Temp.temp =
 	    let val t = Temp.newtemp() in
@@ -39,14 +39,14 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	    (*Assume that there is no other op except PLUS right after T.MEM according to translate*)
 	    emit(A.OPER{assem = "sw `s0, " ^ toStr(offset) ^ "(`d0)\n",
 			src = [munchExp s],
-			dst = [munchexp d],
+			dst = [munchExp d],
 			jump = NONE})
 
-	and genLwStm (offset:int, d: T.exp, s: T.exp) =
+	and genLwStm (offset:int, d: Temp.temp, s: T.exp) =
 	    (*Assume that there is no other op except PLUS right after T.MEM according to translate*)
 	    emit(A.OPER{assem = "lw `d0, " ^ toStr(offset) ^ "(`s0)\n",
 			src = [munchExp s],
-			dst = [munchExp d],
+			dst = [d],
 			jump = NONE})
 
 	and genLwExp (offset:int, s: T.exp) =
@@ -56,8 +56,8 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 				  dst = [d],
 				  jump = NONE})
 
-	and munchStm (T.SEQ(a,b)) = (munchStm a, munchStm b)
-	  | munchStm (T.LABEL l) = emit(A.LABEL{assem = Temp.namedlabel(l) ^ ":\n", lab = l})
+	and munchStm (T.SEQ(a,b)) = (munchStm a; munchStm b)
+	  | munchStm (T.LABEL l) = emit(A.LABEL{assem = S.name(l) ^ ":\n", lab = l})
 	  | munchStm (T.JUMP(T.NAME(l), ls)) = emit(A.OPER {assem = "j "^S.name l^"\n", src =[],
 							    dst = [], jump = SOME ls})
 	  | munchStm (T.JUMP(e, ls)) = emit(A.OPER {assem = "jr `j0\n", src =[munchExp e],
@@ -82,34 +82,33 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	  | munchStm (T.MOVE(T.TEMP(r), T.CONST(i))) =
 	    emit (A.OPER {assem = "li `d0, " ^ toStr(i) ^ "\n",
 			  src = [],
-			  dst = [munchExp r],
+			  dst = [r],
 			  jump = NONE})
 
 	  | munchStm (T.MOVE(T.TEMP(d), T.TEMP(s))) =
 	    emit (A.OPER {assem = "move `d0, `s0\n",
-			  src = [munchExp s],
-			  dst = [munchExp d],
+			  src = [s],
+			  dst = [d],
 			  jump = NONE})
 
 	  | munchStm (T.MOVE(T.TEMP(d), T.MEM(T.BINOP(_, s, T.CONST i)))) =
-	    getLwStm(i, d, s)
+	    genLwStm(i, d, s)
 	  | munchStm (T.MOVE(T.TEMP(d), T.MEM(T.BINOP(_, T.CONST i, s)))) =
-	    getLwStm(i, d, s)
+	    genLwStm(i, d, s)
 	  | munchStm (T.MOVE(T.TEMP(d), T.MEM(s))) =
-	    getLwStm(0, d, s)
+	    genLwStm(0, d, s)
           | munchStm(T.MOVE(T.TEMP(d), T.NAME(lab))) = 
             emit(A.OPER {assem="la `d0, " ^ (Symbol.name lab) ^ "\n",
-                         src=[], dst=[d], jump=NONE})		    
-
+                         src=[], dst=[d], jump=NONE})
 	  | munchStm (T.MOVE(T.TEMP(r), e)) =
 	    emit (A.OPER {assem = "lw `d0, `s0\n",
 			  src = [munchExp e],
-			  dst = [munchExp r],
+			  dst = [r],
 			  jump = NONE})
+	  | munchStm(T.MOVE(e1, e2)) = ()
+	  | munchStm (T.EXP e) = (munchExp e; ())
 
-	  | munchStm (T.EXP e) = munchExp e
-
-	and munchExp(T.BINOP(T.PLUS, e, T.CONST(i))) =
+	and munchExp(T.BINOP(T.PLUS, e, T.CONST(i))): Temp.temp =
 	    result(fn d => A.OPER{assem = "addi `d0,`s0," ^ toStr(i) ^ "\n",
 			src = [munchExp e],
 			dst = [d],
@@ -134,25 +133,25 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	  | munchExp (T.MEM(T.BINOP(_, T.CONST(i), e))) = genLwExp (i, e)
 	  | munchExp (T.MEM(e)) = genLwExp (0, e)
 	  | munchExp (T.TEMP t) = t
-	  | munchExp (T.ESEQ(s, e)) = (munchStm(s); munchStm(e))
+	  | munchExp (T.ESEQ(s, e)) = (munchStm(s); munchExp(e))
 	  | munchExp (T.NAME l) =
-	    result(fn d => A.OPER{assem= "la `d0, " ^ Temp.namedlabel(l) ^ "\n",
-                                  src=[], dst=[d], jump=NONE}))
+	    result(fn d => A.OPER{assem= "la `d0, " ^ S.name(l) ^ "\n",
+                                  src=[], dst=[d], jump=NONE})
 	  | munchExp (T.CONST i) =
 	    result(fn d => A.OPER{assem = "li `d0, " ^ toStr(i) ^ "\n",
 				  src = [], dst = [d], jump = NONE})
 	  | munchExp (T.CALL (nameExp, args)) =
 	    (emit(A.OPER{assem = "CALL `s0\n",
-			 src = munchExp(name)::munchArgs(args),
-			 dst = F.RA::F.RV::F.callersaves , jump = NONE});
+			 src = munchExp(nameExp)::munchArgs(args),
+			 dst = F.RA::F.RV::F.callersaveRegs , jump = NONE});
 	     F.RV)
 
-	  and munchArgs(args: T.exp list): Temp.temp list =
+	  and munchArgs (args: T.exp list): Temp.temp list =
 	      let
 		  val argRegs = map (fn (x: Temp.temp, _) => x) F.argregs
-		  fun moveArgToTemp (arg, r) = munchStm(T.MOVE(T.TEMP(r), munchExp(arg)))
+		  fun moveArgToTemp (arg, r) = munchStm(T.MOVE(T.TEMP(r), T.TEMP(munchExp(arg))))
 		  fun moveArgToFrame (arg, offset) =
-		      munchStm(T.MOVE(T.MEM(T.BINOP(T.PLUS, T.TEMP(F.SP), T.CONST offset))), munchExp(arg))
+		      munchStm(T.MOVE(T.MEM(T.BINOP(T.PLUS, T.TEMP(F.SP), T.CONST offset)), T.TEMP(munchExp(arg))))
 		  fun helper (i, arg::tl, offset) =
 		      if i > 3
 		      then (moveArgToFrame(arg, offset); helper(i+1, tl, offset + F.wordSize))
@@ -163,19 +162,14 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 			      moveArgToTemp(arg, temp);
 			      temp::helper(i+1, tl, offset)
 			  end
+		    | helper (_, [], _) = []
 	      in
 		  helper(0, args, 16)
 	      end
-		  
-
-		  
-	    
-
-	    
 								
     in
-	muchStm stm;
-	rev (!list)
+	munchStm stm;
+	rev (!ilist)
     end
 
 	
