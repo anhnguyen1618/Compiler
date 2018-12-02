@@ -33,7 +33,7 @@ structure Assem = struct
           | OPER{assem,dst,src,jump=SOME j} => speak(assem,dst,src,j)
 	  | LABEL{assem,...} => assem
 	  | MOVE{assem,dst,src} => speak(assem,[dst],[src],nil)
-     end
+    end
 
 end
 

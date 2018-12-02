@@ -150,10 +150,12 @@ fun unitExp () = intExp(0)
 fun fieldVar (recordTemp, index) = Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx recordTemp, Tr.CONST(F.wordSize * index))))
 
 fun subscriptVar (arrayTemp, indexExp) =
-    case unEx indexExp of
-	Tr.CONST index => fieldVar(arrayTemp, index)
-      | _ => (Err.error 0 "This should not happened because type of size is int";
-	      intExp 0)
+    let
+	val indexExp = unEx indexExp
+    in
+	Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx recordTemp,
+			     Tr.BINOP(Tr.MUL, indexExp, Tr.CONST(F.wordSize)))))
+    end
 
 fun whileExp (testExp, bodyExp, done) =
     let
