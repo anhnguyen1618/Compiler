@@ -516,6 +516,7 @@ structure Semant = struct
 	    val mainlevel = Translate.newLevel {parent=Translate.outermost, name=mainlabel, formals=[]}
 	    val _ = FindEscape.findEscape my_exp
 	    (* The reason that we have to use mainlevel instead of outermost here is that we can't alloc local on outermost *)
+	    (* See alloclocal function in translate.sml*)
 	    val {exp = mainexp, ty = _} = transExp(Env.base_venv, Env.base_tenv, mainlevel, my_exp, mainlabel)
 	    val _ = Translate.procEntryExit {level=mainlevel, body=mainexp};
 	    val resultIR = Translate.getResult()

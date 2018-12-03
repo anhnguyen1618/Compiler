@@ -113,7 +113,7 @@ fun formals TOP = []
 fun allocLocal lv esc =
     case lv of
 	NESTED e => (lv, F.allocLocal (#frame e) esc)
-      | TOP => (outermost, F.allocLocal (F.newFrame{name = Temp.newlabel(), formals = []}) esc)
+      | TOP => (outermost, F.allocLocal (F.newFrame{name = Temp.newlabel(), formals = []}) esc) (* Should not run here at all, don't alloc at TOP level *)
 
 fun generateSLChain (TOP, TOP, currentFP) = currentFP
   | generateSLChain (NESTED _, TOP, currentFP) = (Err.error 0 "Impossible"; currentFP)
