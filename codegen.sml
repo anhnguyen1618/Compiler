@@ -100,8 +100,8 @@ fun codegen (frame) (stm: T.stm): A.instr list =
           | munchStm(T.MOVE(T.TEMP(d), T.NAME(lab))) = 
             emit(A.OPER {assem="la `d0, " ^ (Symbol.name lab) ^ "\n",
                          src=[], dst=[d], jump=NONE})
-	  | munchStm (T.MOVE(T.TEMP(r), e)) =
-	    emit (A.OPER {assem = "lw `d0, `s0\n",
+	  | munchStm (T.MOVE(T.TEMP(r), e)) = (* munchExp e => T.TEMP(x)*)
+	    emit (A.OPER {assem = "move `d0, `s0\n",
 			  src = [munchExp e],
 			  dst = [r],
 			  jump = NONE})

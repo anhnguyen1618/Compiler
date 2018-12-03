@@ -15,7 +15,7 @@ struct
         of SOME((depth, escape)) =>
              if depth < d
              then escape := true
-             else ()
+             else escape := false
          | NONE => ())
     | traverseVar (env:escEnv, d:depth, A.FieldVar(var, id, pos)) =
         traverseVar(env, d, var)

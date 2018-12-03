@@ -19,7 +19,8 @@ structure Main = struct
    | emitproc out (F.STRING(lab,s)) = TextIO.output(out,F.string(lab,s))
 
 fun withOpenFile fname f = 
-    let val out = TextIO.openOut fname
+    let
+	val out = TextIO.openOut fname
     in (f out before TextIO.closeOut out) 
        handle e => (TextIO.closeOut out; raise e)
     end 
@@ -29,7 +30,8 @@ fun compile filename =
         val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
     in 
         withOpenFile (filename ^ ".s") 
-		     (fn out => (app (emitproc out) frags))
+		     (fn out => (app (emitproc out) frags));
+	Translate.clearFrags()
     end
 
 end

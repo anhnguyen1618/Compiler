@@ -2,41 +2,41 @@ EXP(
  ESEQ(
   SEQ(
    MOVE(
-    TEMP t132,
+    TEMP t144,
     CONST 5),
    SEQ(
     MOVE(
-     TEMP t133,
+     TEMP t145,
      CONST 6),
     MOVE(
-     TEMP t134,
+     TEMP t146,
      CONST 7))),
   ESEQ(
    MOVE(
-    TEMP t134,
+    TEMP t146,
     BINOP(MINUS,
-     TEMP t132,
-     TEMP t133)),
+     TEMP t144,
+     TEMP t145)),
    CONST 0)))
 MOVE(
- TEMP t132,
+ TEMP t144,
  CONST 5)
 MOVE(
- TEMP t133,
+ TEMP t145,
  CONST 6)
 MOVE(
- TEMP t134,
+ TEMP t146,
  CONST 7)
 MOVE(
- TEMP t134,
+ TEMP t146,
  BINOP(MINUS,
-  TEMP t132,
-  TEMP t133))
-L13:
-li t132, 5
-li t133, 6
-li t134, 7
-sub t135,t132,t133
-lw t134, t135
-j L12
-L12:
+  TEMP t144,
+  TEMP t145))
+L25:
+li t144, 5
+li t145, 6
+li t146, 7
+sub t147,t144,t145
+move t146, t147
+j L24
+L24:

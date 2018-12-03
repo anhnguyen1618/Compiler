@@ -126,7 +126,7 @@ structure Semant = struct
     and transDec (vEnv: venv, tEnv: tenv, level: Translate.level, exps: Absyn.dec list, break: Temp.label): decty =
 	let
 	    val actual_ty = (actual_ty tEnv) o #ty
-	    fun checkVarDec (vEnv: venv, tEnv: tenv, {name, typ, init, pos, escape = _}, expList) =
+	    fun checkVarDec (vEnv: venv, tEnv: tenv, {name, typ, init, pos, escape }, expList) =
 		let
 		    val {exp = initValueIrExp, ty} = transExp(vEnv, tEnv, level, init, break)
 		    fun createAssignStm access = expList @ [Translate.assignStm(Translate.simpleVar(access, level), initValueIrExp)]
@@ -136,7 +136,7 @@ structure Semant = struct
 					   SOME t => if T.eq(t, ty)
 						     then
 							 let
-							     val access = Translate.allocLocal(level)(true)
+							     val access = Translate.allocLocal(level)(!escape)
 							     val newVenv = S.enter(vEnv, name,
 							       E.VarEntry{ty = ty, access = access})
 							 in

@@ -32,6 +32,7 @@ sig
     val convertToStm : exp -> Tree.stm
     val concatExpList: exp list * exp -> exp
     val printLevel: level -> string
+    val clearFrags: unit -> unit
 end
     
 
@@ -346,6 +347,7 @@ fun stringExp lit =
 
 fun getResult () = !frags
 
+fun clearFrags () = frags := [];
 
 fun concatExpList (expList, body) = Ex(Tr.ESEQ(seq(map unNx expList), unEx(body)))
 
