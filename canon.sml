@@ -175,6 +175,7 @@ and getnext(table,(b as (T.LABEL lab::_))::rest) =
       of SOME(_::_) => trace(table,b,rest)
        | _ => getnext(table,rest))
   | getnext(table,nil) = nil
+  | getnext (_, _) = nil
 
 fun traceSchedule(blocks,done) =
   getnext(foldr enterblock Symbol.empty blocks, blocks)

@@ -113,6 +113,9 @@ val tempMap = foldl addToNameTable Temp.Table.empty (specialregs @ argregs @ cal
 fun makestring temp = case Temp.Table.look(tempMap, temp) of
 			  SOME x => x
 			| NONE => Temp.makestring temp
+
+fun string (lab, str) =
+    Symbol.name(lab) ^ " .asciiz " ^ "\"" ^ str ^ "\"\n"
 		       
 
 fun newFrame {name: Temp.label, formals: bool list}: frame =
@@ -126,7 +129,7 @@ fun newFrame {name: Temp.label, formals: bool list}: frame =
 	{ name = name, formals = formalAccesses, numLocals = ref 0, curOffset = ref START_OFF_SET}
     end
 
-val name: frame -> Temp.label = #name
+(* val name: frame -> Temp.label = #name *)
 
 val formals: frame -> access list = #formals
 
@@ -155,5 +158,8 @@ fun procEntryExit2 (frame, body) =
 		       src = [R0, RA, SP] @ calleesavedRegs, (*Recover those at the end of function*)
 		       dst = [], jump = SOME([])}]
 
+fun name (frame: frame): string = S.name(#name frame)
 end
+
+
     

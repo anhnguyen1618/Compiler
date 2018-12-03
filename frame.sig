@@ -10,7 +10,10 @@ sig
     val RA : Temp.temp
     val SP : Temp.temp
     val newFrame: {name: Temp.label, formals: bool list} -> frame
-    val name: frame -> Temp.label
+
+    val string : Tree.label * string -> string
+					    
+    (*val name: frame -> Temp.label*)
     val formals: frame -> access list
     val allocLocal: frame -> bool -> access
     val wordSize: int
@@ -22,5 +25,6 @@ sig
     val callersaveRegs: Temp.temp list
 
     val tempMap: register Temp.Table.table
+    val name: frame -> string
 end
     

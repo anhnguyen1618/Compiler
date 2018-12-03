@@ -27,5 +27,5 @@ tiger.grm
 printtree.sml
 assem.sml
 codegen.sml
-
-
+canon.sml
+main.sml

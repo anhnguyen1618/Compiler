@@ -510,7 +510,7 @@ structure Semant = struct
 	    trExp exp
 	end
 
-    fun transProg (my_exp : A.exp) = 
+    fun transProg (my_exp : A.exp): F.frag list = 
 	let
 	    val mainlabel = Temp.newlabel()
 	    val mainlevel = Translate.newLevel {parent=Translate.outermost, name=mainlabel, formals=[]}
@@ -522,7 +522,8 @@ structure Semant = struct
 					      
 	    val printFn = fn exp => Printtree.printtree (TextIO.stdOut, exp)
 	in
-	    printFn (Translate.convertToStm mainexp)
+	    Translate.convertToStm mainexp;
+	    resultIR
 	end
 
     fun testIR (name: string) =
