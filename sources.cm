@@ -29,3 +29,7 @@ assem.sml
 codegen.sml
 canon.sml
 main.sml
+graph.sig
+graph.sml
+flowgraph.sml
+makegraph.sml

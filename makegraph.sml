@@ -1,5 +1,5 @@
 structure MakeGraph:sig
-	      val instrs2graph: Assem.instr list -> Flow.flowgraph * Flow.Graph.node list
+	      val instrs2graph: Assem.instr list -> Flow.flowgraph * Graph.node list
 	  end =
 struct
 
@@ -13,7 +13,7 @@ val labelNodeMap : (string, G.node) H.hash_table =
 val emptyTable = G.Table.empty
 
 fun mapLabel ((instr as A.LABEL{assem = _, lab}), node: G.node) =
-    (H.insert labelNodemap (S.name(lab), node); (instr, node))
+    (H.insert labelNodeMap (S.name(lab), node); (instr, node))
   | mapLabel (instr, n) = (instr, n)
 
 fun addNode (graph: G.graph) (instr: Assem.instr): (Assem.instr * G.node) =
@@ -21,31 +21,31 @@ fun addNode (graph: G.graph) (instr: Assem.instr): (Assem.instr * G.node) =
 
 exception labelNotFoundException;
 fun findNode (label: Temp.label) =
-    case H.find labelNodeMap label of
+    case H.find labelNodeMap (S.name(label)) of
 	SOME(n) => n
       | NONE => raise labelNotFoundException
 
 fun addEdge (nodes: (Assem.instr * G.node) list) =
     let
-	fun makeEdge cur next = G.mk_edge(cur, next)
+	fun makeEdge cur next = G.mk_edge{from=cur, to=next}
 	fun addJumpEdge (A.OPER{jump = SOME(labels),...}, node) =
 	    map ((makeEdge node) o findNode) labels
-	  | addJumpEdge (_, _) = ()
+	  | addJumpEdge (_, _) = []
 
 	fun extractInfo ((A.OPER{dst, src,...}, node), (def, use, move)) =
-	    (G.Table.enter def (node, dst),
-	     G.Table.enter use (node, src),
-	     G.Table.enter move (node, false))
+	    (G.Table.enter(def, node, dst),
+	     G.Table.enter(use, node, src),
+	     G.Table.enter(move, node, false))
 		
 	  | extractInfo ((A.MOVE{dst, src,...}, node), (def, use, move)) =
-	    (G.Table.enter def (node, dst),
-	     G.Table.enter use (node, src),
-	     G.Table.enter move (node, true))
+	    (G.Table.enter(def, node, [dst]),
+	     G.Table.enter (use, node, [src]),
+	     G.Table.enter (move, node, true))
 		
-	  | extractInfo (_, (def, use, mode)) = 
-	    (G.Table.enter def (node, nil),
-	     G.Table.enter use (node, nil),
-	     G.Table.enter move (node, false))
+	  | extractInfo ((_, node), (def, use, move)) = 
+	    (G.Table.enter(def, node, nil),
+	     G.Table.enter(use, node, nil),
+	     G.Table.enter(move, node, false))
 
 	fun f (cur::next::tl, result) =
 	    let
@@ -55,24 +55,24 @@ fun addEdge (nodes: (Assem.instr * G.node) list) =
 	    in
 		makeEdge curNode nextNode;
 		addJumpEdge cur;
-		f (next::tl, newDef, newResult)
+		f (next::tl, newResult)
 	    end
 	  | f (cur::[], result) = (addJumpEdge cur; extractInfo(cur, result))
 	  | f ([], result) = result
     in
-	f (nodes, emptyTable, emptyTable, emptyTable)
+	f (nodes, (emptyTable, emptyTable, emptyTable))
     end	
 
 fun instrs2graph (instrs: Assem.instr list) =
     let
 	val graph = G.newGraph()
 	val instrNodes = map (addNode graph) instrs;
-	val (def, use, move) = addEdge(graph, instrNodes)
+	val (def, use, move) = addEdge(instrNodes)
 	val flowGraph = Flow.FGRAPH {
 		control = graph,
 		def = def,
 		use = use,
-		move = move
+		ismove = move
 	    }
     in
 	(flowGraph, G.nodes(graph))
