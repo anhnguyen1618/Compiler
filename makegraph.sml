@@ -5,14 +5,12 @@ struct
 
 structure G = Graph
 structure A = Assem
-
 structure H = HashTable
 
-
-
 val labelNodeMap : (string, G.node) H.hash_table = 
-    H.mkTable(HashString.hashString, op = )
+    H.mkTable(HashString.hashString, op = ) (42, Fail "not found")
 
+val emptyTable = G.Table.empty
 
 fun mapLabel ((instr as A.LABEL{assem = _, lab}), node: G.node) =
     (H.insert labelNodemap (S.name(lab), node); (instr, node))
@@ -33,20 +31,51 @@ fun addEdge (nodes: (Assem.instr * G.node) list) =
 	fun addJumpEdge (A.OPER{jump = SOME(labels),...}, node) =
 	    map ((makeEdge node) o findNode) labels
 	  | addJumpEdge (_, _) = ()
-	fun helper ((cur as (curInstr, curNode))::(_, nextNode):: tl) =
-	    (makeEdge curNode nextNode; addJumpEdge cur)
-	  | helper (cur::[]) = addJumpEdge cur
-	  | helper [] = () 
+
+	fun extractInfo ((A.OPER{dst, src,...}, node), (def, use, move)) =
+	    (G.Table.enter def (node, dst),
+	     G.Table.enter use (node, src),
+	     G.Table.enter move (node, false))
+		
+	  | extractInfo ((A.MOVE{dst, src,...}, node), (def, use, move)) =
+	    (G.Table.enter def (node, dst),
+	     G.Table.enter use (node, src),
+	     G.Table.enter move (node, true))
+		
+	  | extractInfo (_, (def, use, mode)) = 
+	    (G.Table.enter def (node, nil),
+	     G.Table.enter use (node, nil),
+	     G.Table.enter move (node, false))
+
+	fun f (cur::next::tl, result) =
+	    let
+		val (_,curNode) = cur
+		val (_, nextNode) = next
+		val newResult = extractInfo(cur, result)
+	    in
+		makeEdge curNode nextNode;
+		addJumpEdge cur;
+		f (next::tl, newDef, newResult)
+	    end
+	  | f (cur::[], result) = (addJumpEdge cur; extractInfo(cur, result))
+	  | f ([], result) = result
     in
-	helper nodes
+	f (nodes, emptyTable, emptyTable, emptyTable)
     end	
 
 fun instrs2graph (instrs: Assem.instr list) =
     let
 	val graph = G.newGraph()
 	val instrNodes = map (addNode graph) instrs;
+	val (def, use, move) = addEdge(graph, instrNodes)
+	val flowGraph = Flow.FGRAPH {
+		control = graph,
+		def = def,
+		use = use,
+		move = move
+	    }
     in
-	addEdge(graph, instrNodes)
+	(flowGraph, G.nodes(graph))
     end
 	
 
