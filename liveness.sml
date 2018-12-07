@@ -14,11 +14,17 @@ structure G = Graph
 type liveSet = (*unit Temp.Table.table * *) Temp.temp list
 type liveMap = liveSet G.Table.table
 
+datatype igraph =
+	 IGRAPH of {graph: Graph.graph,
+		    tnode: Temp.temp -> Graph.node,
+		    gtemp: Graph.node -> Temp.temp,
+		    moves: (Graph.node * Graph.node) list}
+
 structure H = HashTable
 val tempNodeMap : (Temp.temp, G.node) H.hash_table = 
     H.mkTable(HashString.hashString o Int.toString, op = ) (42, Fail "not found")
 
-val nodeTempMap = ref G.Table.empty
+val nodeTempMap = ref (G.Table.empty : Temp.temp G.Table.table)
 
 exception labelNotFoundException;
 fun getIgraphNode (temp: Temp.temp): G.node =
@@ -27,7 +33,7 @@ fun getIgraphNode (temp: Temp.temp): G.node =
       | NONE => raise labelNotFoundException
 
 fun getTempFromIGraphNode (node: G.node): Temp.temp =
-    case G.Table.look !nodeTempMap node of
+    case G.Table.look (!nodeTempMap, node) of
 	SOME x => x
       | NONE => raise labelNotFoundException
     
@@ -97,10 +103,10 @@ fun computeLiveMap {control: G.graph, def, use, ismove}: liveMap =
 	loop(G.Table.empty, G.Table.empty, true)
     end
 	
-fun extractAllTemps (def, use, nodes): Temp.temp list =
+fun extractAllTemps (def, use, nodes: G.node list): Temp.temp list =
     let
-	fun extract (node, acc) =  getTempsFromFlowNode(def, use, nodes) @ acc
-	val allTemps = fold extract [] nodes
+	fun extract (node, acc) =  getTempsFromFlowNode(def, use, node) @ acc
+	val allTemps = foldl extract [] nodes
     in
 	unique(allTemps, Temp.Table.empty)
     end
@@ -109,7 +115,7 @@ fun addNodeToIGraph (graph: G.graph, temps: Temp.temp list): unit list =
     let
 	fun addNode temp =
 	    let
-		val newNode = G.graph.newNode(graph)
+		val newNode = G.newNode(graph)
 		val _ = H.insert tempNodeMap (temp, newNode);
 		val _ = nodeTempMap := G.Table.enter (!nodeTempMap, newNode, temp);
 	    in	
@@ -121,7 +127,12 @@ fun addNodeToIGraph (graph: G.graph, temps: Temp.temp list): unit list =
 
 fun makeEdge cur next = G.mk_edge{from=cur, to=next}
 	
-fun addEdgeToIGraphAndComputeMoveList (flowNodes, def, use, ismove, liveTable): (G.node * G.node) list =
+fun addEdgeToIGraphAndComputeMoveList (
+    flowNodes: G.node list,
+    def: liveMap,
+    use: liveMap,
+    ismove: bool G.Table.table,
+    liveTable: liveMap): (G.node * G.node) list =
     let
 	fun f (node, acc) =
 	    (let
@@ -136,25 +147,31 @@ fun addEdgeToIGraphAndComputeMoveList (flowNodes, def, use, ismove, liveTable): 
 			    end
 			  | (_, _) => ())
 	    in
-		case (G.Table.look ismove node, getTemps(def, node), getTemps(use, node)) of
-		    (SOME (true), [dstTemp], [srcTemp]) => (dstTemp, srcTemp):: acc
+		case (G.Table.look(ismove, node), getTemps(def, node), getTemps(use, node)) of
+		    (SOME (true), [dstTemp], [srcTemp]) => (getIgraphNode(dstTemp), getIgraphNode(srcTemp))::acc
 		  | (_, _, _) => acc
 	    end)
     in
 	foldl f [] flowNodes
     end
 
-fun computeIgraph (liveTable, flowNodes, def, temps, ismove): igraph  =
+fun computeIgraph (
+    liveTable: liveMap,
+    flowNodes: G.node list,
+    def: liveMap,
+    use: liveMap,
+    temps: Temp.temp list,
+    ismove: bool G.Table.table)  =
     let
 	val igraph = G.newGraph()
 	val _ = addNodeToIGraph (igraph, temps);
-	val moveList = addEdgeToIGraphAndComputeMoveList(flowNodes, def, ismove, liveTable);
+	val moveList = addEdgeToIGraphAndComputeMoveList(flowNodes, def, use, ismove, liveTable);
     in
 	IGRAPH {
-	    graph = iGraph,
+	    graph = igraph,
 	    tnode = getIgraphNode,
 	    gtemp = getTempFromIGraphNode,
-	    move = moveList
+	    moves = moveList
 	}
     end
 	
@@ -164,9 +181,9 @@ fun interferenceGraph (Flow.FGRAPH(e as {control, def, use, ismove})) =
 	val flowNodes = G.nodes control
 	val temps = extractAllTemps(def, use, flowNodes)
 	val liveTable = computeLiveMap(e)
-	val igraph = computeIgraph(liveTable, flowNodes, def, temps, ismove)
+	val igraph = computeIgraph(liveTable, flowNodes, def, use, temps, ismove)
     in
-	(igraph, getTempsFromFlowNode)
+	(igraph, getTempFromIGraphNode)
     end
 
 fun show (stream, graph) = ()
