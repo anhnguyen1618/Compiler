@@ -5,8 +5,8 @@ structure Liveness: sig
 				  gtemp: Graph.node -> Temp.temp,
 				  moves: (Graph.node * Graph.node) list}
 
-	      val interferenceGraph: Flow.flowgraph -> igraph * (Flow.Graph.node -> Temp.temp list)
-	      val show: outstream * igraph -> unit
+	      val interferenceGraph: Flow.flowgraph -> igraph * (Graph.node -> Temp.temp list)
+	      val show: 'a * igraph -> unit
 	  end =
 struct
 
@@ -16,7 +16,7 @@ type liveMap = liveSet G.Table.table
 
 structure H = HashTable
 val tempNodeMap : (Temp.temp, G.node) H.hash_table = 
-    H.mkTable(HashString.hashString o S.name, op = ) (42, Fail "not found")
+    H.mkTable(HashString.hashString o Int.toString, op = ) (42, Fail "not found")
 
 val nodeTempMap = ref G.Table.empty
 
@@ -32,26 +32,26 @@ fun getTempFromIGraphNode (node: G.node): Temp.temp =
       | NONE => raise labelNotFoundException
     
 
-fun getTemps (table: G.Table, node: G.node): Temp.temp list =
+fun getTemps (table, node: G.node): Temp.temp list =
     case G.Table.look(table, node) of
 	SOME x => x
       | NONE => []
 
-fun getTempsFromFlowNode (def: G.Table, use: G.Table, flowNode: G.node): Temp.temp list =
+fun getTempsFromFlowNode (def, use, flowNode): Temp.temp list =
     getTemps(def, flowNode) @ getTemps(use, flowNode)
 
-fun unique (xs: Temp.temp list, notAddable: Temp.Table): Temp.temp list =
+fun unique (xs: Temp.temp list, notAddable): Temp.temp list =
     let
 	fun f (cur, (notAddable, result)) =
-	    case Temp.table.look(notAddable, cur) of
-		SOME _ => (notAddable, acc)
-	      | NONE => (Temp.table.enter(notAddable, cur, ()), cur::acc)
-	val (_, temps) = fold f (notAddable, []) xs 		    
+	    case Temp.Table.look(notAddable, cur) of
+		SOME _ => (notAddable, result)
+	      | NONE => (Temp.Table.enter(notAddable, cur, ()), cur::result)
+	val (_, temps) = foldl f (notAddable, []) xs 		    
     in
 	temps
     end
 
-fun computeLiveMap {control: G.graph, def: G.Table, use: G.Table, ismove: G.Table}: liveMap =
+fun computeLiveMap {control: G.graph, def, use, ismove}: liveMap =
     let
 	val flowNodes = G.nodes control
 	val shouldContinue = false
@@ -60,12 +60,12 @@ fun computeLiveMap {control: G.graph, def: G.Table, use: G.Table, ismove: G.Tabl
 	    let
 		(* TODO: compute this set is wrong because if there is the same temps in use, it will not be added because
 		 it is prevented *)
-		val notAddable = fold ((cur, acc) => Temp.Table.enter(acc, cur, ())) Temp.Table.empty defTemps
+		val notAddable = foldl (fn (cur, acc) => Temp.Table.enter(acc, cur, ())) Temp.Table.empty defTemps
 	    in
 		unique(outTemps @ useTemps, notAddable)
 	    end
 		
-	fun compute (node: G.node, inMap: liveMap, outMap: liveMap): (G.Table, G.Table, bool) =
+	fun compute (node: G.node, inMap: liveMap, outMap: liveMap) =
 	    let
 		val oldTempOut = getTemps(outMap, node)
 		val oldTempIn = getTemps(inMap, node)
@@ -73,18 +73,18 @@ fun computeLiveMap {control: G.graph, def: G.Table, use: G.Table, ismove: G.Tabl
 		val defs = getTemps(def, node)
 		val uses = getTemps(use, node)
 				      
-		val inUniqTempOut= fold (fn (succ, acc) => acc @ getTemps(inMap, succ)) [] successors
-		val newTempOut = unique(inUniqTempout, Temp.table.empty)
+		val inUniqTempOut= foldl (fn (succ, acc) => acc @ getTemps(inMap, succ)) [] successors
+		val newTempOut = unique(inUniqTempOut, Temp.Table.empty)
 		val newTempIn = computeInTemp (newTempOut, defs, uses)
 		val hasChanges = (List.length(oldTempOut) <> List.length(newTempOut))
-				 orelse (List.length(newTempIn) <> List.length(outTempIn))
+				 orelse (List.length(newTempIn) <> List.length(oldTempIn))
 	    in
 		(G.Table.enter(inMap, node, newTempIn),
 		 G.Table.enter(outMap, node, newTempOut),
 		 hasChanges)
 	    end
 		
-	fun f (cur, (inMap, outMap, continue)): (G.Table, G.Table, bool) =
+	fun f (cur, (inMap, outMap, continue)) =
 	    let
 		val (newInMap, newOutMap, hasChanges) = compute(cur, inMap, outMap)
 	    in
@@ -110,9 +110,10 @@ fun addNodeToIGraph (graph: G.graph, temps: Temp.temp list): unit list =
 	fun addNode temp =
 	    let
 		val newNode = G.graph.newNode(graph)
-	    in
-		H.insert tempNodeMap (temp, newNode);
-		nodeTempMap := G.Table.enter (!nodeTempMap, newNode, temp);
+		val _ = H.insert tempNodeMap (temp, newNode);
+		val _ = nodeTempMap := G.Table.enter (!nodeTempMap, newNode, temp);
+	    in	
+		()
 	    end
     in
 	map addNode temps
@@ -124,14 +125,14 @@ fun addEdgeToIGraphAndComputeMoveList (flowNodes, def, use, ismove, liveTable): 
     let
 	fun f (node, acc) =
 	    (let
-		let _ = (case (getTemps(def, node), getTemps(liveTable, node)) of
+		val _ = (case (getTemps(def, node), getTemps(liveTable, node)) of
 			    (defTemp::[], outs) =>
 			    let
 				val curNode = getIgraphNode (defTemp)
 				val addEdge = makeEdge curNode
+				val _ = map (addEdge o getIgraphNode) outs;
 			    in
-				map (addEdge o getIgraphNode) outs;
-				();
+				()
 			    end
 			  | (_, _) => ())
 	    in
@@ -140,7 +141,7 @@ fun addEdgeToIGraphAndComputeMoveList (flowNodes, def, use, ismove, liveTable): 
 		  | (_, _, _) => acc
 	    end)
     in
-	fold f [] flowNodes
+	foldl f [] flowNodes
     end
 
 fun computeIgraph (liveTable, flowNodes, def, temps, ismove): igraph  =
