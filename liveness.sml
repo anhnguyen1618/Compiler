@@ -205,8 +205,8 @@ fun show (stream, (IGRAPH{graph, tnode, gtemp, moves})) =
 	fun printNode node =
 	    let
 		val master = (getTempStr node) ^ ": "
-		val adjs = G.adj(node)
-		val next = (foldl (fn (cur, acc) => acc ^ " " ^ getTempStr(cur)) "" adjs) ^ "\n"
+		val adjs = G.adj node
+		val next = foldr (fn (cur, acc) => getTempStr(cur) ^ " " ^ acc) "\n" adjs
 	    in
 		print (master ^ next)
 	    end
