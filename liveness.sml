@@ -71,11 +71,9 @@ fun computeLiveMap {control: G.graph, def, use, ismove}: liveMap =
 		
 	fun computeInTemp (outTemps, defTemps, useTemps): Temp.temp list =
 	    let
-		(* TODO: compute this set is wrong because if there is the same temps in use, it will not be added because
-		 it is prevented *)
 		val notAddable = foldl (fn (cur, acc) => Temp.Table.enter(acc, cur, ())) Temp.Table.empty defTemps
 	    in
-		unique(outTemps @ useTemps, notAddable)
+		unique(unique(outTemps, notAddable)@ useTemps, Temp.Table.empty)
 	    end
 		
 	fun compute (node: G.node, inMap: liveMap, outMap: liveMap) =
