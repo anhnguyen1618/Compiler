@@ -26,6 +26,13 @@ val tempNodeMap : (Temp.temp, G.node) H.hash_table =
 
 val nodeTempMap = ref (G.Table.empty : Temp.temp G.Table.table)
 
+val flowNodeTempMap = ref (G.Table.empty: (Temp.temp list) G.Table.table)
+
+fun getGlobalTempsFromFlowNode node =
+    case G.Table.look (!flowNodeTempMap, node) of
+	SOME x => x
+      | NONE => []
+
 exception labelNotFoundException;
 fun getIgraphNode (temp: Temp.temp): G.node =
     case H.find tempNodeMap temp of
@@ -105,7 +112,14 @@ fun computeLiveMap {control: G.graph, def, use, ismove}: liveMap =
 	
 fun extractAllTemps (def, use, nodes: G.node list): Temp.temp list =
     let
-	fun extract (node, acc) =  getTempsFromFlowNode(def, use, node) @ acc
+	fun extract (node, acc) =
+	    let
+		val temps = getTempsFromFlowNode(def, use, node)
+		val _ = flowNodeTempMap := G.Table.enter(!flowNodeTempMap, node, temps)
+	    in
+		temps @ acc
+	    end
+		
 	val allTemps = foldl extract [] nodes
     in
 	unique(allTemps, Temp.Table.empty)
@@ -183,7 +197,7 @@ fun interferenceGraph (Flow.FGRAPH(e as {control, def, use, ismove})) =
 	val liveTable = computeLiveMap(e)
 	val igraph = computeIgraph(liveTable, flowNodes, def, use, temps, ismove)
     in
-	(igraph, getTempFromIGraphNode)
+	(igraph, getGlobalTempsFromFlowNode)
     end
 
 fun show (stream, graph) = ()
