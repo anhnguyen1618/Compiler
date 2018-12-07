@@ -198,9 +198,23 @@ fun interferenceGraph (Flow.FGRAPH(e as {control, def, use, ismove})) =
 	(igraph, getGlobalTempsFromFlowNode)
     end
 
-fun show (stream, graph) = ()
-	
+fun show (stream, (IGRAPH{graph, tnode, gtemp, moves})) =
+    let
+	val nodes = G.nodes graph
+	val getTempStr = Temp.makestring o gtemp
+	fun printNode node =
+	    let
+		val master = (getTempStr node) ^ ": "
+		val adjs = G.adj(node)
+		val next = (foldl (fn (cur, acc) => acc ^ " " ^ getTempStr(cur)) "" adjs) ^ "\n"
+	    in
+		print (master ^ next)
+	    end
+	val _ = map printNode nodes
 
+    in
+	()
+    end
 end
     
 			
