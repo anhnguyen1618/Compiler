@@ -146,25 +146,42 @@ fun addEdgeToIGraphAndComputeMoveList (
     ismove: bool G.Table.table,
     liveTable: liveMap): (G.node * G.node) list =
     let
+	fun addEdge (defTemp, depri, outs) =
+	    let
+		val curNode = getIgraphNode (defTemp)
+		(* Prevent node to make edge to itself, or make edge to single case a = c *)
+		val addEdge = fn nextNode => if depri(curNode,nextNode)
+					     then ()
+					     else makeEdge curNode nextNode
+		val _ = map (addEdge o getIgraphNode) outs;
+	    in
+		()
+	    end
+		
 	fun f (node, acc) =
 	    (let
-		val _ = (case (getTemps(def, node), getTemps(liveTable, node)) of
-			    (defTemp::[], outs) =>
-			    let
-				val curNode = getIgraphNode (defTemp)
-				val addEdge = makeEdge curNode
-				val _ = map (addEdge o getIgraphNode) outs;
-			    in
-				()
-			    end
-			  | (_, _) => ())
+		val defTemps = getTemps(def, node)
+		val useTemps = getTemps(use, node)
+		val isMove = G.Table.look(ismove, node)
+		val liveTemps = getTemps(liveTable, node)
+		val _ = (case (defTemps, useTemps, liveTemps) of
+			     ([defTemp], [useTemp], outs) =>
+			     let
+				 val useNode = getIgraphNode useTemp
+				 val depricate = fn (cur, out) => G.eq(useNode, out)
+								  orelse G.eq(cur, out)
+			     in
+				 addEdge(defTemp, depricate, outs)
+			     end
+			   | ([defTemp], _, outs) => addEdge(defTemp, G.eq, outs)
+			   | (_, _, _) => ())
 	    in
-		case (G.Table.look(ismove, node), getTemps(def, node), getTemps(use, node)) of
+		case (isMove, defTemps, useTemps) of
 		    (SOME (true), [dstTemp], [srcTemp]) => (getIgraphNode(dstTemp), getIgraphNode(srcTemp))::acc
 		  | (_, _, _) => acc
 	    end)
     in
-	foldl f [] flowNodes
+	foldr f [] flowNodes
     end
 
 fun computeIgraph (

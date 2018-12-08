@@ -67,7 +67,16 @@ struct
        in ()
       end
 
-  val mk_edge = diddle_edge (op ::)
+  fun addDistinctEdge (newEdge, existingEdges) =
+      let
+	  fun computeExist (cur, acc) = newEdge = cur orelse acc
+	  val exist = foldl computeExist false existingEdges
+      in
+	  if exist then existingEdges else newEdge::existingEdges
+      end
+	  
+
+  val mk_edge = diddle_edge addDistinctEdge
   val rm_edge = diddle_edge delete
 
   structure Table = IntMapTable(type key = node
