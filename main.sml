@@ -12,7 +12,10 @@ structure Main = struct
 	 val stms = Canon.linearize body
 	 val _ = app (fn s => Printtree.printtree(out,s)) stms;
          val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
-	 val instrs =   List.concat(map (Mipsgen.codegen frame) stms') 
+	 val instrs =   List.concat(map (Mipsgen.codegen frame) stms')
+	 val (flowGraph, _) = MakeGraph.instrs2graph(instrs)
+	 val (igraph, _) = Liveness.interferenceGraph(flowGraph)
+	 val _ = Liveness.show((), igraph)
          val format0 = Assem.format(Temp.makestring)
      in  app (fn i => TextIO.output(out,format0 i)) instrs
      end
