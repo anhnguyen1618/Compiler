@@ -137,6 +137,7 @@ structure Semant = struct
 						     then
 							 let
 							     val access = Translate.allocLocal(level)(!escape)
+							    
 							     val newVenv = S.enter(vEnv, name,
 							       E.VarEntry{ty = ty, access = access})
 							 in
@@ -152,11 +153,15 @@ structure Semant = struct
 		      | NONE => ((if T.eq(ty, T.NIL)
 				  then (Err.error pos ("Can't assign Nil to non-record type variable"))
 				  else ());
-				 {
-				   venv = S.enter(vEnv, name, E.VarEntry{ty = ty, access = Translate.allocLocal(level)(true)}),
-				   tenv = tEnv,
-				   expList = expList
-				})
+				 (let
+				     val access = Translate.allocLocal(level)(!escape)
+				 in
+				     {
+				       venv = S.enter(vEnv, name, E.VarEntry{ty = ty, access = access}),
+				       tenv = tEnv,
+				       expList = createAssignStm (access)
+				     }
+				 end))
 		end
 
 	    fun checkTypeDec (vEnv: venv, tEnv: tenv, xs, expList) =
@@ -405,7 +410,7 @@ structure Semant = struct
 			val results = map (fn (exp, _) => trExp exp) xs
 			val irExps = map #exp results
 		    in
-			List.last results
+			{exp = Translate.seqExp(irExps), ty = ((#ty o List.last) results)}
 		    end
 
 

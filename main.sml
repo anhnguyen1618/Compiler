@@ -31,6 +31,8 @@ fun withOpenFile fname f =
 fun compile filename = 
     let val absyn = Parse.parse filename
         val frags = (FindEscape.findEscape absyn; Semant.transProg absyn)
+	val _ = (PrintAbsyn.print (TextIO.stdOut, absyn);
+	 print "\n-------------------\n")
     in 
         withOpenFile (filename ^ ".s") 
 		     (fn out => (app (emitproc out) frags));

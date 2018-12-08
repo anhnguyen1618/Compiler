@@ -1,0 +1,12 @@
+let
+	var c: int := 5
+	var a: int := 0
+in
+	while a < 10 do
+	let
+		var b := a + 1	
+	in
+		c := c + b;
+		a := b * 2
+	end
+end

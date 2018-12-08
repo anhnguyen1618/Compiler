@@ -21,7 +21,7 @@ fun getAssemRelOp T.EQ = "beq"
 
 fun getOperStm T.PLUS = "add"
   | getOperStm T.MINUS = "sub"
-  | getOperStm T.MUL = "mult"
+  | getOperStm T.MUL = "mul"
   | getOperStm T.DIV = "div"
   | getOperStm _ = "Oper not used"
     

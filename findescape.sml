@@ -13,9 +13,12 @@ struct
   fun traverseVar (env:escEnv, d:depth, A.SimpleVar(id, pos)) =
       (case Symbol.look(env,id)
         of SOME((depth, escape)) =>
+	   (
              if depth < d
              then escape := true
-             else escape := false
+             else escape := false;
+	     print (S.name(id) ^" ->" ^ Int.toString (depth) ^ " : " ^ Int.toString (d) ^ "\n")
+	   )
          | NONE => ())
     | traverseVar (env:escEnv, d:depth, A.FieldVar(var, id, pos)) =
         traverseVar(env, d, var)

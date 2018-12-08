@@ -138,6 +138,7 @@ fun allocLocal f esc =
 	val {name = _, formals = formals, numLocals = numLocals, curOffset = curOffset} = f
 	(*local var grows from high addr -> low addr *)
 	fun decreaseOffset () = curOffset := !curOffset - wordSize
+	val _ = print ("dec var: -> " ^ (if esc then "true" else "false") ^ "\n")
     in
 	numLocals := !numLocals + 1;
 	if esc then (decreaseOffset();
