@@ -19,5 +19,6 @@ sig
     sharing type Table.key = node
 
     val nodename: node->string  (* for debugging only *)
-
+    val compare: node * node -> order
+    val compareMove: (node * node) * (node * node) -> order
 end

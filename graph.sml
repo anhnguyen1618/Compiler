@@ -29,6 +29,13 @@ struct
 
   fun eq((_,a),(_,b)) = a=b
 
+  fun compare ((_, a), (_, b)) = Int.compare(a,b)
+
+  fun compareMove (((_, x1),(_,y1)), ((_, x2), (_,y2))) = 
+      let fun cantor(x,y) = (x + y) * (x + y + 1) div 2 + y
+      in Int.compare(cantor(x1,y1), cantor(x2,y2))
+      end
+
   fun augment (g: graph) (n: node') : node = (g,n)
 
   exception NOTFOUND
