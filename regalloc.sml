@@ -13,17 +13,12 @@ structure Tr = Tree
 structure G = Graph
 structure L = Liveness
 structure C = Color
-structure S = RedBlackSetFn (struct
-			      type ord_key = Temp.temp
-			      fun compare(n1, n2) = String.compare(Temp.makestring(n1),Temp.makestring(n2))
-			      end)
 
 type allocation = F.register Temp.Table.table
 
 
 fun rewriteProgram (spills: Temp.temp list, oldInstrs: A.instr list, frame: F.frame): A.instr list =
     let
-	val newtemps = ref S.empty
 	val mappingsAddress = ref Temp.Table.empty
 	fun isSpill (t: Temp.temp) =
 	    case List.find (fn x => x = t) spills of
@@ -52,7 +47,6 @@ fun rewriteProgram (spills: Temp.temp list, oldInstrs: A.instr list, frame: F.fr
 		let
 		    val addr = getAddress(temp)
 		    val newTemp = Temp.newtemp()
-		    val _ = S.add(!newtemps, newTemp)
 		in
 		    handleSpill (newTemp, addr)
 		end
