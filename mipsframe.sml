@@ -108,7 +108,10 @@ val wordSize = 4
 val START_OFF_SET= ~44
 
 val addToNameTable = fn ((t, n), table) => Temp.Table.enter(table, t, n)
-val tempMap = foldl addToNameTable Temp.Table.empty (specialregs @ argregs @ calleesaves @ callersaves)
+val registerMappings = specialregs @ argregs @ calleesaves @ callersaves
+val tempMap = foldl addToNameTable Temp.Table.empty registerMappings
+
+val registers = map #2 registerMappings
 
 fun makestring temp = case Temp.Table.look(tempMap, temp) of
 			  SOME x => x

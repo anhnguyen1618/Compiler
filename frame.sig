@@ -25,6 +25,7 @@ sig
     val callersaveRegs: Temp.temp list
 
     val tempMap: register Temp.Table.table
+    val registers: register list
     val name: frame -> string
 end
     

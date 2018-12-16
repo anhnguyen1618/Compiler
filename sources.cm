@@ -34,3 +34,4 @@ graph.sml
 flowgraph.sml
 makegraph.sml
 liveness.sml
+regalloc.sml

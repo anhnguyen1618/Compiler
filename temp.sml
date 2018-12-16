@@ -16,6 +16,8 @@ fun makestring t = "t" ^ Int.toString t
 
 fun newlabel () = (labelCount := !labelCount + 1; Symbol.symbol("L" ^ Int.toString(!labelCount)))
 
+fun eq (a: temp, b: temp): bool = a = b
+					 
 val namedlabel = Symbol.symbol
 		      
 end

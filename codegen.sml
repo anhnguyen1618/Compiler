@@ -86,10 +86,9 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 			  jump = NONE})
 
 	  | munchStm (T.MOVE(T.TEMP(d), T.TEMP(s))) =
-	    emit (A.OPER {assem = "move `d0, `s0\n",
-			  src = [s],
-			  dst = [d],
-			  jump = NONE})
+	    emit (A.MOVE {assem = "move `d0, `s0\n",
+			  src = s,
+			  dst = d})
 
 	  | munchStm (T.MOVE(T.TEMP(d), T.MEM(T.BINOP(_, s, T.CONST i)))) =
 	    genLwStm(i, d, s)
