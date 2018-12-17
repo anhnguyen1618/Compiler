@@ -108,7 +108,6 @@ val callersaveRegs = map (fn (x, _) => x) callersaves
 val argRegs = map (fn (x, _) => x) argregs
 		     
 val wordSize = 4
-val START_OFF_SET= ~44
 
 val addToNameTable = fn ((t, n), table) => Temp.Table.enter(table, t, n)
 val registerMappings = specialregs @ argregs @ calleesaves @ callersaves
@@ -126,16 +125,17 @@ fun string (lab, str) =
 
 fun newFrame {name: Temp.label, formals: bool list}: frame =
     let
+	let localNums = ref 0
 	fun allocLocals ([], _) = []
 	  | allocLocals (h::t, offset) =
 	    let
-		(* check if offset is correct after all*)
+		(* Local allocs on top of stack => starting from 0*)
 		val access = if h then InFrame(offset) else InReg(Temp.newtemp())
-		val newOffSet = if h then offset + wordSize else offset
+		val newOffSet = if h then (localNums:= !localNums + 1; offset + wordSize) else offset
 	    in access :: allocLocals(t, newOffSet) end
 	val formalAccesses = allocLocals (formals, 0)
     in
-	{ name = name, formals = formalAccesses, numLocals = ref 0, curOffset = ref START_OFF_SET}
+	{ name = name, formals = formalAccesses, numLocals = localNums, curOffset = ref START_OFF_SET}
     end
 
 (* val name: frame -> Temp.label = #name *)
@@ -147,11 +147,11 @@ fun allocLocal f esc =
 	val {name = _, formals = formals, numLocals = numLocals, curOffset = curOffset} = f
 	(*local var grows from high addr -> low addr *)
 	fun decreaseOffset () = curOffset := !curOffset - wordSize
-	val _ = print ("dec var: -> " ^ (if esc then "true" else "false") ^ "\n")
     in
-	numLocals := !numLocals + 1;
-	if esc then (decreaseOffset();
-		     InFrame(!curOffset))
+	if esc then
+	    ( numLocals := !numLocals + 1;
+	      decreaseOffset();
+	      InFrame((!numLocals - 1) * wordSize))
 	else InReg(Temp.newtemp())
     end
 
@@ -165,13 +165,8 @@ fun externalCall (name, args) = Tr.CALL(Tr.NAME(Temp.namedlabel name), args)
 fun procEntryExit1 (frame as {name, formals, numLocals, curOffset}, bodyStm) =
     let
 	val saveToFrame = true
-	val regLocMappping = map (fn reg => (reg, exp (allocLocal frame saveToFrame) (Tr.TEMP(FP)))) calleesavedRegs
-	fun generateSaveMove (reg, loc) = Tr.MOVE(loc, Tr.TEMP(reg))
-	fun generateRestoreMove (reg, loc) = Tr.MOVE(Tr.TEMP(reg), loc)
-	val calleeSaveMoves = map generateSaveMove regLocMapping
-	val calleeRestoreMoves = map generateRestoreMove regLocMapping
-				     	    
-	fun genererateArgsMoves () =
+
+	val argsMoves =
 	    let
 		fun allocArgToLoc (i, access) =
 		    let
@@ -187,23 +182,55 @@ fun procEntryExit1 (frame as {name, formals, numLocals, curOffset}, bodyStm) =
 	    in
 		List.mapi allocArgToLoc formals
 	    end
+
+	val returnAddress = exp (allocLocal frame saveToFrame) (Tr.TEMP FP)
+	val saveRA = Tr.MOVE(returnAddress, Tr.TEMP(RA))
+	val restoreRA = Tr.MOVE(Tr.TEMP(RA), returnAddress)
+			       
+	val regLocMappping = map (fn reg => (reg, exp (allocLocal frame saveToFrame) (Tr.TEMP(FP)))) calleesavedRegs
+	fun generateSaveMove (reg, loc) = Tr.MOVE(loc, Tr.TEMP(reg))
+	fun generateRestoreMove (reg, loc) = Tr.MOVE(Tr.TEMP(reg), loc)
+	val calleeSaveMoves = map generateSaveMove regLocMapping
+	val calleeRestoreMoves = map generateRestoreMove regLocMapping
+			
     in
-	generateArgsMoves() @ calleeSaveMoves @ [bodyStm] @ calleeRestoreMoves
+	argsMoves @ [saveRA] @ calleeSaveMoves @ [bodyStm] @ calleeRestoreMoves @ [restoreRA]
     end
 	
 
 fun procEntryExit2 (frame, body) =
-    body @ [Assem.OPER{assem = "",
-		       src = [R0, RA, SP] @ calleesavedRegs, (*Recover those at the end of function*)
-		       dst = [], jump = SOME([])}]
-
-fun procEntryExit3 (frame, instrs) =
     let
-	val prolog = "";
-	val epilog = "";
-	val body = []
+	(* detect max num args of any call inside the function *)
+	fun findMaxCallArgs ((A.OPER{assem, src,...}), max) =
+	    case String.isPrefix("jal", assem) of
+		true => if List.length(src) > max then List.length(src) else max
+	      | false => max
+	  | findMaxCallArgs (_, max) = max
+
+	val maxArgs = foldl findMaxCallArgs 0 body
+	val stms = body @ [Assem.OPER{assem = "",
+				      src = [R0, RA, SP] @ calleesavedRegs, (*Recover those at the end of function*)
+				      dst = [], jump = SOME([])}]
     in
-	{prolog= prolog, body= body, epilog= epilog}			
+	(stms, maxArgs)
+    end
+	
+	    
+
+fun procEntryExit3 (frame, instrs, maxArgs) =
+    let
+	(*Save return address*)
+	val requiredSpace = (!(#numLocals frame) + maxArgs) * wordSize
+        val prolog = String.concat([Symbol.name(location), ":\n",
+                                    "sw $fp, 0($sp)\n",
+                                    "move $fp, $sp\n",
+                                    "addiu $sp, $sp, ", Int.toString(requiredSpace), "\n"])
+        (* sp := fp, fp := 0(sp), return *)
+        val epilog = String.concat(["move $sp, $fp\n",
+                                    "lw $fp, 0($sp)\n",
+                                    "jr $ra\n"])
+    in
+	{prolog= prolog, body=instrs, epilog= epilog}			
     end
 	
 	    

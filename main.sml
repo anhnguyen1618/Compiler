@@ -5,13 +5,6 @@ structure Main = struct
    (*structure R = RegAlloc *)
 
    (* fun getsome (SOME x) = x *)
-
-   fun removeMove (instrs, alloc) =
-       let
-	   fun f Assem.
-       in
-	   List.filter f instrs
-       end
 	   
 
  fun emitproc out (F.PROC{body,frame}) =
@@ -22,11 +15,11 @@ structure Main = struct
          val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
 	 val bodyInstrs = List.concat(map (Mipsgen.codegen frame) stms')
 
-	 val instrs = F.procEntryExit2(frame, bodyInstrs)
+	 val (instrs, maxArgs) = F.procEntryExit2(frame, bodyInstrs)
 	 val (newInstrs, allocation) = RegAlloc.alloc(instrs, frame)
 	 val refinedInstrs = Mipsgen.removeRedundantMoves(newInstrs, allocation)
 
-	 val {prolog, body, epilog} = F.procEntryExit3(frame, refinedInstrs)
+	 val {prolog, body, epilog} = F.procEntryExit3(frame, refinedInstrs, maxArgs)
          val format0 = Assem.format(F.makestring allocation)
      in
 	 TextIO.output(out, prolog);
