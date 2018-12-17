@@ -55,10 +55,10 @@ val frags : F.frag list ref = ref []
 
 (* helper function for generating statement sequences from a list of Tree
    * statements. *)
-  fun seq (x::[]) = x
-    | seq (x::rest) = Tr.SEQ(x, seq(rest))
-    (* the empty list of sequences is represented by the 0 expression *)
-    | seq ([]) = Tr.EXP(Tr.CONST 0)
+fun seq (x::[]) = x
+  | seq (x::rest) = Tr.SEQ(x, seq(rest))
+  (* the empty list of sequences is represented by the 0 expression *)
+  | seq ([]) = Tr.EXP(Tr.CONST 0)
 
 fun unEx (Ex e) = e
   | unEx (Nx (Tr.EXP e)) = e

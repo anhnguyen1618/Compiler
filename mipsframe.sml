@@ -115,6 +115,12 @@ val tempMap = foldl addToNameTable Temp.Table.empty registerMappings
 
 val registers = map #2 registerMappings
 
+fun seq (x::[]) = x
+  | seq (x::rest) = Tr.SEQ(x, seq(rest))
+  (* the empty list of sequences is represented by the 0 expression *)
+  | seq ([]) = Tr.EXP(Tr.CONST 0)
+
+
 fun makestring tempMap temp = case Temp.Table.look(tempMap, temp) of
 				  SOME x => x
 				| NONE => Temp.makestring temp
@@ -125,7 +131,7 @@ fun string (lab, str) =
 
 fun newFrame {name: Temp.label, formals: bool list}: frame =
     let
-	let localNums = ref 0
+	val localNums = ref 0
 	fun allocLocals ([], _) = []
 	  | allocLocals (h::t, offset) =
 	    let
@@ -135,7 +141,7 @@ fun newFrame {name: Temp.label, formals: bool list}: frame =
 	    in access :: allocLocals(t, newOffSet) end
 	val formalAccesses = allocLocals (formals, 0)
     in
-	{ name = name, formals = formalAccesses, numLocals = localNums, curOffset = ref START_OFF_SET}
+	{ name = name, formals = formalAccesses, numLocals = localNums, curOffset = ref 0}
     end
 
 (* val name: frame -> Temp.label = #name *)
@@ -170,14 +176,14 @@ fun procEntryExit1 (frame as {name, formals, numLocals, curOffset}, bodyStm) =
 	    let
 		fun allocArgToLoc (i, access) =
 		    let
-			val dstLoc = exp access (T.TEMP FP)
+			val dstLoc = exp access (Tr.TEMP FP)
 			val argOffset = i * wordSize (* Starting at 16 *)
 		    in
 			if i < 3
 			then
-			    Tr.MOVE(dstLoc, List.nth(argRegs, i))
+			    Tr.MOVE(dstLoc, Tr.TEMP(List.nth(argRegs, i)))
 			else
-			    Tr.MOVE(dstLoc, Tr.MEM(Tr.PLUS, Tr.TEMP(FP), Tr.CONST(argOffset)))
+			    Tr.MOVE(dstLoc, Tr.MEM(Tr.BINOP(Tr.PLUS, Tr.TEMP(FP), Tr.CONST(argOffset))))
 		    end
 	    in
 		List.mapi allocArgToLoc formals
@@ -187,24 +193,24 @@ fun procEntryExit1 (frame as {name, formals, numLocals, curOffset}, bodyStm) =
 	val saveRA = Tr.MOVE(returnAddress, Tr.TEMP(RA))
 	val restoreRA = Tr.MOVE(Tr.TEMP(RA), returnAddress)
 			       
-	val regLocMappping = map (fn reg => (reg, exp (allocLocal frame saveToFrame) (Tr.TEMP(FP)))) calleesavedRegs
+	val regLocMapping = map (fn reg => (reg, exp (allocLocal frame saveToFrame) (Tr.TEMP(FP)))) calleesavedRegs
 	fun generateSaveMove (reg, loc) = Tr.MOVE(loc, Tr.TEMP(reg))
 	fun generateRestoreMove (reg, loc) = Tr.MOVE(Tr.TEMP(reg), loc)
 	val calleeSaveMoves = map generateSaveMove regLocMapping
 	val calleeRestoreMoves = map generateRestoreMove regLocMapping
 			
     in
-	argsMoves @ [saveRA] @ calleeSaveMoves @ [bodyStm] @ calleeRestoreMoves @ [restoreRA]
+	seq (argsMoves @ [saveRA] @ calleeSaveMoves @ [bodyStm] @ calleeRestoreMoves @ [restoreRA])
     end
 	
 
 fun procEntryExit2 (frame, body) =
     let
 	(* detect max num args of any call inside the function *)
-	fun findMaxCallArgs ((A.OPER{assem, src,...}), max) =
-	    case String.isPrefix("jal", assem) of
+	fun findMaxCallArgs ((Assem.OPER{assem, src,...}), max) =
+	    (case String.isPrefix "jal" assem of
 		true => if List.length(src) > max then List.length(src) else max
-	      | false => max
+	      | false => max)
 	  | findMaxCallArgs (_, max) = max
 
 	val maxArgs = foldl findMaxCallArgs 0 body
@@ -217,11 +223,11 @@ fun procEntryExit2 (frame, body) =
 	
 	    
 
-fun procEntryExit3 (frame, instrs, maxArgs) =
+fun procEntryExit3 (frame: frame, instrs, maxArgs) =
     let
 	(*Save return address*)
 	val requiredSpace = (!(#numLocals frame) + maxArgs) * wordSize
-        val prolog = String.concat([Symbol.name(location), ":\n",
+        val prolog = String.concat([Symbol.name(#name frame), ":\n",
                                     "sw $fp, 0($sp)\n",
                                     "move $fp, $sp\n",
                                     "addiu $sp, $sp, ", Int.toString(requiredSpace), "\n"])

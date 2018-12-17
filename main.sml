@@ -24,7 +24,7 @@ structure Main = struct
      in
 	 TextIO.output(out, prolog);
 	 app (fn i => TextIO.output(out,format0 i)) newInstrs;
-	 TextIO.output(out, epilog);
+	 TextIO.output(out, epilog)
      end
    | emitproc out (F.STRING(lab,s)) = TextIO.output(out,F.string(lab,s))
 

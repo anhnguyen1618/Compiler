@@ -79,8 +79,7 @@ structure Semant = struct
 					(not (!isCir), S.name(name)::cirNodes)
 				    else (false, cirNodes)
 				end
-				    
-			       )
+				    			       )
 			 | NONE => (false, [])
 
 		   end
@@ -174,7 +173,7 @@ structure Semant = struct
 		    foldl f {venv = vEnv, tenv = dumbTenv, expList = expList} xs
 		end
 
-	    fun checkFuncDec (vEnv: venv, tEnv: tenv, fs, expList) =
+	    fun checkFuncDec (vEnv: venv, tEnv: tenv, fs: A.fundec list, expList) =
 		let
 		    fun lookTypeUp (s, p) =
 			case S.look(tEnv, s) of
@@ -199,13 +198,13 @@ structure Semant = struct
 			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType, label = label, level = level})
 			end
 						
-		    fun addNewFuncEntry ({name, params, result, body, pos}, curVenv) = 
+		    fun addNewFuncEntry ({name, params, result, body, pos}: A.fundec, curVenv) = 
 																   
 			let
 			    val typeList = map getType params
 			    val resultType = getTypeForResult result
 			    val label = Temp.newlabel()
-			    val escapes = map #escape params
+			    val escapes = map (! o #escape) params
 			    val funcLevel = Translate.newLevel{parent = level, name = label, formals = escapes}
 			    (* We already create new function's level in addFuncHeaders() so we just extract level from here*)
 
