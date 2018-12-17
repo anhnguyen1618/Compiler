@@ -2,6 +2,7 @@ signature CODEGEN =
 sig
   structure Frame : FRAME
   val codegen : Frame.frame -> Tree.stm -> Assem.instr list
+  val removeRedundantMoves: A.instr list * Temp.register Temp.Table.table -> A.instr list
 end
 
 structure Mipsgen: CODEGEN =
@@ -173,10 +174,19 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	rev (!ilist)
     end
 
-	
-	
 
-
+fun removeRedundantMoves (instrs: A.instr list, alloc: Temp.register Temp.Table.table): A.instr list =
+    let
+	fun getColor t =
+	    case Temp.Table.look(alloc, t) of
+		SOME x => x
+	      | NONE => raise Fail ("No allocation found for " ^ Temp.makestring(t))
+			      
+	fun f A.MOVE{dst, src, ...} = getColor(dst) <> getColor(src)
+	  | f _ = true
+    in
+	List.filter f instrs
+    end
     
 end
     
