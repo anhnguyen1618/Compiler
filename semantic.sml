@@ -203,8 +203,12 @@ structure Semant = struct
 			let
 			    val typeList = map getType params
 			    val resultType = getTypeForResult result
-			    val label = Temp.newlabel()
+							      
 			    val escapes = map (! o #escape) params
+			    val label = case S.look(curVenv, name) of
+					    SOME(E.FunEntry{label,...}) => label
+					  | _ => Temp.newlabel() 
+					       
 			    val funcLevel = Translate.newLevel{parent = level, name = label, formals = escapes}
 			    (* We already create new function's level in addFuncHeaders() so we just extract level from here*)
 
@@ -214,8 +218,8 @@ structure Semant = struct
 						     (S.enter(temp, name,
 							 E.VarEntry({ ty = ty,
 								      access = List.nth(paramAccesses, i)})), i + 1)
-
-			    val (bodyVenv, _) = foldl addParamsToBody (curVenv, 0) typeList
+			    val startAccessIndex = 1 (* First access is static link, first front-end args is allocated at index 1*)
+			    val (bodyVenv, _) = foldl addParamsToBody (curVenv, startAccessIndex) typeList
 			    val {exp = bodyIr, ty = tyBody } = transExp(bodyVenv, tEnv, funcLevel, body, break)
 			in
 			    Translate.procEntryExit {level = funcLevel, body = bodyIr};

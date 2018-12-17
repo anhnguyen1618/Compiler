@@ -1,0 +1,5 @@
+let
+        function sum (a: int): int = a + 1
+in
+        sum(3)
+end

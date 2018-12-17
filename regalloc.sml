@@ -144,7 +144,7 @@ fun alloc (instrs: A.instr list, frame: F.frame): A.instr list * allocation =
 		initial = F.tempMap,
 		spillCost = fn x => 1, (*actually calculate this shit*)
 		registers = F.registers
-	    }
+	    } handle e => raise Fail("color failed")
     in
 	if (List.length(spills) > 0)
 	then

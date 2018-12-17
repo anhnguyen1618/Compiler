@@ -182,7 +182,7 @@ fun removeRedundantMoves (instrs: A.instr list, alloc: Frame.register Temp.Table
 		SOME x => x
 	      | NONE => raise Fail ("No allocation found for " ^ Temp.makestring(t))
 			      
-	fun f (A.MOVE{dst, src, ...}) = getColor(dst) <> getColor(src)
+	fun f (A.MOVE{dst, src, ...}) = false andalso getColor(dst) <> getColor(src)
 	  | f _ = true
     in
 	List.filter f instrs

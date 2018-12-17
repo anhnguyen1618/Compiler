@@ -105,9 +105,9 @@ fun seq [] = Tr.EXP(Tr.CONST 0)
   | seq[stm] = stm
   | seq(stm::stms) = Tr.SEQ(stm,seq(stms))
 
-fun newLevel {parent = p, name = _, formals = formals} =
+fun newLevel {parent = p, name = name, formals = formals} =
     NESTED {uniq = ref (), parent = p,
-	    frame = F.newFrame{ name = Temp.newlabel(), formals = true::formals}}
+	    frame = F.newFrame{ name = name, formals = true::formals}}
 fun formals TOP = []
   | formals (NESTED e) = map (fn x => (NESTED(e), x)) ((#formals o #frame) e)
 
