@@ -205,7 +205,7 @@ structure Semant = struct
 			    val typeList = map getType params
 			    val resultType = getTypeForResult result
 			    val label = Temp.newlabel()
-			    val escapes = map (fn x => true) params
+			    val escapes = map #escape params
 			    val funcLevel = Translate.newLevel{parent = level, name = label, formals = escapes}
 			    (* We already create new function's level in addFuncHeaders() so we just extract level from here*)
 

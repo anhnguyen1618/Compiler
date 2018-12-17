@@ -104,6 +104,8 @@ val callersaves = [
 val calleesavedRegs = map (fn (x, _) => x) calleesaves
 
 val callersaveRegs = map (fn (x, _) => x) callersaves
+
+val argRegs = map (fn (x, _) => x) argregs
 		     
 val wordSize = 4
 val START_OFF_SET= ~44
@@ -120,14 +122,17 @@ fun makestring tempMap temp = case Temp.Table.look(tempMap, temp) of
 
 fun string (lab, str) =
     Symbol.name(lab) ^ " .asciiz " ^ "\"" ^ str ^ "\"\n"
-		       
+						    
 
 fun newFrame {name: Temp.label, formals: bool list}: frame =
     let
 	fun allocLocals ([], _) = []
-	  | allocLocals (h::t, offset) = let val access = if h then InFrame(offset) else InReg(Temp.newtemp()) (*TODO: handle args number 4 up here*)
-					    val newOffSet = if h then offset + wordSize else offset
-					 in access :: allocLocals(t, newOffSet) end
+	  | allocLocals (h::t, offset) =
+	    let
+		(* check if offset is correct after all*)
+		val access = if h then InFrame(offset) else InReg(Temp.newtemp())
+		val newOffSet = if h then offset + wordSize else offset
+	    in access :: allocLocals(t, newOffSet) end
 	val formalAccesses = allocLocals (formals, 0)
     in
 	{ name = name, formals = formalAccesses, numLocals = ref 0, curOffset = ref START_OFF_SET}
@@ -156,12 +161,53 @@ fun exp (InFrame(offset)) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, 
 
 fun externalCall (name, args) = Tr.CALL(Tr.NAME(Temp.namedlabel name), args)
 
-fun procEntryExit1 (frame, stm) = stm
+(* NOTICE: bodyStm already include move to save bodyResult to F.RV*)
+fun procEntryExit1 (frame as {name, formals, numLocals, curOffset}, bodyStm) =
+    let
+	val saveToFrame = true
+	val regLocMappping = map (fn reg => (reg, exp (allocLocal frame saveToFrame) (Tr.TEMP(FP)))) calleesavedRegs
+	fun generateSaveMove (reg, loc) = Tr.MOVE(loc, Tr.TEMP(reg))
+	fun generateRestoreMove (reg, loc) = Tr.MOVE(Tr.TEMP(reg), loc)
+	val calleeSaveMoves = map generateSaveMove regLocMapping
+	val calleeRestoreMoves = map generateRestoreMove regLocMapping
+				     	    
+	fun genererateArgsMoves () =
+	    let
+		fun allocArgToLoc (i, access) =
+		    let
+			val dstLoc = exp access (T.TEMP FP)
+			val argOffset = i * wordSize (* Starting at 16 *)
+		    in
+			if i < 3
+			then
+			    Tr.MOVE(dstLoc, List.nth(argRegs, i))
+			else
+			    Tr.MOVE(dstLoc, Tr.MEM(Tr.PLUS, Tr.TEMP(FP), Tr.CONST(argOffset)))
+		    end
+	    in
+		List.mapi allocArgToLoc formals
+	    end
+    in
+	generateArgsMoves() @ calleeSaveMoves @ [bodyStm] @ calleeRestoreMoves
+    end
+	
 
 fun procEntryExit2 (frame, body) =
     body @ [Assem.OPER{assem = "",
 		       src = [R0, RA, SP] @ calleesavedRegs, (*Recover those at the end of function*)
 		       dst = [], jump = SOME([])}]
+
+fun procEntryExit3 (frame, instrs) =
+    let
+	val prolog = "";
+	val epilog = "";
+	val body = []
+    in
+	{prolog= prolog, body= body, epilog= epilog}			
+    end
+	
+	    
+
 
 fun name (frame: frame): string = S.name(#name frame)
 end

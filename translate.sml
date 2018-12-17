@@ -300,6 +300,7 @@ fun opExp (left, oper: A.oper, right) =
 
 fun funCallExp (decLevel, usedLevel, label, args) =
     let
+	(* compute static link and add to arg as first arg *)
 	val funAddr = generateSLChain(decLevel, usedLevel, Tr.TEMP(F.FP))
 	val newArgs = funAddr::(map unEx args)
     in
@@ -333,9 +334,10 @@ fun procEntryExit {level, body} =
                 TOP => (Err.error 0 "Fundec should not happen in outermost";   
                              F.newFrame {name=Temp.newlabel(), formals=[]})
               | NESTED ({uniq=_, parent=_, frame=frame'}) => frame'
-        val funcBody = unNx body
+	val returnStm = Tr.MOVE(Tr.TEMP(F.RV), unEx body)
+	val bodyStm = F.procEntryExit1(levelFrame, returnStm)
     in
-        frags := F.PROC({body=funcBody, frame=levelFrame})::(!frags)
+        frags := F.PROC({body=bodyStm, frame=levelFrame})::(!frags)
     end
 
 fun stringExp lit =

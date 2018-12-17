@@ -139,11 +139,12 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	  | munchExp (T.CONST i) =
 	    result(fn d => A.OPER{assem = "li `d0, " ^ toStr(i) ^ "\n",
 				  src = [], dst = [d], jump = NONE})
-	  | munchExp (T.CALL (nameExp, args)) =
-	    (emit(A.OPER{assem = "CALL `s0\n",
-			 src = munchExp(nameExp)::munchArgs(args),
+	  | munchExp (T.CALL(T.NAME(f), args)) =
+	    (emit(A.OPER{assem = "jal " ^ S.name(f) ^"\n",
+			 src = munchArgs(args),
 			 dst = F.RA::F.RV::F.callersaveRegs , jump = NONE});
 	     F.RV)
+		
 
 	  and munchArgs (args: T.exp list): Temp.temp list =
 	      let
@@ -151,6 +152,7 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 		  fun moveArgToTemp (arg, r) = munchStm(T.MOVE(T.TEMP(r), T.TEMP(munchExp(arg))))
 		  fun moveArgToFrame (arg, offset) =
 		      munchStm(T.MOVE(T.MEM(T.BINOP(T.PLUS, T.TEMP(F.SP), T.CONST offset)), T.TEMP(munchExp(arg))))
+		  val START_POS_IN_FRAME_ARG = 16
 		  fun helper (i, arg::tl, offset) =
 		      if i > 3
 		      then (moveArgToFrame(arg, offset); helper(i+1, tl, offset + F.wordSize))
@@ -163,7 +165,7 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 			  end
 		    | helper (_, [], _) = []
 	      in
-		  helper(0, args, 16)
+		  helper(0, args, START_POS_IN_FRAME_ARG)
 	      end
 								
     in
