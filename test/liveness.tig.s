@@ -85,20 +85,20 @@ JUMP(
  NAME L13)
 LABEL L12
 L16:
-li t132, 5
-li t133, 0
+li $zero, 5
+li $v0, 0
 L13:
-li t135, 10
-blt t133,t135,L14
+li $at, 10
+blt $v0,$at,L14
 L12:
 j L15
 L14:
-addi t136,t133,1
-move t134, t136
-add t137,t132,t134
-move t132, t137
-li t139, 2
-mul t138,t134,t139
-move t133, t138
+addi $at,$v0,1
+move $v0, $at
+add $zero,$zero,$v0
+move $zero, $zero
+li $v1, 2
+mul $v0,$v0,$v1
+move $v0, $v0
 j L13
 L15:

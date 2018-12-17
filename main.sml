@@ -13,11 +13,13 @@ structure Main = struct
 	 val _ = app (fn s => Printtree.printtree(out,s)) stms;
          val stms' = Canon.traceSchedule(Canon.basicBlocks stms)
 	 val instrs =   List.concat(map (Mipsgen.codegen frame) stms')
-	 val (flowGraph, _) = MakeGraph.instrs2graph(instrs)
+	 (*val (flowGraph, _) = MakeGraph.instrs2graph(instrs)
 	 val (igraph, _) = Liveness.interferenceGraph(flowGraph)
-	 val _ = Liveness.show((), igraph)
-         val format0 = Assem.format(Temp.makestring)
-     in  app (fn i => TextIO.output(out,format0 i)) instrs
+	 val _ = Liveness.show((), igraph) *)
+	 val (newInstrs, allocation) = RegAlloc.alloc(instrs, frame)
+			      
+         val format0 = Assem.format(F.makestring allocation)
+     in  app (fn i => TextIO.output(out,format0 i)) newInstrs
      end
    | emitproc out (F.STRING(lab,s)) = TextIO.output(out,F.string(lab,s))
 

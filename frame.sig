@@ -26,6 +26,7 @@ sig
 
     val tempMap: register Temp.Table.table
     val registers: register list
+    val makestring: register Temp.Table.table -> Temp.temp -> string
     val name: frame -> string
 end
     

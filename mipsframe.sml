@@ -57,50 +57,51 @@ val RA = Temp.newtemp() (* return address *)
 val FP = Temp.newtemp()
 
 val specialregs = [
-    (R0, "R0"),
-    (AT, "AT"), 
-    (RV, "RV"),
-    (V1, "V1"),
-    (K0, "K0"),
-    (K1, "K1"),
-    (GP, "GP"),
-    (SP, "SP"),
-    (FP, "FP"),
-    (RA, "RA")
+    (RV, "$v0"),
+    (V1, "$v1"),
+    (R0, "$zero"),
+    (AT, "$at"), 
+    (K0, "$k0"),
+    (K1, "$k1"),
+    (GP, "$gp"),
+    (SP, "$sp"),
+    (FP, "$fp"),
+    (RA, "$ra")
 ]
 		      
 val argregs = [
-    (A0, "A0"),
-    (A1, "A1"),
-    (A2, "A2"),
-    (A3, "A3")
+    (A0, "$a0"),
+    (A1, "$a1"),
+    (A2, "$a2"),
+    (A3, "$a3")
 ]
 		  
 val calleesaves = [
-    (S0, "S0"),
-    (S1, "S1"),
-    (S2, "S2"),
-    (S3, "S3"),
-    (S4, "S4"),
-    (S5, "S5"),
-    (S6, "S6"),
-    (S7, "S7")
+    (S0, "$s0"),
+    (S1, "$s1"),
+    (S2, "$s2"),
+    (S3, "$s3"),
+    (S4, "$s4"),
+    (S5, "$s5"),
+    (S6, "$s6"),
+    (S7, "$s7")
 ]
-
-val calleesavedRegs = map (fn (x, _) => x) calleesaves
 		      
 val callersaves = [
-    (T0, "T0"),
-    (T1, "T1"),
-    (T2, "T2"),
-    (T3, "T3"),
-    (T4, "T4"),
-    (T5, "T5"),
-    (T6, "T6"),
-    (T7, "T7"),
-    (T8, "T8"),
-    (T9, "T9")
+    (T0, "$t0"),
+    (T1, "$t1"),
+    (T2, "$t2"),
+    (T3, "$t3"),
+    (T4, "$t4"),
+    (T5, "$t5"),
+    (T6, "$t6"),
+    (T7, "$t7"),
+    (T8, "$t8"),
+    (T9, "$t9")
 ]
+
+
+val calleesavedRegs = map (fn (x, _) => x) calleesaves
 
 val callersaveRegs = map (fn (x, _) => x) callersaves
 		     
@@ -113,9 +114,9 @@ val tempMap = foldl addToNameTable Temp.Table.empty registerMappings
 
 val registers = map #2 registerMappings
 
-fun makestring temp = case Temp.Table.look(tempMap, temp) of
-			  SOME x => x
-			| NONE => Temp.makestring temp
+fun makestring tempMap temp = case Temp.Table.look(tempMap, temp) of
+				  SOME x => x
+				| NONE => Temp.makestring temp
 
 fun string (lab, str) =
     Symbol.name(lab) ^ " .asciiz " ^ "\"" ^ str ^ "\"\n"
