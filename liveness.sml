@@ -150,9 +150,16 @@ fun addEdgeToIGraphAndComputeMoveList (
 	    let
 		val curNode = getIgraphNode (defTemp)
 		(* Prevent node to make edge to itself, or make edge to single case a = c *)
-		val addEdge = fn nextNode => if depri(curNode,nextNode)
+		val addEdge = fn nextNode =>
+				 let
+				    (* val _ = print ("from "^ Temp.makestring(getTempFromIGraphNode(curNode))^" ")
+				     val _ = print ("to "^ Temp.makestring(getTempFromIGraphNode(nextNode))^ " \n") *)
+				 in
+				     if depri(curNode,nextNode)
 					     then ()
 					     else makeEdge curNode nextNode
+				 end
+				     
 		val _ = map (addEdge o getIgraphNode) outs;
 	    in
 		()
@@ -222,7 +229,7 @@ fun show (stream, (IGRAPH{graph, tnode, gtemp, moves})) =
 	fun printNode node =
 	    let
 		val master = (getTempStr node) ^ ": "
-		val adjs = G.succ node
+		val adjs = G.adj node
 		val next = foldr (fn (cur, acc) => getTempStr(cur) ^ " " ^ acc) "\n" adjs
 	    in
 		print (master ^ next)

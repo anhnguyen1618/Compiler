@@ -73,18 +73,22 @@ fun color {interference = L.IGRAPH{graph, tnode, gtemp, moves}, initial, spillCo
 	    let
 		val allColors = registers
 		val curTemp = gtemp(node)
-		fun f (cur, acc) = case TT.look(!coloredNodeMapping, curTemp) of
+		fun f (cur, acc) = case TT.look(!coloredNodeMapping, gtemp(cur)) of
 				       SOME x => x::acc
 				     | NONE => acc
 		    
 		val neighborColors = foldl f [] (G.adj(node))
+		(*val _ = print ("cur node "^ Temp.makestring(curTemp))
+		val _ = print "\n----------------------\n"
+		val _ = map (fn x => print (Temp.makestring(gtemp(x)) ^ " ")) (G.adj(node))
+		val _ = print "\n----------------------\n"*)
 		fun exclude (x) = case List.find (fn t => t = x) neighborColors of
 				      SOME _ => false
 				    | NONE => true
 		val okcolor = List.find exclude allColors
 	    in
 		case okcolor of
-		    SOME color => (coloredNodeMapping := TT.enter(!coloredNodeMapping, curTemp, color); spills)
+		    SOME color => (coloredNodeMapping := TT.enter(!coloredNodeMapping, curTemp, color); (*print("node " ^ Temp.makestring(curTemp)^ ": "^ color ^"\n"); *) spills)
 		  | NONE => (curTemp::spills)
 	    end
 	val _ = simplify()

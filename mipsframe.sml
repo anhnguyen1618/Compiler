@@ -230,7 +230,7 @@ fun procEntryExit3 (frame: frame, instrs, maxArgs) =
         val prolog = String.concat([Symbol.name(#name frame), ":\n",
                                     "sw $fp, 0($sp)\n",
                                     "move $fp, $sp\n",
-                                    "addiu $sp, $sp, ", Int.toString(requiredSpace), "\n"])
+                                    "addiu $sp, $sp, -", Int.toString(requiredSpace), "\n"])
         (* sp := fp, fp := 0(sp), return *)
         val epilog = String.concat(["move $sp, $fp\n",
                                     "lw $fp, 0($sp)\n",
