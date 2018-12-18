@@ -225,6 +225,7 @@ fun procEntryExit2 (frame, body) =
 
 fun procEntryExit3 (frame: frame, instrs, maxArgs) =
     let
+	val _ = print("Max arg " ^ Int.toString(maxArgs)^" " ^Symbol.name(#name frame)^" \n");
 	(*Save return address*)
 	val requiredSpace = (!(#numLocals frame) + maxArgs) * wordSize
         val prolog = String.concat([Symbol.name(#name frame), ":\n",
@@ -239,7 +240,7 @@ fun procEntryExit3 (frame: frame, instrs, maxArgs) =
 	{prolog= prolog, body=instrs, epilog= epilog}			
     end
 	
-	    
+(*, check offset, static link*)
 
 
 fun name (frame: frame): string = S.name(#name frame)
