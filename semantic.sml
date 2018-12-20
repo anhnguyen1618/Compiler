@@ -195,7 +195,7 @@ structure Semant = struct
 			    val resultType = getTypeForResult result
 			    val label = Temp.newlabel()
 			in
-			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType, label = label, level = level})
+			    S.enter(acc, name, E.FunEntry{formals = typeList, result = resultType, label = (*label*)name, level = level})
 			end
 						
 		    fun addNewFuncEntry ({name, params, result, body, pos}: A.fundec, curVenv) = 

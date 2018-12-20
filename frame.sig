@@ -8,6 +8,7 @@ sig
     val registers: register list
     val tempMap: register Temp.Table.table
     val wordSize: int
+    val initialOffset: int
 		      
     val externalCall: string * Tree.exp list -> Tree.exp
 

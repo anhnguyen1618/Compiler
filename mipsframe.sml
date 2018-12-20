@@ -1,8 +1,7 @@
 structure MipsFrame : FRAME = struct
 
 datatype access = InFrame of int | InReg of Temp.temp
-type frame = {name: Temp.label, formals: access list,
-	      numLocals: int ref, curOffset: int ref}
+type frame = {name: Temp.label, formals: access list, curOffset: int ref}
 datatype frag = PROC of {body: Tree.stm, frame: frame}
 	      | STRING of Temp.label * string
 
@@ -126,22 +125,26 @@ fun makestring tempMap temp = case Temp.Table.look(tempMap, temp) of
 				| NONE => Temp.makestring temp
 
 fun string (lab, str) =
-    Symbol.name(lab) ^ " .asciiz " ^ "\"" ^ str ^ "\"\n"
+    Symbol.name(lab) ^ ": .asciiz " ^ "\"" ^ str ^ "\"\n\n"
+
+val initialOffset = ~4 (*First slot is to save old $fp*)
 						    
 
 fun newFrame {name: Temp.label, formals: bool list}: frame =
     let
-	val localNums = ref 0
-	fun allocLocals ([], _) = []
-	  | allocLocals (h::t, offset) =
+	val offset = ref initialOffset
+	fun allocLocals ([]) = []
+	  | allocLocals (h::t) =
 	    let
 		(* Local allocs on top of stack => starting from 0*)
-		val access = if h then InFrame(offset) else InReg(Temp.newtemp())
-		val newOffSet = if h then (localNums:= !localNums + 1; offset + wordSize) else offset
-	    in access :: allocLocals(t, newOffSet) end
-	val formalAccesses = allocLocals (formals, 0)
+		val access = if h then InFrame(!offset) else InReg(Temp.newtemp())
+		val _ = if h then offset := !offset - wordSize else ()
+	    in
+		access :: allocLocals(t)
+	    end
+	val formalAccesses = allocLocals formals
     in
-	{ name = name, formals = formalAccesses, numLocals = localNums, curOffset = ref 0}
+	{ name = name, formals = formalAccesses, curOffset = offset}
     end
 
 (* val name: frame -> Temp.label = #name *)
@@ -150,14 +153,11 @@ val formals: frame -> access list = #formals
 
 fun allocLocal f esc =
     let
-	val {name = _, formals = formals, numLocals = numLocals, curOffset = curOffset} = f
+	val {name = _, formals = formals, curOffset = curOffset} = f
 	(*local var grows from high addr -> low addr *)
 	fun decreaseOffset () = curOffset := !curOffset - wordSize
     in
-	if esc then
-	    ( numLocals := !numLocals + 1;
-	      decreaseOffset();
-	      InFrame((!numLocals - 1) * wordSize))
+	if esc then InFrame(!curOffset) before decreaseOffset()
 	else InReg(Temp.newtemp())
     end
 
@@ -168,7 +168,7 @@ fun exp (InFrame(offset)) frameAddress = Tr.MEM(Tr.BINOP(Tr.PLUS, frameAddress, 
 fun externalCall (name, args) = Tr.CALL(Tr.NAME(Temp.namedlabel name), args)
 
 (* NOTICE: bodyStm already include move to save bodyResult to F.RV*)
-fun procEntryExit1 (frame as {name, formals, numLocals, curOffset}, bodyStm) =
+fun procEntryExit1 (frame as {name, formals, curOffset}, bodyStm) =
     let
 	val saveToFrame = true
 
@@ -198,9 +198,10 @@ fun procEntryExit1 (frame as {name, formals, numLocals, curOffset}, bodyStm) =
 	fun generateRestoreMove (reg, loc) = Tr.MOVE(Tr.TEMP(reg), loc)
 	val calleeSaveMoves = map generateSaveMove regLocMapping
 	val calleeRestoreMoves = map generateRestoreMove regLocMapping
-	val _ = 			seq (argsMoves @ [saveRA] @ calleeSaveMoves @ [bodyStm] @ calleeRestoreMoves @ [restoreRA])
+	val finalBody = seq (argsMoves @ [saveRA] @ calleeSaveMoves @ [bodyStm] @ calleeRestoreMoves @ [restoreRA])
+	val _ = seq (argsMoves @ [bodyStm])
     in
-	seq (argsMoves @ [bodyStm])
+	finalBody
     end
 	
 
@@ -226,16 +227,15 @@ fun procEntryExit2 (frame, body) =
 fun procEntryExit3 (frame: frame, instrs, maxArgs) =
     let
 	val _ = print("Max arg " ^ Int.toString(maxArgs)^" " ^Symbol.name(#name frame)^" \n");
-	(*Save return address*)
-	val requiredSpace = (!(#numLocals frame) + maxArgs) * wordSize
-        val prolog = String.concat([Symbol.name(#name frame), ":\n",
-                                    "sw $fp, 0($sp)\n",
-                                    "move $fp, $sp\n",
-                                    "addiu $sp, $sp, -", Int.toString(requiredSpace), "\n"])
+	val requiredSpace = Int.abs(!(#curOffset frame)) + maxArgs * wordSize
+        val prolog = String.concat([Symbol.name(#name frame), ":   #Function start here\n",
+                                    "sw $fp, 0($sp)   #save old fp -> stack\n",
+                                    "move $fp, $sp   #move sp to fp\n",
+                                    "addiu $sp, $sp, -", Int.toString(requiredSpace), "   #allocate stack\n"])
         (* sp := fp, fp := 0(sp), return *)
-        val epilog = String.concat(["move $sp, $fp\n",
-                                    "lw $fp, 0($sp)\n",
-                                    "jr $ra\n"])
+        val epilog = String.concat(["move $sp, $fp   #restore sp\n",
+                                    "lw $fp, 0($sp)   #restore fp\n",
+                                    "jr $ra    #jump back to return address\n#Function end here\n\n"])
     in
 	{prolog= prolog, body=instrs, epilog= epilog}			
     end

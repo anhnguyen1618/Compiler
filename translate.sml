@@ -117,16 +117,29 @@ fun allocLocal lv esc =
 	NESTED e => (lv, F.allocLocal (#frame e) esc)
       | TOP => (outermost, F.allocLocal (F.newFrame{name = Temp.newlabel(), formals = []}) esc) (* Should not run here at all, don't alloc at TOP level *)
 )
-fun generateSLChain (TOP, TOP, currentFP) = currentFP
+
+(* Generate a chain of FP of the caller frame to pass as first arg to callee *)
+fun generateSLChain (TOP, TOP, currentFP) = (Err.error 0 "Impossible"; currentFP)
   | generateSLChain (NESTED _, TOP, currentFP) = (Err.error 0 "Impossible"; currentFP)
-  | generateSLChain (TOP, NESTED usedLevel, currentFP) = generateSLChain (TOP, #parent usedLevel, Tr.MEM (currentFP))
+  | generateSLChain (TOP, NESTED usedLevel, currentFP) = (Err.error 0 "Impossible"; currentFP)
   | generateSLChain (NESTED decLevel, NESTED usedLevel, currentFP) =
     if (#uniq decLevel) = (#uniq usedLevel)
     then currentFP
-    else generateSLChain (NESTED decLevel, #parent usedLevel, Tr.MEM (currentFP)) (*Add pointer offset here if needed*)
-	
+    else
+	let
+	    val STATIC_LINK_OFFSET = F.initialOffset
+	    val curStaticLink = Tr.MEM(Tr.BINOP(Tr.PLUS, Tr.CONST(STATIC_LINK_OFFSET), currentFP)) (*This is fp of the previous frame*)
+	in
+	    generateSLChain (
+		NESTED decLevel,
+		#parent usedLevel,
+		curStaticLink
+	    )
+	end
+	    
 
-fun simpleVar ((decLevel: level, access: F.access): access, usedLevel: level) = Ex(F.exp(access)(generateSLChain(decLevel, usedLevel, Tr.TEMP(F.FP))))
+fun simpleVar ((decLevel: level, access: F.access): access, usedLevel: level) =
+    Ex(F.exp (access) (generateSLChain(decLevel, usedLevel, Tr.TEMP(F.FP))))	
 
 fun arrayDec (sizeExp, initEx) =
     Ex (F.externalCall("tig_initArray", [unEx sizeExp, unEx initEx]))

@@ -34,7 +34,7 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	    let val t = Temp.newtemp() in
 		(emit (gen t); t) end
 
-	val toStr = Int.toString
+	val toStr = fn x => if x >= 0 then Int.toString(x) else "-"^Int.toString(~x)
 	(* Helper functions *)
 	fun genStoreStm (offset: int, d: T.exp, s: T.exp) =
 	    (*Assume that there is no other op except PLUS right after T.MEM according to translate*)

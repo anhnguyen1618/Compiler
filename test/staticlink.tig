@@ -1,0 +1,11 @@
+let
+        function sum (a: int): int =
+            let
+                function n (): int = a + 5
+            in
+                n()
+            end
+in
+        sum(3)
+end
+
