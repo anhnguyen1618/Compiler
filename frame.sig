@@ -33,6 +33,7 @@ sig
 			{prolog: string, body: Assem.instr list, epilog: string}
 
     val argregs: (Temp.temp * string) list
+    val argRegs: Temp.temp list
     val callersaveRegs: Temp.temp list
     val makestring: register Temp.Table.table -> Temp.temp -> string
     val name: frame -> string

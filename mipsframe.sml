@@ -96,7 +96,7 @@ val callersaves = [
     (T6, "$t6"),
     (T7, "$t7"),
     (T8, "$t8"),
-    (T9, "$t9")
+    (T9, "$t9") (* check if we need to save RV here*)
 ]
 
 
@@ -109,10 +109,11 @@ val argRegs = map (fn (x, _) => x) argregs
 val wordSize = 4
 
 val addToNameTable = fn ((t, n), table) => Temp.Table.enter(table, t, n)
-val registerMappings = specialregs @ argregs @ calleesaves @ callersaves
+val usableRegisters = argregs @ calleesaves @ callersaves
+val registerMappings = specialregs @ usableRegisters
 val tempMap = foldl addToNameTable Temp.Table.empty registerMappings
 
-val registers = map #2 registerMappings
+val registers = map #2 usableRegisters
 
 fun seq (x::[]) = x
   | seq (x::rest) = Tr.SEQ(x, seq(rest))
@@ -125,7 +126,9 @@ fun makestring tempMap temp = case Temp.Table.look(tempMap, temp) of
 				| NONE => Temp.makestring temp
 
 fun string (lab, str) =
-    Symbol.name(lab) ^ ": .asciiz " ^ "\"" ^ str ^ "\"\n\n"
+    ".data\n" ^
+    Symbol.name(lab) ^ ": .asciiz " ^ "\"" ^ str ^ "\"\n" ^
+    ".text\n\n"
 
 val initialOffset = ~4 (*First slot is to save old $fp*)
 						    

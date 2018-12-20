@@ -66,7 +66,7 @@ fun rewriteProgram (spills: Temp.temp list, oldInstrs: A.instr list, frame: F.fr
 			    in
 				(newSrcs, newInstrs)
 			    end
-			fun  handleUnSpill () = (accSrcs, accInstrs)
+			fun  handleUnSpill () = (accSrcs@[curTemp], accInstrs)
 		    in
 			helper(curTemp, handleSpill, handleUnSpill)
 		    end
@@ -82,7 +82,7 @@ fun rewriteProgram (spills: Temp.temp list, oldInstrs: A.instr list, frame: F.fr
 			    in
 				(newDsts, newInstrs)
 			    end
-			fun handleUnSpill () = (accDsts, accInstrs)
+			fun handleUnSpill () = (accDsts@[curTemp], accInstrs)
 		    in
 			helper(curTemp, handleSpill, handleUnSpill) 
 		    end
@@ -91,6 +91,8 @@ fun rewriteProgram (spills: Temp.temp list, oldInstrs: A.instr list, frame: F.fr
 		val (newSrcs, srcInstrs) = foldl handleSpillSrcs ([], []) srcs
 		val (newDsts, dstInstrs) = foldl handleSpillDsts ([], []) dsts
 		val newMainInstr = A.OPER {dst = newDsts, src = newSrcs, assem = assem, jump=jump}
+		val _ = print "rewrite heelo-----------------------\n"
+		val _ = print( "rewrite distance"^ Int.toString(List.length(newSrcs)))
 	    in
 		newInstrs @ srcInstrs @ [newMainInstr] @ dstInstrs
 	    end
@@ -149,6 +151,7 @@ fun alloc (instrs: A.instr list, frame: F.frame): A.instr list * allocation =
 	if (List.length(spills) > 0)
 	then
 	    let
+		val _ = print ("there is spill----------------------------------" ^ Int.toString(List.length(spills)) ^ "\n")
 		val newInstrs = rewriteProgram (spills, instrs, frame)
 	    in
 		alloc(newInstrs, frame)

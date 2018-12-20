@@ -39,9 +39,9 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	fun genStoreStm (offset: int, d: T.exp, s: T.exp) =
 	    (*Assume that there is no other op except PLUS right after T.MEM according to translate*)
 	    emit(A.OPER{assem = "sw `s0, " ^ toStr(offset) ^ "(`d0)\n",
-			src = [munchExp s],
-			dst = [munchExp d],
-			jump = NONE})
+			     src = [munchExp s],
+			     dst = [munchExp d],
+			     jump = NONE})
 
 	and genLwStm (offset:int, d: Temp.temp, s: T.exp) =
 	    (*Assume that there is no other op except PLUS right after T.MEM according to translate*)
@@ -120,7 +120,7 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 			jump = NONE})
 
 	  | munchExp(T.BINOP(T.MINUS, e, T.CONST i)) =
-            result(fn d => A.OPER {assem="addi `d0, `s0, " ^ (Int.toString (~i)) ^ "\n",
+            result(fn d => A.OPER {assem="addi `d0, `s0, " ^ toStr (~i) ^ "\n",
 				   src=[munchExp e], dst=[d], jump=NONE})
 	  (*AND, OR, SHIFT, ... does not exist in front-end, see tiger.grm*)
 	  | munchExp (T.BINOP(oper, e1, e2)) =
@@ -141,10 +141,39 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	    result(fn d => A.OPER{assem = "li `d0, " ^ toStr(i) ^ "\n",
 				  src = [], dst = [d], jump = NONE})
 	  | munchExp (T.CALL(T.NAME(f), args)) =
-	    (emit(A.OPER{assem = "jal " ^ S.name(f) ^"\n",
-			 src = munchArgs(args),
-			 dst = F.RA::F.RV::F.callersaveRegs , jump = NONE});
-	     F.RV)
+	    let
+		fun restoreRegs (regPairs) = map (fn x => munchStm(T.MOVE x)) regPairs
+		fun saveRegs (argRegs: Temp.temp list, allocDst: (int -> T.exp)): (T.exp * T.exp) list =
+		      let
+			  fun f (i, reg) =
+			      let
+				  val src = T.TEMP(reg)
+				  val dst = allocDst i
+			      in
+				  munchStm(T.MOVE(dst, src));
+				  (src, dst)
+			      end
+		      in
+			  List.mapi f argRegs 
+		      end
+
+		fun saveArgRegs i =
+		    T.MEM(T.BINOP(T.PLUS, T.TEMP(F.FP), T.CONST(i * F.wordSize)))
+					 
+		val saveToFrame = true
+		fun saveCallerRegs _ = F.exp (F.allocLocal frame saveToFrame) (Tr.TEMP F.FP)
+
+		val argRegPair = saveRegs(F.argRegs, saveArgRegs)
+		val callerRegPair = saveRegs(F.callersaveRegs, saveCallerRegs)
+	    in
+		emit(A.OPER{assem = "jal " ^ S.name(f) ^"\n",
+			     src = munchArgs(args),
+			     dst = F.RA::F.RV::F.callersaveRegs , jump = NONE});
+		restoreRegs(callerRegPair);
+		restoreRegs(argRegPair);
+		F.RV
+	    end
+		
 		
 
 	  and munchArgs (args: T.exp list): Temp.temp list =
@@ -153,6 +182,7 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 		  fun moveArgToTemp (arg, r) = munchStm(T.MOVE(T.TEMP(r), T.TEMP(munchExp(arg))))
 		  fun moveArgToFrame (arg, offset) =
 		      munchStm(T.MOVE(T.MEM(T.BINOP(T.PLUS, T.TEMP(F.SP), T.CONST offset)), T.TEMP(munchExp(arg))))
+
 		  val START_POS_IN_FRAME_ARG = 16
 		  fun helper (i, arg::tl, offset) =
 		      if i > 3

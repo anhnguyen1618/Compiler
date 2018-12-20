@@ -16,12 +16,12 @@ structure Main = struct
 	 val bodyInstrs = List.concat(map (Mipsgen.codegen frame) stms')
 
 	 val (instrs, maxArgs) = F.procEntryExit2(frame, bodyInstrs)
-	 val (newInstrs, allocation) = RegAlloc.alloc(instrs, frame) handle e => raise e
+	 val (newInstrs, allocation) = RegAlloc.alloc(instrs, frame)
 	 val refinedInstrs = Mipsgen.removeRedundantMoves(newInstrs, allocation)
 
 	 val {prolog, body, epilog} = F.procEntryExit3(frame, refinedInstrs, maxArgs)
 	 (* t104, t105, t106 ton tai dong thoi, check call codegen*)
-         val format0 = Assem.format (*F.makestring F.tempMap*) (F.makestring allocation)
+         val format0 = Assem.format (F.makestring F.tempMap) (*F.makestring allocation*) 
      in
 	 TextIO.output(out, prolog);
 	 app (fn i => TextIO.output(out,format0 i)) newInstrs;
@@ -29,12 +29,17 @@ structure Main = struct
      end
    | emitproc out (F.STRING(lab,s)) = TextIO.output(out,F.string(lab,s))
 
+fun writeHeader out =
+    TextIO.output(out, ".text\n"^"main:\n")
+
 fun withOpenFile fname f = 
     let
 	val out = TextIO.openOut fname
+	val _ = writeHeader out
     in (f out before TextIO.closeOut out) 
-       (*handle e => (TextIO.closeOut out; raise e)*)
-    end 
+       (*handle e => (TextIO.closeOut out; raise Fail "open file") *)
+    end
+
 
 fun compile filename = 
     let val absyn = Parse.parse filename
