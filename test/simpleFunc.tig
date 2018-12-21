@@ -1,5 +1,5 @@
 let
-        function sum (a: int): int = a + 1
+        function sum (a: int): int = sum(a + 1) + sum (a+2)
 in
         sum(3)
 end

@@ -201,7 +201,7 @@ fun procEntryExit1 (frame as {name, formals, curOffset}, bodyStm) =
 	fun generateRestoreMove (reg, loc) = Tr.MOVE(Tr.TEMP(reg), loc)
 	val calleeSaveMoves = map generateSaveMove regLocMapping
 	val calleeRestoreMoves = map generateRestoreMove regLocMapping
-	val finalBody = seq (argsMoves @ [saveRA] @ calleeSaveMoves @ [bodyStm] @ calleeRestoreMoves @ [restoreRA])
+	val finalBody = seq (calleeSaveMoves @ [saveRA] @ argsMoves @ [bodyStm] @ calleeRestoreMoves @ [restoreRA])
 	val _ = seq (argsMoves @ [bodyStm])
     in
 	finalBody

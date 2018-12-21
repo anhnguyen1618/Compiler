@@ -225,7 +225,7 @@ fun interferenceGraph (Flow.FGRAPH(e as {control, def, use, ismove})) =
 fun show (stream, (IGRAPH{graph, tnode, gtemp, moves})) =
     let
 	val nodes = G.nodes graph
-	val getTempStr = Temp.makestring o gtemp
+	val getTempStr = (F.makestring F.tempMap) o gtemp
 	fun printNode node =
 	    let
 		val master = (getTempStr node) ^ ": "

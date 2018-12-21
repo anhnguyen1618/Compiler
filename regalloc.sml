@@ -152,10 +152,13 @@ fun alloc (instrs: A.instr list, frame: F.frame): A.instr list * allocation =
 	then
 	    let
 		val _ = print ("there is spill----------------------------------" ^ Int.toString(List.length(spills)) ^ "\n")
-		val newInstrs = rewriteProgram (spills, instrs, frame)
+		val _ = map (fn x => print ((F.makestring F.tempMap x)^" ")) spills
+		(*val newInstrs = rewriteProgram (spills, instrs, frame)*)
 	    in
-		alloc(newInstrs, frame)
+		(*alloc(newInstrs, frame)*)
+		(instrs, allocation)
 	    end
+	   
 	else
 	    (instrs, allocation)
     end	
