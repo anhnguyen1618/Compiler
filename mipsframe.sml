@@ -218,7 +218,7 @@ fun procEntryExit2 (frame, body) =
 	  | findMaxCallArgs (_, max) = max
 
 	val maxArgs = foldl findMaxCallArgs 0 body
-	val stms = body @ [Assem.OPER{assem = "",
+	val stms = body @ [Assem.OPER{assem = "#procEntryExit 2\n",
 				      src = [R0, RA, SP] @ calleesavedRegs, (*Recover those at the end of function*)
 				      dst = [], jump = SOME([])}]
     in

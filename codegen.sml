@@ -158,7 +158,7 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 		      end
 
 		fun saveArgRegs i =
-		    T.MEM(T.BINOP(T.PLUS, T.TEMP(F.FP), T.CONST(i * F.wordSize)))
+		    T.MEM(T.BINOP(T.PLUS, T.TEMP(F.FP), T.CONST((i+1) * F.wordSize)))
 					 
 		val saveToFrame = true
 		fun saveCallerRegs _ = F.exp (F.allocLocal frame saveToFrame) (Tr.TEMP F.FP)

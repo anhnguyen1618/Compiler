@@ -13,6 +13,7 @@ struct
 structure G = Graph
 type liveSet = (*unit Temp.Table.table * *) Temp.temp list
 type liveMap = liveSet G.Table.table
+structure M = MakeGraph
 
 datatype igraph =
 	 IGRAPH of {graph: Graph.graph,
@@ -85,6 +86,12 @@ fun computeLiveMap {control: G.graph, def, use, ismove}: liveMap =
 		val uses = getTemps(use, node)
 				      
 		val inUniqTempOut= foldl (fn (succ, acc) => acc @ getTemps(inMap, succ)) [] successors
+		(*val _ = print "block temp in----------------------\n"
+		val _ = print ("Label: "^ M.getLabel(node) ^"\n")
+		val _ = print ("successor: "^ Int.toString(List.length(successors)) ^ "\n")
+		val _ = map (fn x => print ((F.makestring F.tempMap x) ^ " - ")) inUniqTempOut
+		val _ = print "\n\n"  *)
+					 
 		val newTempOut = unique(inUniqTempOut, Temp.Table.empty)
 		val newTempIn = computeInTemp (newTempOut, defs, uses)
 		val hasChanges = (List.length(oldTempOut) <> List.length(newTempOut))

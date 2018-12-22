@@ -1,5 +1,5 @@
 let
-        function sum (a: int): int = sum(a + 1) + sum (a+2)
+        function sum (a: int): int = if a = 5 then 3 else 6
 in
         sum(3)
 end

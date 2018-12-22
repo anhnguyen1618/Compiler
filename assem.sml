@@ -35,5 +35,21 @@ structure Assem = struct
 	  | MOVE{assem,dst,src} => speak(assem,[dst],[src],nil)
     end
 
+  fun getAssem (OPER{assem,...}) = assem
+    | getAssem (LABEL{assem,...}) = assem
+    | getAssem( MOVE{assem,...}) = assem
+
+  fun isNormalJump instr =
+      let
+	  val assem = getAssem instr
+      in
+	  (String.isPrefix "j " assem) orelse (String.isPrefix "jr " assem)
+      end
+	  
+
+	  
+
 end
+
+
 

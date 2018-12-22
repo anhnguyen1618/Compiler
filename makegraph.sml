@@ -1,5 +1,6 @@
 structure MakeGraph:sig
 	      val instrs2graph: Assem.instr list -> Flow.flowgraph * Graph.node list
+	      val getLabel: Graph.node -> string
 	  end =
 struct
 
@@ -10,11 +11,21 @@ structure H = HashTable
 val labelNodeMap : (string, G.node) H.hash_table = 
     H.mkTable(HashString.hashString, op = ) (42, Fail "not found")
 
+val nodeLabelMap : (G.node, string) H.hash_table = 
+    H.mkTable(HashString.hashString o G.nodename, G.eq) (42, Fail "not found")
+
 val emptyTable = G.Table.empty
 
 fun mapLabel ((instr as A.LABEL{assem = _, lab}), node: G.node) =
-    (H.insert labelNodeMap (S.name(lab), node); (instr, node))
+    (H.insert labelNodeMap (S.name(lab), node);
+     H.insert nodeLabelMap (node, S.name(lab));
+     (instr, node))
   | mapLabel (instr, n) = (instr, n)
+
+fun getLabel (node: G.node) =
+    case H.find nodeLabelMap node of
+	SOME(x) => x
+      | NONE => ""
 
 fun addNode (graph: G.graph) (instr: Assem.instr): (Assem.instr * G.node) =
     mapLabel(instr, G.newNode(graph))
@@ -49,17 +60,27 @@ fun addEdge (nodes: (Assem.instr * G.node) list) =
 
 	fun f (cur::next::tl, result) =
 	    let
-		val (_,curNode) = cur
+		val (curInstr,curNode) = cur
 		val (_, nextNode) = next
+		val curNodeIsNormalJump = A.isNormalJump curInstr
 		val newResult = extractInfo(cur, result)
+(*		val _ = print "make edge============================\n"
+		val _ = print( (Assem.getAssem x) ^ "\n")
+		val _ = print( (Assem.getAssem y) ^ "\n")
+		val _ = print "\n" *)
 	    in
-		makeEdge curNode nextNode;
+		if curNodeIsNormalJump then () else makeEdge curNode nextNode;
 		addJumpEdge cur;
 		f (next::tl, newResult)
 	    end
 	  | f (cur::[], result) = (addJumpEdge cur; extractInfo(cur, result))
 	  | f ([], result) = result
+	fun printNode (node,_) = 
+	    print( (Assem.getAssem node) ^ "\n")
     in
+	(*print "assemCode:\n";
+	map printNode nodes;
+	print "end assemcode here\n";*)
 	f (nodes, (emptyTable, emptyTable, emptyTable))
     end	
 
