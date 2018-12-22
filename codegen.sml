@@ -158,6 +158,8 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 		      end
 
 		fun saveArgRegs i =
+		    (*i+1 because we save from top to bottom => tosave
+		     at position fp + 1 => $fp + 4 has to be used*)
 		    T.MEM(T.BINOP(T.PLUS, T.TEMP(F.FP), T.CONST((i+1) * F.wordSize)))
 					 
 		val saveToFrame = true
