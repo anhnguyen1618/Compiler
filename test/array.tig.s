@@ -4,7 +4,7 @@ L0:   #Function start here
 sw $fp, 0($sp)   #save old fp -> stack
 move $fp, $sp   #move sp to fp
 addiu $sp, $sp, -132   #allocate stack
-L9:
+L2:
 sw $s0, -12($fp)
 sw $s1, -16($fp)
 sw $s2, -20($fp)
@@ -29,10 +29,11 @@ sw $t6, -68($fp)
 sw $t7, -72($fp)
 sw $t8, -76($fp)
 sw $t9, -80($fp)
-move $a0, $fp
+li $a0, 1
+move $a0, $a0
 li $a1, 5
 move $a1, $a1
-jal fib
+jal tig_initArray
 lw $t0, -44($fp)
 lw $t1, -48($fp)
 lw $t2, -52($fp)
@@ -47,7 +48,14 @@ lw $a0, 4($fp)
 lw $a1, 8($fp)
 lw $a2, 12($fp)
 lw $a3, 16($fp)
-move $s0, $v0
+move $s2, $v0
+li $s1, 10
+li $s0, 0
+addi $s0,$s0,1
+li $s3, 4
+mul $s0,$s0,$s3
+add $s0,$s2,$s0
+sw $s1, 0($s0)
 sw $a0, 4($fp)
 sw $a1, 8($fp)
 sw $a2, 12($fp)
@@ -62,7 +70,13 @@ sw $t6, -108($fp)
 sw $t7, -112($fp)
 sw $t8, -116($fp)
 sw $t9, -120($fp)
-move $a0, $s0
+li $a0, 0
+addi $a0,$a0,1
+li $a1, 4
+mul $a0,$a0,$a1
+add $a0,$s2,$a0
+lw $a0, 0($a0)
+move $a0, $a0
 jal print_int
 lw $t0, -84($fp)
 lw $t1, -88($fp)
@@ -88,128 +102,8 @@ lw $s5, -32($fp)
 lw $s6, -36($fp)
 lw $s7, -40($fp)
 lw $ra, -8($fp)
-j L8
-L8:
-#procEntryExit 2
-move $sp, $fp   #restore sp
-lw $fp, 0($sp)   #restore fp
-jr $ra    #jump back to return address
-#Function end here
-
-fib:   #Function start here
-sw $fp, 0($sp)   #save old fp -> stack
-move $fp, $sp   #move sp to fp
-addiu $sp, $sp, -132   #allocate stack
-L11:
-sw $s0, -12($fp)
-sw $s1, -16($fp)
-sw $s2, -20($fp)
-sw $s3, -24($fp)
-sw $s4, -28($fp)
-sw $s5, -32($fp)
-sw $s6, -36($fp)
-sw $s7, -40($fp)
-sw $ra, -8($fp)
-sw $a0, -4($fp)
-move $s1, $a1
-li $s0, 0
-beq $s1,$s0,L5
-L6:
-li $s0, 1
-beq $s1,$s0,L2
-L3:
-sw $a0, 4($fp)
-sw $a1, 8($fp)
-sw $a2, 12($fp)
-sw $a3, 16($fp)
-sw $t0, -44($fp)
-sw $t1, -48($fp)
-sw $t2, -52($fp)
-sw $t3, -56($fp)
-sw $t4, -60($fp)
-sw $t5, -64($fp)
-sw $t6, -68($fp)
-sw $t7, -72($fp)
-sw $t8, -76($fp)
-sw $t9, -80($fp)
-lw $a0, -4($fp)
-move $a0, $a0
-addi $a1, $s1, -1
-move $a1, $a1
-jal fib
-lw $t0, -44($fp)
-lw $t1, -48($fp)
-lw $t2, -52($fp)
-lw $t3, -56($fp)
-lw $t4, -60($fp)
-lw $t5, -64($fp)
-lw $t6, -68($fp)
-lw $t7, -72($fp)
-lw $t8, -76($fp)
-lw $t9, -80($fp)
-lw $a0, 4($fp)
-lw $a1, 8($fp)
-lw $a2, 12($fp)
-lw $a3, 16($fp)
-move $s0, $v0
-move $s0, $s0
-sw $a0, 4($fp)
-sw $a1, 8($fp)
-sw $a2, 12($fp)
-sw $a3, 16($fp)
-sw $t0, -84($fp)
-sw $t1, -88($fp)
-sw $t2, -92($fp)
-sw $t3, -96($fp)
-sw $t4, -100($fp)
-sw $t5, -104($fp)
-sw $t6, -108($fp)
-sw $t7, -112($fp)
-sw $t8, -116($fp)
-sw $t9, -120($fp)
-lw $a0, -4($fp)
-move $a0, $a0
-addi $a1, $s1, -2
-move $a1, $a1
-jal fib
-lw $t0, -84($fp)
-lw $t1, -88($fp)
-lw $t2, -92($fp)
-lw $t3, -96($fp)
-lw $t4, -100($fp)
-lw $t5, -104($fp)
-lw $t6, -108($fp)
-lw $t7, -112($fp)
-lw $t8, -116($fp)
-lw $t9, -120($fp)
-lw $a0, 4($fp)
-lw $a1, 8($fp)
-lw $a2, 12($fp)
-lw $a3, 16($fp)
-move $a0, $v0
-add $a0,$s0,$a0
-move $a0, $a0
-L4:
-move $a0, $a0
-L7:
-move $v0, $a0
-lw $s0, -12($fp)
-lw $s1, -16($fp)
-lw $s2, -20($fp)
-lw $s3, -24($fp)
-lw $s4, -28($fp)
-lw $s5, -32($fp)
-lw $s6, -36($fp)
-lw $s7, -40($fp)
-lw $ra, -8($fp)
-j L10
-L5:
-li $a0, 0
-j L7
-L2:
-li $a0, 1
-j L4
-L10:
+j L1
+L1:
 #procEntryExit 2
 move $sp, $fp   #restore sp
 lw $fp, 0($sp)   #restore fp
@@ -274,8 +168,7 @@ tig_initArray:
 	sw	$v1,24($fp)
 	b	.L3
 .L4:
-	lw	$v1,28($fp)
-	move	$v0,$v1
+	lw	$v0,28($fp)
 	b	.L2
 .L2:
 	move	$sp,$fp

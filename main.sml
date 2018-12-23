@@ -30,14 +30,35 @@ structure Main = struct
    | emitproc out (F.STRING(lab,s)) = TextIO.output(out,F.string(lab,s))
 
 fun writeHeader out =
-    TextIO.output(out, ".text\n"^"main:\n")
+    TextIO.output(out, ".text\n"^"tig_main:\n")
+
+fun writeRuntime (outstream) = 
+    let
+        val runtimeStream = TextIO.openIn "runtime.s"
+        val _ = TextIO.output(outstream, TextIO.inputAll runtimeStream)
+        val _ = TextIO.closeIn runtimeStream
+    in
+        ()
+    end
+
+fun writeSysspim (outstream) = 
+    let
+        val runtimeStream = TextIO.openIn "sysspim.s"
+        val _ = TextIO.output(outstream, TextIO.inputAll runtimeStream)
+        val _ = TextIO.closeIn runtimeStream
+    in
+        ()
+    end
 
 fun withOpenFile fname f = 
     let
 	val out = TextIO.openOut fname
-	val _ = writeHeader out
-    in (f out before TextIO.closeOut out) 
-       (*handle e => (TextIO.closeOut out; raise Fail "open file") *)
+    in
+	writeHeader out;
+	f out;  (*handle e => (TextIO.closeOut out; raise Fail "open file") *)	
+	writeRuntime out;
+	writeSysspim out;
+	TextIO.closeOut out
     end
 
 

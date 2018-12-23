@@ -162,11 +162,13 @@ fun intExp e = Ex (Tr.CONST e)
 fun nilExp () = intExp(0)
 fun unitExp () = intExp(0)
 
-fun fieldVar (recordTemp, index) = Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx recordTemp, Tr.CONST(F.wordSize * index))))
+fun fieldVar (recordTemp, index) = Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx recordTemp, Tr.CONST(F.wordSize * (index + 1))))) (* check here *)
 
 fun subscriptVar (arrayTemp, indexExp) =
     let
-	val indexExp = unEx indexExp
+	(* remember array is allocated from top to bottom
+	   => if array loc = x => first element is saved at x - 4*)
+	val indexExp = Tr.BINOP(Tr.PLUS, unEx indexExp, Tr.CONST(1))
     in
 	Ex (Tr.MEM (Tr.BINOP(Tr.PLUS, unEx arrayTemp,
 			     Tr.BINOP(Tr.MUL, indexExp, Tr.CONST(F.wordSize)))))
@@ -311,7 +313,9 @@ fun opExp (left, oper: A.oper, right) =
 	  | A.GeOp => opCx Tr.GE
     end
 
-fun funCallExp (decLevel, usedLevel, label, args) =
+(* Only external function are declared at TOP level, No need to send SL for external one *)
+fun funCallExp (TOP, _, label, args) = Ex(Tr.CALL(Tr.NAME(label), (map unEx args)))
+  | funCallExp (decLevel, usedLevel, label, args) =
     let
 	(* compute static link and add to arg as first arg *)
 	val funAddr = generateSLChain(decLevel, usedLevel, Tr.TEMP(F.FP))
