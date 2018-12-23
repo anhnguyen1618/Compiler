@@ -148,10 +148,10 @@ fun recordDec (fields) =
     let
 	val length = List.length fields
 	val r = Temp.newtemp()
-	val allocRecStm = Tr.MOVE(Tr.TEMP(r), Tr.CALL(Tr.NAME(Temp.namedlabel ("malloc")), [Tr.CONST(length * F.wordSize)]))
-	fun calFieldAddr offset = Tr.MEM(Tr.BINOP(Tr.PLUS, Tr.TEMP(r), Tr.CONST(offset * F.wordSize)))
-	fun createFieldStm (cur, (stms, offset)) = (Tr.MOVE(calFieldAddr(offset), unEx cur)::stms, offset - 1)
-	val (fieldStms, _) = foldr createFieldStm ([], length -1) fields
+	val allocRecStm = Tr.MOVE(Tr.TEMP(r), Tr.CALL(Tr.NAME(Temp.namedlabel ("malloc")), [Tr.CONST((length + 1) * F.wordSize)]))
+	fun calFieldAddr index = Tr.MEM(Tr.BINOP(Tr.PLUS, Tr.TEMP(r), Tr.CONST((index + 1) * F.wordSize)))
+	fun createFieldStm (index, cur, stms) = (Tr.MOVE(calFieldAddr(index), unEx cur)::stms)
+	val fieldStms = List.foldri createFieldStm [] fields
 	val finalLocationExp = Tr.TEMP(r)
     in
 	Ex(Tr.ESEQ(seq(allocRecStm::fieldStms), finalLocationExp))

@@ -153,7 +153,7 @@ fun addEdgeToIGraphAndComputeMoveList (
     ismove: bool G.Table.table,
     liveTable: liveMap): (G.node * G.node) list =
     let
-	fun addEdge (defTemp, depri, outs) =
+	fun addEdge (defTemp, outs) =
 	    let
 		val curNode = getIgraphNode (defTemp)
 		(* Prevent node to make edge to itself, or make edge to single case a = c *)
@@ -162,7 +162,7 @@ fun addEdgeToIGraphAndComputeMoveList (
 				    (* val _ = print ("from "^ Temp.makestring(getTempFromIGraphNode(curNode))^" ")
 				     val _ = print ("to "^ Temp.makestring(getTempFromIGraphNode(nextNode))^ " \n") *)
 				 in
-				     if depri(curNode,nextNode)
+				     if G.eq(curNode, nextNode)
 					     then ()
 					     else makeEdge curNode nextNode
 				 end
@@ -179,15 +179,8 @@ fun addEdgeToIGraphAndComputeMoveList (
 		val isMove = G.Table.look(ismove, node)
 		val liveTemps = getTemps(liveTable, node)
 		val _ = (case (defTemps, useTemps, liveTemps) of
-			     ([defTemp], [useTemp], outs) =>
-			     let
-				 val useNode = getIgraphNode useTemp
-				 val depricate = fn (cur, out) => G.eq(useNode, out)
-								  orelse G.eq(cur, out)
-			     in
-				 addEdge(defTemp, depricate, outs)
-			     end
-			   | ([defTemp], _, outs) => addEdge(defTemp, G.eq, outs)
+			     (* there is max of 1 def temp per flow node *)
+			     ([defTemp], _, outs) => addEdge(defTemp, outs)
 			   | (_, _, _) => ())
 	    in
 		case (isMove, defTemps, useTemps) of

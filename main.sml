@@ -20,7 +20,6 @@ structure Main = struct
 	 val refinedInstrs = Mipsgen.removeRedundantMoves(newInstrs, allocation)
 
 	 val {prolog, body, epilog} = F.procEntryExit3(frame, refinedInstrs, maxArgs)
-	 (* t104, t105, t106 ton tai dong thoi, check call codegen*)
          val format0 = Assem.format (*F.makestring F.tempMap*) (F.makestring allocation) 
      in
 	 TextIO.output(out, prolog);

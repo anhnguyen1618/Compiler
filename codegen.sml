@@ -38,9 +38,10 @@ fun codegen (frame) (stm: T.stm): A.instr list =
 	(* Helper functions *)
 	fun genStoreStm (offset: int, d: T.exp, s: T.exp) =
 	    (*Assume that there is no other op except PLUS right after T.MEM according to translate*)
-	    emit(A.OPER{assem = "sw `s0, " ^ toStr(offset) ^ "(`d0)\n",
-			     src = [munchExp s],
-			     dst = [munchExp d],
+	    (* in sw s0, (x)s1, both s0 and s1 is in USE set, so defSet = []*) 
+	    emit(A.OPER{assem = "sw `s0, " ^ toStr(offset) ^ "(`s1)\n",
+			     src = [munchExp(s), munchExp(d)],
+			     dst = [],
 			     jump = NONE})
 
 	and genLwStm (offset:int, d: Temp.temp, s: T.exp) =
